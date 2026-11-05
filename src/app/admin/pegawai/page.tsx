@@ -1,0 +1,39 @@
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { Navbar } from '@/components/layout/Navbar';
+import { EmployeeManager } from '@/components/admin/EmployeeManager';
+
+export const dynamic = 'force-dynamic';
+
+export default async function AdminPegawaiPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    redirect('/unauthorized');
+  }
+
+  const [users, superiors] = await Promise.all([
+    prisma.user.findMany({
+      include: { atasan: true },
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.user.findMany({
+      where: {
+        role: { in: ['ATASAN', 'ADMIN'] },
+        isActive: true,
+      },
+      orderBy: { name: 'asc' },
+    }),
+  ]);
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Navbar />
+
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <EmployeeManager users={users} superiors={superiors} />
+      </main>
+    </div>
+  );
+}
