@@ -167,30 +167,30 @@ export default async function AdminDashboardPage() {
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner Admin - Fresh Campus Theme */}
-        <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 rounded-3xl p-6 sm:p-7 text-white shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-emerald-900/30 relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-44 h-44 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+        {/* Banner Admin - Fresh Sky Blue Theme Selaras */}
+        <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-sky-600 rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-sky-600/15 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-sky-400/30 relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 border border-emerald-400/30 rounded-full text-emerald-300 text-xs font-semibold mb-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 border border-white/30 rounded-full text-white text-xs font-semibold mb-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-sky-100" />
               <span>Portal Administrator SDM STIMI</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
               Pusat Kendali Kepegawaian & Presensi
             </h1>
-            <p className="text-slate-300 text-xs mt-1">
+            <p className="text-sky-100 text-xs mt-1">
               {campusSetting?.campusName} • Radius Geofence Aktif: {campusSetting?.radiusMeters} Meter • Jam Kerja: {campusSetting?.workStart} - {campusSetting?.workEnd} WITA
             </p>
           </div>
 
           <Link
             href="/admin/monitoring"
-            className="relative z-10 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white px-5 py-3.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition shrink-0"
+            className="relative z-10 bg-white text-sky-700 hover:bg-sky-50 active:bg-sky-100 px-5 py-3.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-950/10 transition shrink-0"
           >
-            <Activity className="w-4 h-4" />
+            <Activity className="w-4 h-4 text-sky-600" />
             <span>Pantau Kehadiran Real-Time Hari Ini</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 text-sky-600" />
           </Link>
         </div>
 
@@ -473,12 +473,12 @@ export default async function AdminDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
           <Link
             href="/admin/pegawai"
-            className="p-5 bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-300 transition shadow-xs group"
+            className="p-5 bg-white rounded-3xl border border-slate-200/90 hover:border-sky-300 transition shadow-xs group cursor-pointer"
           >
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 group-hover:bg-indigo-600 text-indigo-600 group-hover:text-white flex items-center justify-center mb-3 transition shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-sky-50 group-hover:bg-sky-600 text-sky-600 group-hover:text-white flex items-center justify-center mb-3 transition shadow-xs">
               <Users className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition">
+            <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition">
               Kelola Data Pegawai
             </h3>
             <p className="text-xs text-slate-500 mt-1 leading-relaxed">
@@ -488,12 +488,12 @@ export default async function AdminDashboardPage() {
 
           <Link
             href="/admin/pengaturan"
-            className="p-5 bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-300 transition shadow-xs group"
+            className="p-5 bg-white rounded-3xl border border-slate-200/90 hover:border-sky-300 transition shadow-xs group cursor-pointer"
           >
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 group-hover:bg-purple-600 text-purple-600 group-hover:text-white flex items-center justify-center mb-3 transition shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-sky-50 group-hover:bg-sky-600 text-sky-600 group-hover:text-white flex items-center justify-center mb-3 transition shadow-xs">
               <Settings className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900 group-hover:text-purple-600 transition">
+            <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition">
               Pengaturan Kampus & Geofence
             </h3>
             <p className="text-xs text-slate-500 mt-1 leading-relaxed">
@@ -503,12 +503,12 @@ export default async function AdminDashboardPage() {
 
           <Link
             href="/admin/laporan"
-            className="p-5 bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-300 transition shadow-xs group"
+            className="p-5 bg-white rounded-3xl border border-slate-200/90 hover:border-sky-300 transition shadow-xs group cursor-pointer"
           >
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 group-hover:bg-emerald-600 text-emerald-600 group-hover:text-white flex items-center justify-center mb-3 transition shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-sky-50 group-hover:bg-sky-600 text-sky-600 group-hover:text-white flex items-center justify-center mb-3 transition shadow-xs">
               <FileSpreadsheet className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900 group-hover:text-emerald-600 transition">
+            <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition">
               Rekapitulasi & Ekspor Laporan
             </h3>
             <p className="text-xs text-slate-500 mt-1 leading-relaxed">

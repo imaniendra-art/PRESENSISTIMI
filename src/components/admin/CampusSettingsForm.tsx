@@ -210,7 +210,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
           onClick={() => setActiveTab('LOCATIONS')}
           className={`pb-3 px-4 text-xs font-bold transition border-b-2 flex items-center gap-2 ${
             activeTab === 'LOCATIONS'
-              ? 'border-indigo-600 text-indigo-700'
+              ? 'border-sky-600 text-sky-700'
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
@@ -223,7 +223,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
           onClick={() => setActiveTab('HOURS')}
           className={`pb-3 px-4 text-xs font-bold transition border-b-2 flex items-center gap-2 ${
             activeTab === 'HOURS'
-              ? 'border-indigo-600 text-indigo-700'
+              ? 'border-sky-600 text-sky-700'
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
@@ -250,7 +250,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                 setModalLng('');
                 setIsAddLocationModalOpen(true);
               }}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-200 self-start sm:self-auto"
+              className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm shadow-sky-200 self-start sm:self-auto cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Tambah Gedung Baru</span>
@@ -262,7 +262,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
               <div
                 key={loc.id}
                 className={`bg-white rounded-3xl border p-5 shadow-xs transition space-y-3 relative ${
-                  loc.isActive ? 'border-slate-200 hover:border-indigo-300' : 'border-slate-200 bg-slate-50/50 opacity-75'
+                  loc.isActive ? 'border-slate-200 hover:border-sky-300' : 'border-slate-200 bg-slate-50/50 opacity-75'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -270,7 +270,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     <div
                       className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
                         loc.isActive
-                          ? 'bg-indigo-50 text-indigo-700 border border-indigo-100'
+                          ? 'bg-sky-50 text-sky-700 border border-sky-100'
                           : 'bg-slate-100 text-slate-400'
                       }`}
                     >
@@ -311,7 +311,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block font-bold uppercase">Batas Radius Geofence</span>
-                    <span className="font-bold text-indigo-700">{loc.radiusMeters} meter</span>
+                    <span className="font-bold text-sky-700">{loc.radiusMeters} meter</span>
                   </div>
                 </div>
 
@@ -332,7 +332,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                         setModalLng(loc.longitude.toString());
                         setIsEditLocationModalOpen(true);
                       }}
-                      className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                      className="p-1.5 text-slate-500 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition cursor-pointer"
                       title="Edit Gedung"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -341,7 +341,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     <button
                       type="button"
                       onClick={() => handleToggleStatus(loc.id)}
-                      className={`p-1.5 rounded-lg transition ${
+                      className={`p-1.5 rounded-lg transition cursor-pointer ${
                         loc.isActive ? 'text-slate-400 hover:text-rose-600' : 'text-emerald-600 hover:bg-emerald-50'
                       }`}
                       title={loc.isActive ? 'Nonaktifkan Gedung' : 'Aktifkan Gedung'}
@@ -352,7 +352,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     <button
                       type="button"
                       onClick={() => handleDeleteLocation(loc.id, loc.name)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                       title="Hapus Gedung"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -369,7 +369,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
       {activeTab === 'HOURS' && (
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 max-w-2xl">
           <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
               <Clock className="w-5 h-5" />
             </div>
             <div>
@@ -388,7 +388,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                 name="campusName"
                 defaultValue={setting.campusName}
                 required
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:ring-2 focus:ring-sky-500"
               />
             </div>
 
@@ -401,7 +401,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                 defaultValue={setting.address}
                 required
                 rows={2}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:ring-2 focus:ring-sky-500"
               />
             </div>
 
@@ -415,7 +415,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                   name="workStart"
                   defaultValue={setting.workStart}
                   required
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:ring-2 focus:ring-sky-500"
                 />
               </div>
 
@@ -428,7 +428,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                   name="workEnd"
                   defaultValue={setting.workEnd}
                   required
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:ring-2 focus:ring-sky-500"
                 />
               </div>
             </div>
@@ -444,7 +444,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                 min={0}
                 max={60}
                 required
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:ring-2 focus:ring-sky-500"
               />
               <p className="text-[11px] text-slate-500 mt-1">
                 Contoh: 15 menit berarti pegawai yang presensi sebelum 08:15 tetap dinyatakan Tepat Waktu.
@@ -455,7 +455,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-indigo-200"
+                className="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-sky-200 cursor-pointer"
               >
                 {isSubmitting ? 'Menyimpan...' : 'Simpan Ketentuan Jam Kerja'}
               </button>
@@ -470,13 +470,13 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 my-8">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Plus className="w-4 h-4 text-indigo-600" />
+                <Plus className="w-4 h-4 text-sky-600" />
                 Tambah Lokasi Gedung Baru
               </h3>
               <button
                 type="button"
                 onClick={() => setIsAddLocationModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -493,7 +493,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     name="name"
                     required
                     placeholder="Contoh: Kampus III - Gedung FEB"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                   />
                 </div>
 
@@ -505,7 +505,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     type="text"
                     name="code"
                     placeholder="KAMPUS_3"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                 </div>
               </div>
@@ -519,21 +519,21 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                   required
                   rows={2}
                   placeholder="Jl. Contoh No. 123, Makassar"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                 />
               </div>
 
               {/* Tombol Ambil GPS */}
-              <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-2xl flex items-center justify-between">
+              <div className="p-3 bg-sky-50/70 border border-sky-100 rounded-2xl flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-indigo-900 block">Isi Koordinat dari Posisi Anda?</span>
-                  <span className="text-[10px] text-indigo-700">Jika Anda sedang berada di lokasi gedung tersebut</span>
+                  <span className="text-xs font-bold text-sky-900 block">Isi Koordinat dari Posisi Anda?</span>
+                  <span className="text-[10px] text-sky-700">Jika Anda sedang berada di lokasi gedung tersebut</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleGetGpsCoords}
                   disabled={isGettingGps}
-                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-bold transition flex items-center gap-1"
+                  className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
                 >
                   <LocateFixed className="w-3.5 h-3.5" />
                   <span>{isGettingGps ? 'Mencari...' : 'Gunakan GPS'}</span>
@@ -553,7 +553,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     onChange={(e) => setModalLat(e.target.value)}
                     required
                     placeholder="-5.147665"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                   />
                 </div>
 
@@ -569,7 +569,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     onChange={(e) => setModalLng(e.target.value)}
                     required
                     placeholder="119.432732"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                   />
                 </div>
 
@@ -584,7 +584,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     min={10}
                     max={1000}
                     required
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                   />
                 </div>
               </div>
@@ -593,14 +593,14 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                 <button
                   type="button"
                   onClick={() => setIsAddLocationModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-indigo-200"
+                  className="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition shadow-md shadow-sky-200 cursor-pointer"
                 >
                   {isSubmitting ? 'Menyimpan...' : 'Simpan Gedung'}
                 </button>
@@ -616,7 +616,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 my-8">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Edit2 className="w-4 h-4 text-indigo-600" />
+                <Edit2 className="w-4 h-4 text-sky-600" />
                 Edit Gedung: {selectedLocation.name}
               </h3>
               <button
@@ -625,7 +625,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                   setIsEditLocationModalOpen(false);
                   setSelectedLocation(null);
                 }}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -644,7 +644,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     name="name"
                     defaultValue={selectedLocation.name}
                     required
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                   />
                 </div>
 
@@ -656,7 +656,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     type="text"
                     name="code"
                     defaultValue={selectedLocation.code || ''}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                 </div>
               </div>
@@ -670,20 +670,20 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                   defaultValue={selectedLocation.address}
                   required
                   rows={2}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                 />
               </div>
 
-              <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-2xl flex items-center justify-between">
+              <div className="p-3 bg-sky-50/70 border border-sky-100 rounded-2xl flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-indigo-900 block">Ambil GPS Saat Ini?</span>
-                  <span className="text-[10px] text-indigo-700">Perbarui koordinat dengan lokasi perangkat Anda</span>
+                  <span className="text-xs font-bold text-sky-900 block">Ambil GPS Saat Ini?</span>
+                  <span className="text-[10px] text-sky-700">Perbarui koordinat dengan lokasi perangkat Anda</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleGetGpsCoords}
                   disabled={isGettingGps}
-                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-bold transition flex items-center gap-1"
+                  className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
                 >
                   <LocateFixed className="w-3.5 h-3.5" />
                   <span>{isGettingGps ? 'Mencari...' : 'Gunakan GPS'}</span>
@@ -702,7 +702,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     value={modalLat}
                     onChange={(e) => setModalLat(e.target.value)}
                     required
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                   />
                 </div>
 
@@ -717,7 +717,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     value={modalLng}
                     onChange={(e) => setModalLng(e.target.value)}
                     required
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                   />
                 </div>
 
@@ -732,7 +732,7 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     min={10}
                     max={1000}
                     required
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                   />
                 </div>
               </div>
@@ -744,14 +744,14 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                     setIsEditLocationModalOpen(false);
                     setSelectedLocation(null);
                   }}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-indigo-200"
+                  className="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition shadow-md shadow-sky-200 cursor-pointer"
                 >
                   {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
                 </button>

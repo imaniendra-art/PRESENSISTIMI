@@ -36,26 +36,26 @@ export default async function PegawaiDashboardPage() {
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner Profil Pegawai - Fresh Campus Emerald Theme */}
-        <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden border border-emerald-900/30">
-          <div className="absolute -top-10 -right-10 w-44 h-44 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+        {/* Banner Profil Pegawai - Fresh Sky Blue Theme Selaras */}
+        <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-sky-600 rounded-3xl p-6 text-white shadow-xl shadow-sky-600/15 relative overflow-hidden border border-sky-400/30">
+          <div className="absolute -top-10 -right-10 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 border border-emerald-400/30 rounded-full text-emerald-300 text-xs font-semibold mb-2">
-                <Award className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 border border-white/30 rounded-full text-white text-xs font-semibold mb-2">
+                <Award className="w-3.5 h-3.5 text-sky-100" />
                 <span>Portal Kepegawaian STIMI</span>
               </div>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
                 Selamat Datang, {user.name}
               </h1>
-              <p className="text-emerald-200 text-xs mt-1">
+              <p className="text-sky-100 text-xs mt-1">
                 {user.jabatan} • {user.unitKerja} (NIP: {user.nip})
               </p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 text-center sm:text-right">
-              <span className="text-[11px] text-emerald-300 block">Jam Operasional Hari Ini</span>
+            <div className="bg-white/20 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/30 text-center sm:text-right">
+              <span className="text-[11px] text-sky-100 block">Jam Operasional Hari Ini</span>
               <span className="text-sm font-bold text-white">
                 {campusSetting.workStart} - {campusSetting.workEnd} WITA
               </span>

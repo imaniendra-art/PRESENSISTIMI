@@ -83,11 +83,11 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
           }}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition whitespace-nowrap ${
             activeTab === 'leave'
-              ? 'bg-white text-indigo-700 shadow-xs'
+              ? 'bg-white text-sky-700 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <CalendarDays className="w-4 h-4 text-indigo-600" />
+          <CalendarDays className="w-4 h-4 text-sky-600" />
           <span>Pengajuan Cuti & Izin</span>
         </button>
 
@@ -99,7 +99,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
           }}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition whitespace-nowrap ${
             activeTab === 'trip'
-              ? 'bg-white text-indigo-700 shadow-xs'
+              ? 'bg-white text-sky-700 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -115,7 +115,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
           }}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition whitespace-nowrap ${
             activeTab === 'history'
-              ? 'bg-white text-indigo-700 shadow-xs'
+              ? 'bg-white text-sky-700 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -152,7 +152,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
               <select
                 name="type"
                 required
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
               >
                 <option value="CUTI_TAHUNAN">Cuti Tahunan</option>
                 <option value="IZIN">Izin Keperluan Mendesak</option>
@@ -171,7 +171,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
                   type="date"
                   name="startDate"
                   required
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                 />
               </div>
 
@@ -183,7 +183,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
                   type="date"
                   name="endDate"
                   required
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                 />
               </div>
             </div>
@@ -197,7 +197,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
                 required
                 rows={3}
                 placeholder="Jelaskan alasan atau keperluan pengajuan cuti secara rinci..."
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-400 font-medium"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 placeholder-slate-400 font-medium"
               />
             </div>
 
@@ -209,14 +209,14 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
                 type="file"
                 name="attachment"
                 accept=".pdf,image/*"
-                className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100"
               />
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-indigo-200 flex items-center gap-2"
+              className="py-3 px-6 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-sky-600/20 cursor-pointer flex items-center gap-2"
             >
               <FileCheck2 className="w-4 h-4" />
               <span>{isSubmitting ? 'Mengirim Pengajuan...' : 'Kirim Permohonan Cuti'}</span>
@@ -236,7 +236,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
                 name="title"
                 required
                 placeholder="Contoh: Rapat Koordinasi Kurikulum LLDIKTI IX"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
               />
             </div>
 
@@ -249,7 +249,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
                 name="destination"
                 required
                 placeholder="Contoh: Kantor LLDIKTI IX Makassar / Hotel Claro"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
               />
             </div>
 
@@ -262,7 +262,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
                   type="date"
                   name="startDate"
                   required
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                 />
               </div>
 
@@ -274,7 +274,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
                   type="date"
                   name="endDate"
                   required
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
                 />
               </div>
             </div>
@@ -287,7 +287,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
                 type="text"
                 name="letterNumber"
                 placeholder="Contoh: 142/ST-STIMI/XI/2026"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
               />
             </div>
 
@@ -319,7 +319,7 @@ export function RequestTabs({ myLeaves, myTrips }: RequestTabsProps) {
           <div className="space-y-6">
             <div>
               <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-indigo-600" />
+                <CalendarDays className="w-4 h-4 text-sky-600" />
                 <span>Riwayat Permohonan Cuti & Izin</span>
               </h3>
               {myLeaves.length === 0 ? (

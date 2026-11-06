@@ -50,23 +50,23 @@ export default async function AtasanDashboardPage() {
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner Atasan */}
-        <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-indigo-950 rounded-3xl p-6 text-white shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Banner Atasan - Fresh Sky Blue Theme Selaras */}
+        <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-sky-600 rounded-3xl p-6 text-white shadow-xl shadow-sky-600/15 border border-sky-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 border border-emerald-400/30 rounded-full text-emerald-200 text-xs font-semibold mb-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 border border-white/30 rounded-full text-white text-xs font-semibold mb-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-sky-100" />
               <span>Portal Pimpinan / Pejabat Penilai STIMI</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
               Selamat Datang, {user.name}
             </h1>
-            <p className="text-emerald-200 text-xs mt-1">
+            <p className="text-sky-100 text-xs mt-1">
               {user.jabatan} • {user.unitKerja} (NIP: {user.nip})
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 text-center sm:text-right">
-            <span className="text-[11px] text-emerald-300 block">Jam Operasional Hari Ini</span>
+          <div className="bg-white/20 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/30 text-center sm:text-right">
+            <span className="text-[11px] text-sky-100 block">Jam Operasional Hari Ini</span>
             <span className="text-sm font-bold text-white">
               {campusSetting.workStart} - {campusSetting.workEnd} WITA
             </span>
@@ -91,7 +91,7 @@ export default async function AtasanDashboardPage() {
 
           <Link
             href="/atasan/approval"
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md shadow-indigo-200 self-start sm:self-auto shrink-0"
+            className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md shadow-sky-600/20 self-start sm:self-auto shrink-0"
           >
             <span>Buka Inbox Approval</span>
             <ArrowRight className="w-4 h-4" />

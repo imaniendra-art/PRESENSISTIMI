@@ -108,9 +108,9 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
             gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
           }}
         >
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-indigo-200 transition">
+          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-sky-200 transition">
             <div className="flex items-center gap-1.5 text-slate-500 text-[11px] sm:text-xs font-semibold truncate">
-              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600 shrink-0" />
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-600 shrink-0" />
               <span className="truncate">Total Pegawai</span>
             </div>
             <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1 sm:mt-1.5 font-mono tabular-nums">{totalEmployees}</p>

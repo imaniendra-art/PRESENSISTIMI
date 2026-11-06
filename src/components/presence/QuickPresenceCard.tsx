@@ -20,6 +20,7 @@ import {
   Radio,
   Search,
   UserCheck,
+  User,
   ShieldCheck,
   Lock,
   ArrowRight,
@@ -392,146 +393,159 @@ export function QuickPresenceCard({
   }
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-slate-200/90 overflow-hidden max-w-lg mx-auto">
-      {/* Header Presensi Cepat - Clean & Fresh Biru Langit (#87CEEB) */}
-      <div className="bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 p-5 sm:p-6 text-white border-b border-sky-800/40 relative overflow-hidden">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-              Presensi Cepat Pegawai
-            </h1>
-            <p className="text-sky-200/90 text-[11px] mt-1 font-medium">
-              Cukup ketik NIP, verifikasi foto selfie, dan langsung tercatat.
-            </p>
-          </div>
-
-          {/* Jam Live Digital WITA */}
-          <div className="bg-sky-900/60 backdrop-blur-md border border-[#87CEEB]/40 rounded-2xl px-3.5 py-2 text-center shrink-0 shadow-inner">
-            <span className="text-[9px] text-[#87CEEB] font-bold uppercase tracking-widest block">
-              Live WITA
+    <div className="w-full max-w-md mx-auto">
+      {/* Form Card - Clean White & Sky Blue (#87CEEB) 100% Setema dengan Halaman Login */}
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xl">
+        {/* Banner Presensi Cepat di Kantor - Identik dengan Kotak Login */}
+        <div className="mb-6 p-4 rounded-2xl bg-sky-50/70 border border-sky-200">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-sky-800 uppercase tracking-widest flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-sky-600" />
+              Presensi Cepat di Kantor
             </span>
-            <span className="font-mono tabular-nums text-xl sm:text-2xl font-extrabold text-white">
-              {formattedTime}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-5 sm:p-6 space-y-5">
-        {/* Notifikasi Pesan */}
-        {alert && (
-          <div
-            className={`p-3.5 rounded-2xl flex items-start gap-2.5 text-xs leading-relaxed animate-slide-up ${
-              alert.type === 'success'
-                ? 'bg-sky-50 text-sky-900 border border-sky-200'
-                : 'bg-rose-50 text-rose-900 border border-rose-200'
-            }`}
-          >
-            {alert.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
-            ) : (
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-            )}
-            <span className="font-medium text-xs">{alert.message}</span>
-          </div>
-        )}
-
-        {/* Status Radar Geofence GPS Ringkas */}
-        <div className="p-3.5 rounded-2xl bg-sky-50/60 border border-sky-100 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span
-                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  isInsideRadius ? 'bg-sky-400' : 'bg-rose-400'
-                }`}
-              />
-              <span
-                className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
-                  isInsideRadius ? 'bg-sky-500' : 'bg-rose-500'
-                }`}
-              />
-            </span>
-            <div>
-              <span className="font-bold text-slate-800 block text-xs">
-                {isLocating
-                  ? 'Mengunci titik GPS...'
-                  : isInsideRadius
-                  ? `Di Dalam Radius: ${locationEval?.targetName}`
-                  : `Di Luar Radius: ${locationEval?.targetName || 'Kampus'}`}
+            <div className="flex items-center gap-1.5 bg-white border border-sky-200 px-2.5 py-1 rounded-xl shadow-2xs">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
               </span>
-              {locationEval && (
-                <span className="text-[10px] text-slate-500 font-mono">
-                  Jarak: ±{Math.round(locationEval.distance)}m (Batas: {locationEval.maxRadius}m)
-                </span>
-              )}
+              <span className="text-[9px] text-sky-700 font-bold uppercase tracking-wider">
+                WITA
+              </span>
+              <span className="font-mono tabular-nums text-xs font-extrabold text-slate-900">
+                {formattedTime}
+              </span>
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={refreshLocation}
-            disabled={isLocating}
-            className="text-[11px] text-sky-700 hover:text-sky-800 font-bold underline shrink-0 flex items-center gap-1 cursor-pointer"
-          >
-            <Radio className="w-3 h-3 text-sky-600" />
-            <span>Segarkan</span>
-          </button>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Sedang di kampus? Ketik NIP, verifikasi foto selfie wajah, dan presensi langsung tercatat tanpa perlu login.
+          </p>
         </div>
 
-        {/* Input NIP Pegawai */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-slate-800 flex items-center justify-between">
-            <span>Nomor Induk Pegawai (NIP):</span>
-            <span className="text-[11px] text-slate-400 font-normal">Contoh: DSN01, TNK01</span>
-          </label>
+        <div className="mb-5">
+          <h2 className="text-lg font-bold text-slate-900">Identifikasi Pegawai</h2>
+          <p className="text-slate-500 text-xs mt-0.5">
+            Masukkan NIP resmi Anda untuk presensi kehadiran hari ini
+          </p>
+        </div>
 
-          <div className="relative">
-            <input
-              type="text"
-              value={nipInput}
-              onChange={(e) => {
-                const val = e.target.value.toUpperCase();
-                setNipInput(val);
-                if (val.length >= 3) {
-                  handleSearchNip(val);
-                } else {
-                  setEmployee(null);
-                  setAttendance(null);
-                  setLookupError(null);
-                }
-              }}
-              onBlur={() => handleSearchNip()}
-              placeholder="Ketik NIP Anda..."
-              autoCapitalize="characters"
-              className="w-full pl-3.5 pr-10 py-3 border border-slate-200 rounded-2xl text-sm font-mono font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 transition uppercase tracking-wider"
-            />
-            <div className="absolute right-3.5 top-3.5 text-slate-400">
-              {isSearchingNip ? (
-                <div className="w-4 h-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
+        <div className="space-y-4">
+          {/* Notifikasi Pesan */}
+          {alert && (
+            <div
+              className={`p-3.5 rounded-2xl flex items-start gap-2.5 text-xs leading-relaxed animate-slide-up ${
+                alert.type === 'success'
+                  ? 'bg-sky-50 text-sky-900 border border-sky-200'
+                  : 'bg-rose-50 text-rose-900 border border-rose-200'
+              }`}
+            >
+              {alert.type === 'success' ? (
+                <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
               ) : (
-                <Search className="w-4 h-4" />
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               )}
+              <span className="font-medium text-xs">{alert.message}</span>
             </div>
-          </div>
-
-          {lookupError && (
-            <p className="text-[11px] text-rose-600 font-medium mt-1 flex items-center gap-1">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-              <span>{lookupError}</span>
-            </p>
           )}
 
-          {/* Tombol Masuk Akun di Bawah NIP */}
-          <div className="pt-2 flex items-center justify-between text-xs border-t border-slate-100">
-            <span className="text-slate-500 text-[11px]">Bukan presensi cepat?</span>
-            <Link
-              href="/login"
-              className="text-sky-700 hover:text-sky-800 font-bold text-[11px] underline flex items-center gap-1 cursor-pointer"
+          {/* Status Radar Geofence GPS Ringkas */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span
+                  className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                    isInsideRadius ? 'bg-sky-400' : 'bg-rose-400'
+                  }`}
+                />
+                <span
+                  className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
+                    isInsideRadius ? 'bg-sky-500' : 'bg-rose-500'
+                  }`}
+                />
+              </span>
+              <div>
+                <span className="font-bold text-slate-800 block text-xs">
+                  {isLocating
+                    ? 'Mengunci titik GPS...'
+                    : isInsideRadius
+                    ? `Di Dalam Radius: ${locationEval?.targetName}`
+                    : `Di Luar Radius: ${locationEval?.targetName || 'Kampus'}`}
+                </span>
+                {locationEval && (
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    Jarak: ±{Math.round(locationEval.distance)}m (Batas: {locationEval.maxRadius}m)
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={refreshLocation}
+              disabled={isLocating}
+              className="text-[11px] text-sky-700 hover:text-sky-800 font-bold underline shrink-0 flex items-center gap-1 cursor-pointer"
             >
-              <span>Masuk Akun Pribadi / Admin →</span>
-            </Link>
+              <Radio className="w-3 h-3 text-sky-600" />
+              <span>Segarkan</span>
+            </button>
           </div>
-        </div>
+
+          {/* Input NIP Pegawai - Sama Persis dengan Input Login */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-700 flex items-center justify-between">
+              <span>Nomor Induk Pegawai (NIP)</span>
+              <span className="text-[11px] text-slate-400 font-normal">Contoh: DSN01, TNK01</span>
+            </label>
+
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <User className="w-4 h-4" />
+              </div>
+              <input
+                type="text"
+                value={nipInput}
+                onChange={(e) => {
+                  const val = e.target.value.toUpperCase();
+                  setNipInput(val);
+                  if (val.length >= 3) {
+                    handleSearchNip(val);
+                  } else {
+                    setEmployee(null);
+                    setAttendance(null);
+                    setLookupError(null);
+                  }
+                }}
+                onBlur={() => handleSearchNip()}
+                placeholder="Contoh: DSN01, TNK01"
+                autoCapitalize="characters"
+                className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition uppercase tracking-wider"
+              />
+              <div className="absolute right-3.5 top-3.5 text-slate-400">
+                {isSearchingNip ? (
+                  <div className="w-4 h-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Search className="w-4 h-4" />
+                )}
+              </div>
+            </div>
+
+            {lookupError && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{lookupError}</span>
+              </p>
+            )}
+
+            {/* Tombol Masuk Akun di Bawah NIP */}
+            <div className="pt-2 flex items-center justify-between text-xs border-t border-slate-100">
+              <span className="text-slate-500 text-[11px]">Bukan presensi cepat?</span>
+              <Link
+                href="/login"
+                className="text-sky-700 hover:text-sky-800 font-bold text-[11px] underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>Masuk Akun Pribadi / Admin →</span>
+              </Link>
+            </div>
+          </div>
 
         {/* Kartu Preview Identitas Pegawai Terdeteksi */}
         {employee && (
@@ -737,6 +751,7 @@ export function QuickPresenceCard({
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

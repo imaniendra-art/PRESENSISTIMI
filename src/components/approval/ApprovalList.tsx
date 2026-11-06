@@ -97,7 +97,7 @@ export function ApprovalList({ pendingLeaves, pendingTrips }: ApprovalListProps)
           onClick={() => setActiveTab('leaves')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
             activeTab === 'leaves'
-              ? 'bg-indigo-600 text-white shadow-sm'
+              ? 'bg-sky-600 text-white shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
@@ -110,7 +110,7 @@ export function ApprovalList({ pendingLeaves, pendingTrips }: ApprovalListProps)
           onClick={() => setActiveTab('trips')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
             activeTab === 'trips'
-              ? 'bg-indigo-600 text-white shadow-sm'
+              ? 'bg-sky-600 text-white shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >

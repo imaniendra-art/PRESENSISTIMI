@@ -36,31 +36,29 @@ export default async function AbsenCepatPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between py-6 px-4 sm:px-6">
-      {/* Top Bar Branding */}
-      <div className="max-w-lg mx-auto w-full flex items-center justify-center mb-5">
-        <Link href="/" className="flex items-center gap-2.5 group text-center">
+      {/* Header Institusi - 100% Setema dengan Halaman Login */}
+      <div className="w-full max-w-md mx-auto text-center mb-6">
+        <div className="inline-flex items-center justify-center mb-3">
           <Image
             src="/logo.png"
             alt="Logo STIMI Makassar"
-            width={40}
-            height={40}
+            width={72}
+            height={72}
             priority
-            className="w-10 h-10 object-contain drop-shadow-xs"
+            className="w-16 h-16 sm:w-18 sm:h-18 object-contain drop-shadow-xs"
           />
-          <div className="text-left">
-            <span className="font-extrabold text-base tracking-tight text-slate-900 block leading-none">
-              PRESENSI<span className="text-sky-600">STIMI</span>
-            </span>
-            <span className="text-[9px] sm:text-[10px] text-slate-600 font-bold tracking-wider uppercase block mt-1">
-              PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
-            </span>
-          </div>
-        </Link>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          PRESENSI<span className="text-sky-600">STIMI</span>
+        </h1>
+        <p className="text-slate-500 text-xs sm:text-[11px] font-bold tracking-wider uppercase mt-1">
+          PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
+        </p>
       </div>
 
       {/* Main Card Component */}
       <main className="flex-1 flex items-center justify-center">
-        <div className="w-full">
+        <div className="w-full max-w-md">
           <QuickPresenceCard
             campusSetting={campusSetting}
             campusLocations={campusLocations}
@@ -69,9 +67,9 @@ export default async function AbsenCepatPage() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-4 text-[11px] text-slate-400">
-        &copy; {new Date().getFullYear()} Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) Makassar. All rights reserved.
-      </footer>
+      <p className="text-center text-xs text-slate-400 mt-6">
+        &copy; {new Date().getFullYear()} Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) YAPMI Makassar. Seluruh Hak Cipta Dilindungi.
+      </p>
     </div>
   );
 }

@@ -91,7 +91,7 @@ export function ReportGenerator({
       <div className="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-xs space-y-4 print:hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
+            <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200">
               <FileSpreadsheet className="w-6 h-6" />
             </div>
             <div>
@@ -99,7 +99,7 @@ export function ReportGenerator({
                 <h2 className="text-sm font-bold text-slate-900">
                   Laporan Periode: {monthNames[filterMonth - 1]} {filterYear}
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
+                <span className="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 text-[10px] font-bold font-mono border border-sky-200">
                   {reportData.length} Pegawai
                 </span>
               </div>
@@ -122,7 +122,7 @@ export function ReportGenerator({
             <button
               type="button"
               onClick={handlePrintPDF}
-              className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-950/20 cursor-pointer"
+              className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Cetak / Simpan PDF</span>
@@ -142,9 +142,9 @@ export function ReportGenerator({
             <button
               type="button"
               onClick={() => handlePeriodChange(10, 2026)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 filterMonth === 10 && filterYear === 2026
-                  ? 'bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-sky-600 text-white shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
@@ -154,9 +154,9 @@ export function ReportGenerator({
             <button
               type="button"
               onClick={() => handlePeriodChange(11, 2026)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 filterMonth === 11 && filterYear === 2026
-                  ? 'bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-sky-600 text-white shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
@@ -167,7 +167,7 @@ export function ReportGenerator({
             <select
               value={filterMonth}
               onChange={(e) => handlePeriodChange(parseInt(e.target.value), filterYear)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
             >
               {monthNames.map((name, idx) => (
                 <option key={idx} value={idx + 1}>
@@ -180,7 +180,7 @@ export function ReportGenerator({
             <select
               value={filterYear}
               onChange={(e) => handlePeriodChange(filterMonth, parseInt(e.target.value))}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
             >
               <option value={2025}>2025</option>
               <option value={2026}>2026</option>

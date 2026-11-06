@@ -329,7 +329,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
       <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <Users className="w-5 h-5 text-indigo-600" />
+            <Users className="w-5 h-5 text-sky-600" />
             <span>Manajemen Pegawai & Dosen ({users.length})</span>
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -360,7 +360,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
               setIsAddModalOpen(true);
               setAlert(null);
             }}
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-200"
+            className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20"
           >
             <UserPlus className="w-4 h-4" />
             <span>Tambah Pegawai</span>
@@ -377,7 +377,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari NIP, nama, jabatan, unit kerja..."
-            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
           />
         </div>
 
