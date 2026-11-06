@@ -16,7 +16,7 @@ export default async function AtasanDashboardPage() {
     redirect('/login');
   }
 
-  const { user, campusSetting, todayAttendance, activeDutyTrip } =
+  const { user, campusSetting, campusLocations, todayAttendance, activeDutyTrip } =
     await getPresenceInitialData();
 
   // Dapatkan daftar bawahan
@@ -58,64 +58,61 @@ export default async function AtasanDashboardPage() {
               <span>Portal Pimpinan / Pejabat Penilai STIMI</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-              Dashboard Atasan: {user.name}
+              Selamat Datang, {user.name}
             </h1>
-            <p className="text-slate-300 text-xs mt-1">
-              {user.jabatan} • Membina {bawahan.length} Pegawai / Dosen
+            <p className="text-emerald-200 text-xs mt-1">
+              {user.jabatan} • {user.unitKerja} (NIP: {user.nip})
             </p>
           </div>
 
-          {totalPending > 0 ? (
-            <Link
-              href="/atasan/approval"
-              className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition shrink-0"
-            >
-              <span>{totalPending} Permohonan Menunggu Persetujuan</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          ) : (
-            <div className="bg-white/10 px-4 py-3 rounded-2xl border border-white/10 text-center sm:text-right">
-              <span className="text-[11px] text-emerald-300 block">Status Verifikasi Tim</span>
-              <span className="text-xs font-bold text-white">Semua Permohonan Beres ✓</span>
-            </div>
-          )}
+          <div className="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 text-center sm:text-right">
+            <span className="text-[11px] text-emerald-300 block">Jam Operasional Hari Ini</span>
+            <span className="text-sm font-bold text-white">
+              {campusSetting.workStart} - {campusSetting.workEnd} WITA
+            </span>
+          </div>
         </div>
 
-        {/* Ringkasan Tim */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-              <Users className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase">Total Staf Binaan</p>
-              <p className="text-xl font-extrabold text-slate-800">{bawahan.length} Orang</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+        {/* Panel Notifikasi Persetujuan Tim Bawahan */}
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
               <ClipboardCheck className="w-6 h-6" />
             </div>
-            <div className="flex-1">
-              <p className="text-xs font-semibold text-slate-500 uppercase">Perlu Tindakan</p>
-              <div className="flex items-center justify-between">
-                <p className="text-xl font-extrabold text-slate-800">{totalPending} Berkas</p>
-                {totalPending > 0 && (
-                  <Link
-                    href="/atasan/approval"
-                    className="text-xs font-bold text-indigo-600 hover:underline"
-                  >
-                    Buka Inbox &rarr;
-                  </Link>
-                )}
-              </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-800">
+                Persetujuan Cuti & Dinas Luar Tim ({totalPending} Menunggu)
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Ada permohonan staf binaan Anda yang membutuhkan verifikasi dan keputusan Anda.
+              </p>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4 sm:col-span-2 lg:col-span-1">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-6 h-6" />
+          <Link
+            href="/atasan/approval"
+            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md shadow-indigo-200 self-start sm:self-auto shrink-0"
+          >
+            <span>Buka Inbox Approval</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {/* Statistik Tim & Unit Kerja */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase">Staf Binaan Langsung</p>
+              <p className="text-base font-bold text-slate-800">{bawahan.length} Dosen / Pegawai</p>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase">Unit Kerja</p>
@@ -133,8 +130,10 @@ export default async function AtasanDashboardPage() {
           </div>
           <PresensiCard
             campusSetting={campusSetting}
+            campusLocations={campusLocations}
             todayAttendance={todayAttendance}
             activeDutyTrip={activeDutyTrip}
+            assignedLocation={user.assignedLocation}
           />
         </div>
       </main>

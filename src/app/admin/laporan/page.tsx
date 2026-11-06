@@ -7,23 +7,35 @@ import { ReportGenerator } from '@/components/admin/ReportGenerator';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminLaporanPage() {
+interface AdminLaporanPageProps {
+  searchParams: Promise<{ month?: string; year?: string }>;
+}
+
+export default async function AdminLaporanPage({ searchParams }: AdminLaporanPageProps) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || session.user.role !== 'ADMIN') {
     redirect('/unauthorized');
   }
 
+  const resolvedParams = await searchParams;
   const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentYear = now.getFullYear();
 
-  const firstDay = new Date(currentYear, now.getMonth(), 1);
-  const lastDay = new Date(currentYear, now.getMonth() + 1, 0, 23, 59, 59);
+  const currentMonth = resolvedParams?.month
+    ? Math.max(1, Math.min(12, parseInt(resolvedParams.month) || now.getMonth() + 1))
+    : now.getMonth() + 1;
+
+  const currentYear = resolvedParams?.year
+    ? parseInt(resolvedParams.year) || now.getFullYear()
+    : now.getFullYear();
+
+  const firstDay = new Date(currentYear, currentMonth - 1, 1, 0, 0, 0);
+  const lastDay = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
 
   const [campusSetting, users, attendances] = await Promise.all([
     prisma.campusSetting.findFirst(),
     prisma.user.findMany({
       where: { isActive: true },
+      include: { assignedLocation: true },
       orderBy: { name: 'asc' },
     }),
     prisma.attendance.findMany({
@@ -48,6 +60,7 @@ export default async function AdminLaporanPage() {
       name: u.name,
       jabatan: u.jabatan,
       unitKerja: u.unitKerja,
+      lokasiPenugasan: u.assignedLocation ? u.assignedLocation.name : 'Semua Gedung (Fleksibel)',
       totalHadir,
       tepatWaktu,
       terlambat,

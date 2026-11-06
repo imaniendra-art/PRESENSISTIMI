@@ -39,28 +39,50 @@ enum RequestStatus {
   REJECTED
 }
 
+model CampusLocation {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  code         String?
+  address      String
+  latitude     Float
+  longitude    Float
+  radiusMeters Float    @default(100.0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assignedUsers User[]       @relation("UserAssignedLocation")
+  attendances   Attendance[] @relation("LocationAttendances")
+
+  @@map("campus_locations")
+}
+
 model User {
-  id             String         @id @default(auto()) @map("_id") @db.ObjectId
-  nip            String         @unique
-  name           String
-  email          String         @unique
-  password       String
-  role           Role           @default(PEGAWAI)
-  jabatan        String
-  unitKerja      String
-  atasanId       String?        @db.ObjectId
-  atasan         User?          @relation("UserHierarchy", fields: [atasanId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  bawahan        User[]         @relation("UserHierarchy")
-  isActive       Boolean        @default(true)
-  avatarUrl      String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id                 String          @id @default(auto()) @map("_id") @db.ObjectId
+  nip                String          @unique
+  name               String
+  email              String?
+  password           String
+  role               Role            @default(PEGAWAI)
+  jabatan            String
+  unitKerja          String
+  atasanId           String?         @db.ObjectId
+  atasan             User?           @relation("UserHierarchy", fields: [atasanId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bawahan            User[]          @relation("UserHierarchy")
+  
+  assignedLocationId String?         @db.ObjectId
+  assignedLocation   CampusLocation? @relation("UserAssignedLocation", fields: [assignedLocationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  
+  isActive           Boolean         @default(true)
+  avatarUrl          String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 
   attendances    Attendance[]
-  leaveRequests  LeaveRequest[] @relation("UserLeaves")
-  approvedLeaves LeaveRequest[] @relation("ApproverLeaves")
-  dutyTrips      DutyTrip[]     @relation("UserDutyTrips")
-  approvedTrips  DutyTrip[]     @relation("ApproverDutyTrips")
+  leaveRequests  LeaveRequest[]  @relation("UserLeaves")
+  approvedLeaves LeaveRequest[]  @relation("ApproverLeaves")
+  dutyTrips      DutyTrip[]      @relation("UserDutyTrips")
+  approvedTrips  DutyTrip[]      @relation("ApproverDutyTrips")
   campusSettings CampusSetting[]
 
   @@map("users")
@@ -72,6 +94,11 @@ model Attendance {
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   date             DateTime
   
+  // Lokasi Gedung Presensi
+  locationId       String?           @db.ObjectId
+  location         CampusLocation?   @relation("LocationAttendances", fields: [locationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  locationName     String?
+
   // Masuk (Clock-in)
   clockInTime      DateTime?
   clockInLat       Float?
@@ -98,8 +125,8 @@ model Attendance {
   updatedAt        DateTime          @updatedAt
 
   @@unique([userId, date])
-  @@index([date])
   @@index([userId])
+  @@index([date])
   @@map("attendances")
 }
 
@@ -114,7 +141,7 @@ model LeaveRequest {
   reason        String
   attachmentUrl String?
   status        RequestStatus @default(PENDING)
-  
+
   approverId    String?       @db.ObjectId
   approver      User?         @relation("ApproverLeaves", fields: [approverId], references: [id])
   approverNote  String?

@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import {
-  Building2,
   CalendarCheck,
   FileText,
   Users,
@@ -60,9 +60,16 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo & Brand */}
           <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200">
-                <Building2 className="w-5 h-5" />
+            <Link href="/dashboard" className="flex items-center gap-2.5 group">
+              <div className="relative w-10 h-10 flex items-center justify-center">
+                <Image
+                  src="/logo.png"
+                  alt="Logo STIMI Makassar"
+                  width={40}
+                  height={40}
+                  priority
+                  className="w-10 h-10 object-contain drop-shadow-xs group-hover:scale-105 transition-transform duration-200"
+                />
               </div>
               <div>
                 <span className="font-extrabold text-base tracking-tight text-slate-900 block leading-none">

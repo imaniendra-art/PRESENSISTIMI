@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, Suspense } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { KeyRound, User, Lock, AlertCircle, Building2, CheckCircle2 } from 'lucide-react';
+import { KeyRound, User, Lock, AlertCircle, CheckCircle2, Zap } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
@@ -51,8 +53,15 @@ function LoginForm() {
     <div className="w-full max-w-md">
       {/* Header Institusi */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/30 border border-indigo-400/30 text-indigo-400 mb-4 shadow-lg backdrop-blur-md">
-          <Building2 className="w-8 h-8 text-indigo-300" />
+        <div className="inline-flex items-center justify-center mb-3">
+          <Image
+            src="/logo-dark.png"
+            alt="Logo STIMI Makassar"
+            width={84}
+            height={84}
+            priority
+            className="w-20 h-20 sm:w-22 sm:h-22 object-contain drop-shadow-md"
+          />
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
           PRESENSI<span className="text-indigo-400">STIMI</span>
@@ -64,6 +73,37 @@ function LoginForm() {
 
       {/* Form Card */}
       <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        {/* Tombol Pintas Presensi Cepat Tanpa Login */}
+        <div className="mb-6 p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 shadow-inner">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-widest flex items-center gap-1">
+              <Zap className="w-3 h-3 text-emerald-400" />
+              Presensi Cepat di Kantor
+            </span>
+            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-400/30 font-semibold">
+              Cukup NIP & Selfie
+            </span>
+          </div>
+          <p className="text-xs text-slate-300 mb-3 leading-relaxed">
+            Sedang di kampus? Anda dapat langsung absen masuk atau pulang tanpa perlu login akun.
+          </p>
+          <Link
+            href="/absen-cepat"
+            className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-950/40 transition group cursor-pointer"
+          >
+            <Zap className="w-4 h-4 text-emerald-200 group-hover:scale-110 transition-transform" />
+            <span>⚡ Buka Presensi Cepat (NIP & Selfie)</span>
+          </Link>
+        </div>
+
+        <div className="relative flex items-center justify-center mb-6">
+          <div className="border-t border-white/10 w-full" />
+          <span className="bg-transparent px-3 text-[11px] text-slate-400 font-semibold uppercase tracking-wider shrink-0">
+            atau Masuk Akun Pegawai / Admin
+          </span>
+          <div className="border-t border-white/10 w-full" />
+        </div>
+
         <div className="mb-6">
           <h2 className="text-xl font-bold text-white">Masuk ke Akun</h2>
           <p className="text-slate-300 text-xs mt-1">

@@ -1,21 +1,21 @@
 # Development Roadmap & Progress Tracking — PRESENSISTIMI
 
-Dokumen pelacak progres pengerjaan sistem presensi **PRESENSISTIMI** terikat dengan alur 8-Fase `zero-to-prod-orchestrator`.
+Dokumen pelacak progres pengerjaan sistem presensi **PRESENSISTIMI** terikat dengan alur `zero-to-prod-orchestrator`.
 
 ---
 
 ## Ringkasan Status Proyek
-* **Tahap Saat Ini**: Fase 8 Selesai (Semua Fase 1 s/d 8 Telah Berhasil Diimplementasikan & Diuji Build)
-* **Status Keseluruhan**: **Production-Ready (Siap Digunakan)**
+* **Tahap Saat Ini**: Fase 10 Selesai (Fase 1 s/d 8 Fondasi Core MVP + Fase 9 Enterprise Enhancement + Fase 10 Multi-Gedung & Hybrid Storage)
+* **Status Keseluruhan**: **Production-Ready, Multi-Building & Cloud-Hybrid Scaled**
 
 ---
 
-## Rincian 8-Fase Implementasi
+## Rincian Fase Implementasi
 
 ### Fase 1: Foundation & Project Scaffolding
-- [x] Inisialisasi proyek Next.js 15/16 (App Router, TypeScript, ESLint, Tailwind CSS v4).
+- [x] Inisialisasi proyek Next.js 16 (App Router, TypeScript, ESLint, Tailwind CSS v4).
 - [x] Konfigurasi struktur folder modular (`src/app`, `src/components`, `src/lib`, `src/actions`).
-- [x] Pengaturan konfigurasi PWA (`manifest.json` & Service Worker shell dasar).
+- [x] Pengaturan konfigurasi PWA (`manifest.json` & Service Worker).
 
 ### Fase 2: Database Layer & Prisma MongoDB Setup
 - [x] Inisialisasi Prisma ORM dengan penyedia MongoDB (`provider = "mongodb"`).
@@ -54,3 +54,17 @@ Dokumen pelacak progres pengerjaan sistem presensi **PRESENSISTIMI** terikat den
 - [x] Verifikasi build produksi Turbopack Next.js (`npm run build` lulus tanpa error / exit code 0).
 - [x] Penegakan zero-slop tanpa kode dummy atau placeholder.
 - [x] Desain responsif mobile-first untuk akses praktis lewat ponsel Android & iOS.
+
+### Fase 9: Enterprise Enhancement & Operational Scale
+- [x] **Branding Kampus Terpadu**: Integrasi logo resmi STIMI (varian terang & gelap), Favicon multi-resolusi, dan kop surat resmi cetak.
+- [x] **Bulk Import Pegawai via Excel / CSV**: Fitur import massal puluhan/ratusan pegawai dalam 1 klik dengan auto-linking NIP atasan.
+- [x] **Template Excel Generator**: Tombol satu-klik unduh file format `Template_Data_Pegawai_STIMI.xlsx` langsung dari browser.
+- [x] **Edit & Reset Password Pegawai**: Modal pembaruan profil data diri pegawai dan fitur reset kata sandi oleh Admin SDM.
+- [x] **Pencarian & Filter Cepat**: Filter pegawai berdasarkan peran (Admin, Atasan, Pegawai) dan pencarian instan NIP/Nama/Unit Kerja.
+- [x] **PWA Service Worker & Install Banner**: Pendaftaran Service Worker aktif untuk caching offline shell dan prompt instalasi aplikasi di layar utama HP (Chrome Android & Safari iOS).
+
+### Fase 10: Multi-Gedung & Hybrid Storage Optimization (Terbaru)
+- [x] **Geofencing Multi-Gedung**: Penambahan model `CampusLocation`, penugasan spesifik per pegawai vs fleksibel semua gedung kampus.
+- [x] **Aturan Lokasi Cerdas**: Validasi radius toleransi ke gedung yang ditugaskan atau pencarian otomatis gedung aktif terdekat.
+- [x] **Auto-Resize & Kompresi WebP**: Optimasi server-side via `sharp` memangkas ukuran foto bukti presensi hingga 79% (menjadi ~15-25 KB).
+- [x] **Hybrid Cloud Storage**: Integrasi cloud Supabase Storage (bucket `presensistimi`) dengan fail-safe cadangan lokal di `public/uploads/`.

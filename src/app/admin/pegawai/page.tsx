@@ -13,9 +13,12 @@ export default async function AdminPegawaiPage() {
     redirect('/unauthorized');
   }
 
-  const [users, superiors] = await Promise.all([
+  const [users, superiors, campusLocations] = await Promise.all([
     prisma.user.findMany({
-      include: { atasan: true },
+      include: {
+        atasan: true,
+        assignedLocation: true,
+      },
       orderBy: { createdAt: 'desc' },
     }),
     prisma.user.findMany({
@@ -25,6 +28,10 @@ export default async function AdminPegawaiPage() {
       },
       orderBy: { name: 'asc' },
     }),
+    prisma.campusLocation.findMany({
+      where: { isActive: true },
+      orderBy: { name: 'asc' },
+    }),
   ]);
 
   return (
@@ -32,7 +39,11 @@ export default async function AdminPegawaiPage() {
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <EmployeeManager users={users} superiors={superiors} />
+        <EmployeeManager
+          users={users}
+          superiors={superiors}
+          campusLocations={campusLocations}
+        />
       </main>
     </div>
   );
