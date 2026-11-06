@@ -541,6 +541,7 @@ export async function submitQuickPresence(data: {
   accuracy?: number;
   photoBase64: string;
   pin?: string;
+  isSimulation?: boolean;
 }) {
   if (!data.nip || !data.nip.trim()) {
     return { success: false, message: 'NIP wajib diisi.' };
@@ -631,7 +632,13 @@ export async function submitQuickPresence(data: {
   let resolvedLocationName: string = campusSetting.campusName;
   let recordedDistance = 0;
 
-  if (user.assignedLocation) {
+  if (data.isSimulation) {
+    // Mode Simulasi / Pengujian Mandiri
+    const targetLoc = user.assignedLocation || (campusLocations.length > 0 ? campusLocations[0] : null);
+    resolvedLocationId = targetLoc ? targetLoc.id : null;
+    resolvedLocationName = targetLoc ? targetLoc.name : campusSetting.campusName;
+    recordedDistance = 12; // Simulasi di dalam kampus
+  } else if (user.assignedLocation) {
     const dist = calculateHaversineDistance(
       data.latitude,
       data.longitude,

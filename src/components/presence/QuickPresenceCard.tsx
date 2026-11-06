@@ -24,6 +24,7 @@ import {
   Lock,
   ArrowRight,
   RotateCcw,
+  Camera,
 } from 'lucide-react';
 import { CampusSetting, CampusLocation } from '@prisma/client';
 import Link from 'next/link';
@@ -80,6 +81,7 @@ export function QuickPresenceCard({
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [isSimulation, setIsSimulation] = useState(false);
 
   // Auto-Reset 4 Detik
   const [successData, setSuccessData] = useState<{
@@ -259,17 +261,17 @@ export function QuickPresenceCard({
       return;
     }
 
-    if (!coords) {
-      setAlert({ type: 'error', message: 'Sinyal GPS belum terdeteksi. Izinkan akses lokasi pada browser Anda.' });
+    if (!coords && !isSimulation) {
+      setAlert({ type: 'error', message: 'Sinyal GPS belum terdeteksi. Izinkan akses lokasi pada browser Anda atau aktifkan mode uji coba.' });
       return;
     }
 
-    if (!isInsideRadius) {
+    if (!isInsideRadius && !isSimulation) {
       setAlert({
         type: 'error',
         message: `Presensi ditolak. Anda berada di luar batas gedung ${locationEval?.targetName} (${Math.round(
           locationEval?.distance || 0
-        )}m). Batas toleransi radius adalah ${locationEval?.maxRadius}m.`,
+        )}m). Aktifkan Mode Uji Coba jika sedang simulasi mandiri.`,
       });
       return;
     }
@@ -285,11 +287,12 @@ export function QuickPresenceCard({
     try {
       const res = await submitQuickPresence({
         nip: employee.nip,
-        latitude: coords.lat,
-        longitude: coords.lng,
-        accuracy: coords.accuracy,
+        latitude: coords?.lat || -5.123286,
+        longitude: coords?.lng || 119.489704,
+        accuracy: coords?.accuracy || 10,
         photoBase64,
         pin: pinInput,
+        isSimulation,
       });
 
       if (res.success && res.actionType) {
@@ -617,20 +620,60 @@ export function QuickPresenceCard({
           </div>
         )}
 
+        {/* Banner Mode Uji Coba jika di Luar Radius */}
+        {employee && !isInsideRadius && (
+          <div className="p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200 flex items-center justify-between gap-3 text-xs animate-slide-up">
+            <div className="flex items-center gap-2 text-amber-900">
+              <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+              <div className="text-[11px] leading-tight">
+                <span className="font-bold block">Di Luar Area Kampus?</span>
+                <span className="text-amber-700">Aktifkan mode simulasi untuk pengujian mandiri.</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsSimulation(!isSimulation)}
+              className={`px-3 py-1.5 rounded-xl font-bold text-xs transition shrink-0 cursor-pointer ${
+                isSimulation
+                  ? 'bg-amber-600 text-white shadow-xs'
+                  : 'bg-white border border-amber-300 text-amber-900 hover:bg-amber-100'
+              }`}
+            >
+              {isSimulation ? '✓ Uji Coba Aktif' : 'Aktifkan Uji Coba'}
+            </button>
+          </div>
+        )}
+
         {/* Tombol Eksekusi Presensi Cepat */}
         {employee && (
-          <div className="pt-2 animate-slide-up">
+          <div className="pt-2 animate-slide-up space-y-2">
             {!attendance?.hasClockedIn ? (
               <button
                 type="button"
-                disabled={isSubmitting || !photoBase64 || !isInsideRadius}
+                disabled={isSubmitting || !photoBase64 || (!isInsideRadius && !isSimulation)}
                 onClick={handleSubmit}
-                className="w-full py-4 px-5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 disabled:opacity-50 text-white font-extrabold rounded-2xl shadow-lg shadow-sky-950/20 border border-sky-400/30 text-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                className={`w-full py-4 px-5 font-extrabold rounded-2xl shadow-lg text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+                  !photoBase64
+                    ? 'bg-slate-200 text-slate-500 border border-slate-300 cursor-not-allowed shadow-none'
+                    : !isInsideRadius && !isSimulation
+                    ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed shadow-none'
+                    : 'bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white shadow-sky-950/20 border border-sky-400/30'
+                }`}
               >
                 {isSubmitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     <span>Mencatat Presensi Masuk...</span>
+                  </>
+                ) : !photoBase64 ? (
+                  <>
+                    <Camera className="w-4 h-4" />
+                    <span>📸 Ambil Foto Wajah Terlebih Dahulu</span>
+                  </>
+                ) : !isInsideRadius && !isSimulation ? (
+                  <>
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>📍 Di Luar Radius (Aktifkan Uji Coba di Atas)</span>
                   </>
                 ) : (
                   <>
@@ -642,14 +685,30 @@ export function QuickPresenceCard({
             ) : !attendance?.hasClockedOut ? (
               <button
                 type="button"
-                disabled={isSubmitting || !photoBase64 || !isInsideRadius}
+                disabled={isSubmitting || !photoBase64 || (!isInsideRadius && !isSimulation)}
                 onClick={handleSubmit}
-                className="w-full py-4 px-5 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 disabled:opacity-50 text-white font-extrabold rounded-2xl shadow-lg shadow-rose-950/20 border border-rose-400/30 text-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                className={`w-full py-4 px-5 font-extrabold rounded-2xl shadow-lg text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+                  !photoBase64
+                    ? 'bg-slate-200 text-slate-500 border border-slate-300 cursor-not-allowed shadow-none'
+                    : !isInsideRadius && !isSimulation
+                    ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed shadow-none'
+                    : 'bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white shadow-rose-950/20 border border-rose-400/30'
+                }`}
               >
                 {isSubmitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     <span>Mencatat Presensi Pulang...</span>
+                  </>
+                ) : !photoBase64 ? (
+                  <>
+                    <Camera className="w-4 h-4" />
+                    <span>📸 Ambil Foto Wajah Terlebih Dahulu</span>
+                  </>
+                ) : !isInsideRadius && !isSimulation ? (
+                  <>
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>📍 Di Luar Radius (Aktifkan Uji Coba di Atas)</span>
                   </>
                 ) : (
                   <>
