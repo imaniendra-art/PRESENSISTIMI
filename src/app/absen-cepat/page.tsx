@@ -37,31 +37,24 @@ export default async function AbsenCepatPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between py-6 px-4 sm:px-6">
       {/* Top Bar Branding */}
-      <div className="max-w-lg mx-auto w-full flex items-center justify-between mb-4">
-        <Link href="/" className="flex items-center gap-2 group">
+      <div className="max-w-lg mx-auto w-full flex items-center justify-center mb-5">
+        <Link href="/" className="flex items-center gap-2.5 group text-center">
           <Image
             src="/logo.png"
             alt="Logo STIMI Makassar"
-            width={36}
-            height={36}
+            width={40}
+            height={40}
             priority
-            className="w-9 h-9 object-contain"
+            className="w-10 h-10 object-contain drop-shadow-xs"
           />
-          <div>
-            <span className="font-extrabold text-sm tracking-tight text-slate-900 block leading-none">
+          <div className="text-left">
+            <span className="font-extrabold text-base tracking-tight text-slate-900 block leading-none">
               PRESENSI<span className="text-emerald-600">STIMI</span>
             </span>
-            <span className="text-[9px] text-slate-500 font-semibold tracking-wider uppercase block">
-              Portal Kehadiran
+            <span className="text-[9px] sm:text-[10px] text-slate-600 font-bold tracking-wider uppercase block mt-1">
+              PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
             </span>
           </div>
-        </Link>
-
-        <Link
-          href="/login"
-          className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs transition"
-        >
-          Masuk Akun
         </Link>
       </div>
 

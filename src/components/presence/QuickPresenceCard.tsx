@@ -390,42 +390,24 @@ export function QuickPresenceCard({
 
   return (
     <div className="bg-white rounded-3xl shadow-xl border border-slate-200/90 overflow-hidden max-w-lg mx-auto">
-      {/* Header Presensi Cepat - Fresh Campus Theme */}
+      {/* Header Presensi Cepat - Clean & Fresh */}
       <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 p-5 sm:p-6 text-white border-b border-emerald-900/30 relative overflow-hidden">
-        <div className="flex items-center justify-between pb-3 border-b border-white/10">
-          <div className="flex items-center gap-2 text-emerald-300 text-xs font-semibold uppercase tracking-wider">
-            <Building className="w-4 h-4 text-emerald-400" />
-            <span>{campusSetting.campusName}</span>
-          </div>
-
-          <Link
-            href="/login"
-            className="text-[11px] text-slate-300 hover:text-white underline font-medium"
-          >
-            Masuk Akun Pribadi →
-          </Link>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider mb-1">
-              <Zap className="w-3 h-3 text-emerald-400" />
-              <span>Mode Presensi Kilat (Kiosk / HP)</span>
-            </div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
               Presensi Cepat Pegawai
             </h1>
-            <p className="text-slate-300 text-[11px] mt-0.5">
+            <p className="text-slate-300 text-[11px] mt-1">
               Cukup ketik NIP, verifikasi foto selfie, dan langsung tercatat.
             </p>
           </div>
 
-          {/* Jam Live Digital */}
-          <div className="bg-emerald-950/80 backdrop-blur-md border border-emerald-500/30 rounded-2xl px-3 py-2 text-center shrink-0">
+          {/* Jam Live Digital WITA */}
+          <div className="bg-emerald-950/80 backdrop-blur-md border border-emerald-500/30 rounded-2xl px-3.5 py-2 text-center shrink-0 shadow-inner">
             <span className="text-[9px] text-emerald-300 font-bold uppercase tracking-widest block">
               Live WITA
             </span>
-            <span className="font-mono tabular-nums text-xl font-extrabold text-white">
+            <span className="font-mono tabular-nums text-xl sm:text-2xl font-extrabold text-white">
               {formattedTime}
             </span>
           </div>
@@ -535,6 +517,17 @@ export function QuickPresenceCard({
               <span>{lookupError}</span>
             </p>
           )}
+
+          {/* Tombol Masuk Akun di Bawah NIP */}
+          <div className="pt-1.5 flex items-center justify-between text-xs">
+            <span className="text-slate-500 text-[11px]">Bukan presensi cepat?</span>
+            <Link
+              href="/login"
+              className="text-emerald-700 hover:text-emerald-800 font-bold text-[11px] underline flex items-center gap-1"
+            >
+              <span>Masuk Akun Pribadi / Admin →</span>
+            </Link>
+          </div>
         </div>
 
         {/* Kartu Preview Identitas Pegawai Terdeteksi */}

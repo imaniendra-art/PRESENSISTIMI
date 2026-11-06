@@ -64,10 +64,10 @@ function LoginForm() {
           />
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          PRESENSI<span className="text-indigo-400">STIMI</span>
+          PRESENSI<span className="text-emerald-400">STIMI</span>
         </h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Sistem Kehadiran Dosen & Tenaga Kependidikan
+        <p className="text-slate-300 text-xs sm:text-sm font-semibold tracking-wider uppercase mt-1">
+          PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
         </p>
       </div>
 

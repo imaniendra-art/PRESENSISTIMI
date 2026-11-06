@@ -73,10 +73,10 @@ export function Navbar() {
               </div>
               <div>
                 <span className="font-extrabold text-base tracking-tight text-slate-900 block leading-none">
-                  PRESENSI<span className="text-indigo-600">STIMI</span>
+                  PRESENSI<span className="text-emerald-600">STIMI</span>
                 </span>
-                <span className="text-[10px] text-slate-500 font-semibold tracking-wider uppercase block mt-0.5">
-                  Kampus Makassar
+                <span className="text-[9px] text-slate-500 font-bold tracking-wider uppercase block mt-0.5">
+                  PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
                 </span>
               </div>
             </Link>
