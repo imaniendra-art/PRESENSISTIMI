@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { KeyRound, User, Lock, AlertCircle, CheckCircle2, Zap } from 'lucide-react';
+import { KeyRound, User, Lock, AlertCircle, Zap } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
@@ -43,84 +43,78 @@ function LoginForm() {
     }
   };
 
-  const fillQuickAccount = (quickNip: string, quickPass: string) => {
-    setNip(quickNip);
-    setPassword(quickPass);
-    setErrorMessage('');
-  };
-
   return (
-    <div className="w-full max-w-md">
-      {/* Header Institusi */}
-      <div className="text-center mb-8">
+    <div className="w-full max-w-md mx-auto">
+      {/* Header Institusi - Biru Langit (#87CEEB) */}
+      <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center mb-3">
           <Image
-            src="/logo-dark.png"
+            src="/logo.png"
             alt="Logo STIMI Makassar"
-            width={84}
-            height={84}
+            width={72}
+            height={72}
             priority
-            className="w-20 h-20 sm:w-22 sm:h-22 object-contain drop-shadow-md"
+            className="w-16 h-16 sm:w-18 sm:h-18 object-contain drop-shadow-xs"
           />
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          PRESENSI<span className="text-emerald-400">STIMI</span>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          PRESENSI<span className="text-sky-600">STIMI</span>
         </h1>
-        <p className="text-slate-300 text-xs sm:text-sm font-semibold tracking-wider uppercase mt-1">
+        <p className="text-slate-500 text-xs sm:text-[11px] font-bold tracking-wider uppercase mt-1">
           PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
         </p>
       </div>
 
       {/* Form Card */}
-      <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl">
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xl">
         {/* Tombol Pintas Presensi Cepat Tanpa Login */}
-        <div className="mb-6 p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 shadow-inner">
+        <div className="mb-6 p-4 rounded-2xl bg-sky-50/70 border border-sky-200">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-widest flex items-center gap-1">
-              <Zap className="w-3 h-3 text-emerald-400" />
+            <span className="text-[10px] font-bold text-sky-800 uppercase tracking-widest flex items-center gap-1">
+              <Zap className="w-3.5 h-3.5 text-sky-600" />
               Presensi Cepat di Kantor
             </span>
-            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-400/30 font-semibold">
+            <span className="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full border border-sky-300 font-semibold">
               Cukup NIP & Selfie
             </span>
           </div>
-          <p className="text-xs text-slate-300 mb-3 leading-relaxed">
+          <p className="text-xs text-slate-600 mb-3 leading-relaxed">
             Sedang di kampus? Anda dapat langsung absen masuk atau pulang tanpa perlu login akun.
           </p>
           <Link
             href="/absen-cepat"
-            className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-950/40 transition group cursor-pointer"
+            className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-sky-950/20 transition group cursor-pointer"
           >
-            <Zap className="w-4 h-4 text-emerald-200 group-hover:scale-110 transition-transform" />
+            <Zap className="w-4 h-4 text-sky-200 group-hover:scale-110 transition-transform" />
             <span>⚡ Buka Presensi Cepat (NIP & Selfie)</span>
           </Link>
         </div>
 
         <div className="relative flex items-center justify-center mb-6">
-          <div className="border-t border-white/10 w-full" />
-          <span className="bg-transparent px-3 text-[11px] text-slate-400 font-semibold uppercase tracking-wider shrink-0">
+          <div className="border-t border-slate-200 w-full" />
+          <span className="bg-white px-3 text-[11px] text-slate-400 font-semibold uppercase tracking-wider shrink-0">
             atau Masuk Akun Pegawai / Admin
           </span>
-          <div className="border-t border-white/10 w-full" />
+          <div className="border-t border-slate-200 w-full" />
         </div>
 
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-white">Masuk ke Akun</h2>
-          <p className="text-slate-300 text-xs mt-1">
+        <div className="mb-5">
+          <h2 className="text-lg font-bold text-slate-900">Masuk ke Akun</h2>
+          <p className="text-slate-500 text-xs mt-0.5">
             Gunakan NIP dan kata sandi resmi STIMI Anda
           </p>
         </div>
 
         {errorMessage && (
-          <div className="mb-5 p-3.5 bg-rose-500/20 border border-rose-500/30 rounded-xl flex items-start gap-3 text-rose-200 text-xs leading-relaxed animate-shake">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+          <div className="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-800 text-xs leading-relaxed animate-shake">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
               Nomor Induk Pegawai (NIP)
             </label>
             <div className="relative">
@@ -132,14 +126,14 @@ function LoginForm() {
                 required
                 value={nip}
                 onChange={(e) => setNip(e.target.value)}
-                placeholder="Contoh: DOSEN001"
-                className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                placeholder="Contoh: DSN01, TNK01"
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
               Kata Sandi
             </label>
             <div className="relative">
@@ -152,7 +146,7 @@ function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition"
               />
             </div>
           </div>
@@ -160,7 +154,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50 text-white font-semibold rounded-xl text-sm transition duration-150 shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 mt-2"
+            className="w-full py-3.5 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 disabled:opacity-50 text-white font-bold rounded-xl text-sm transition duration-150 shadow-lg shadow-sky-600/20 flex items-center justify-center gap-2 mt-2 cursor-pointer"
           >
             {isLoading ? (
               <>
@@ -175,42 +169,11 @@ function LoginForm() {
             )}
           </button>
         </form>
-
-        {/* Quick Demo Switcher */}
-        <div className="mt-6 pt-5 border-t border-white/10">
-          <p className="text-[11px] font-medium text-slate-400 mb-2.5 flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            Pilih Akun Demo Cepat (Klik untuk Isi Otomatis):
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => fillQuickAccount('ADMIN001', 'adminstimi123')}
-              className="px-2.5 py-1.5 bg-white/5 hover:bg-indigo-600/20 border border-white/10 hover:border-indigo-400/40 rounded-lg text-[11px] font-medium text-slate-200 transition text-center"
-            >
-              👑 HRD Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickAccount('ATASAN001', 'atasan123')}
-              className="px-2.5 py-1.5 bg-white/5 hover:bg-indigo-600/20 border border-white/10 hover:border-indigo-400/40 rounded-lg text-[11px] font-medium text-slate-200 transition text-center"
-            >
-              👔 Atasan / Kaprodi
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickAccount('DOSEN001', 'dosen123')}
-              className="px-2.5 py-1.5 bg-white/5 hover:bg-indigo-600/20 border border-white/10 hover:border-indigo-400/40 rounded-lg text-[11px] font-medium text-slate-200 transition text-center"
-            >
-              🎓 Dosen / Staf
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Footer */}
-      <p className="text-center text-xs text-slate-500 mt-6">
-        &copy; {new Date().getFullYear()} Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI). Seluruh Hak Cipta Dilindungi.
+      <p className="text-center text-xs text-slate-400 mt-6">
+        &copy; {new Date().getFullYear()} Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) YAPMI Makassar. Seluruh Hak Cipta Dilindungi.
       </p>
     </div>
   );
@@ -218,8 +181,8 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4 sm:p-6">
-      <Suspense fallback={<div className="text-white text-xs">Memuat formulir masuk...</div>}>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6">
+      <Suspense fallback={<div className="text-slate-600 text-xs">Memuat formulir masuk...</div>}>
         <LoginForm />
       </Suspense>
     </div>

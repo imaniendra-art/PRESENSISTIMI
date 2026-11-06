@@ -62,13 +62,13 @@ export function MobileBottomNav() {
               href={link.href}
               className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 relative ${
                 isActive
-                  ? 'text-emerald-700 font-bold scale-105'
+                  ? 'text-sky-700 font-bold scale-105'
                   : 'text-slate-500 hover:text-slate-900 font-medium'
               }`}
             >
               <div
                 className={`p-1.5 rounded-xl transition ${
-                  isActive ? 'bg-emerald-100/70 text-emerald-700 shadow-2xs' : ''
+                  isActive ? 'bg-sky-100/80 text-sky-700 shadow-2xs border border-sky-200/60' : ''
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -77,7 +77,7 @@ export function MobileBottomNav() {
                 {link.label}
               </span>
               {isActive && (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 absolute -bottom-1" />
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-600 absolute -bottom-1" />
               )}
             </Link>
           );

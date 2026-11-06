@@ -49,7 +49,7 @@ export default async function AbsenCepatPage() {
           />
           <div className="text-left">
             <span className="font-extrabold text-base tracking-tight text-slate-900 block leading-none">
-              PRESENSI<span className="text-emerald-600">STIMI</span>
+              PRESENSI<span className="text-sky-600">STIMI</span>
             </span>
             <span className="text-[9px] sm:text-[10px] text-slate-600 font-bold tracking-wider uppercase block mt-1">
               PORTAL KEHADIRAN STIMI YAPMI MAKASSAR

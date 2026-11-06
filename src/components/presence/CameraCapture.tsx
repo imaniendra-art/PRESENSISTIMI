@@ -221,14 +221,14 @@ export function CameraCapture({
   // Tampilan jika foto sudah diambil
   if (capturedImage) {
     return (
-      <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500 shadow-md bg-slate-900 w-full max-w-sm mx-auto">
+      <div className="relative rounded-2xl overflow-hidden border-2 border-sky-400 shadow-md bg-slate-900 w-full max-w-sm mx-auto">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={capturedImage}
           alt="Foto Selfie Presensi"
           className="w-full h-72 sm:h-80 object-cover"
         />
-        <div className="absolute top-3 left-3 bg-emerald-600/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow">
+        <div className="absolute top-3 left-3 bg-sky-600/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow">
           <CheckCircle className="w-3.5 h-3.5" />
           <span>Foto Selfie Terverifikasi</span>
         </div>
@@ -238,7 +238,7 @@ export function CameraCapture({
             onClick={handleResetSnapshot}
             className="absolute bottom-3 right-3 bg-slate-900/90 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-xl backdrop-blur-md flex items-center gap-1.5 border border-white/20 transition shadow"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+            <RefreshCw className="w-3.5 h-3.5 text-[#87CEEB]" />
             <span>Foto Ulang</span>
           </button>
         )}
@@ -276,12 +276,12 @@ export function CameraCapture({
           {/* Loader saat kamera sedang dinyalakan */}
           {(!isVideoPlaying || isInitializing) && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 text-slate-300 gap-3 p-4">
-              <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-3 border-[#87CEEB] border-t-transparent rounded-full animate-spin" />
               <span className="text-xs font-medium">Menghubungkan ke kamera ponsel...</span>
               <button
                 type="button"
                 onClick={handleManualPlay}
-                className="mt-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-emerald-300 px-3 py-1.5 rounded-lg border border-slate-700 transition"
+                className="mt-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-[#87CEEB] px-3 py-1.5 rounded-lg border border-slate-700 transition"
               >
                 Ketuk jika video belum muncul
               </button>
@@ -291,7 +291,7 @@ export function CameraCapture({
           {/* Overlay Bingkai Wajah Oval + Panduan Posisi */}
           {isVideoPlaying && (
             <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-              <div className="w-40 h-52 sm:w-44 sm:h-56 border-2 border-dashed border-emerald-400/70 rounded-full flex flex-col items-center justify-end pb-3">
+              <div className="w-40 h-52 sm:w-44 sm:h-56 border-2 border-dashed border-[#87CEEB]/90 rounded-full flex flex-col items-center justify-end pb-3">
                 <span className="bg-black/60 backdrop-blur-xs text-white/90 text-[10px] px-2 py-0.5 rounded-full font-medium">
                   Posisikan Wajah
                 </span>
@@ -303,7 +303,7 @@ export function CameraCapture({
           {availableDevices.length > 1 && (
             <div className="absolute top-3 right-3 z-10">
               <div className="bg-slate-900/80 backdrop-blur-md border border-white/20 rounded-xl px-2 py-1 flex items-center gap-1.5 shadow">
-                <SwitchCamera className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <SwitchCamera className="w-3.5 h-3.5 text-[#87CEEB] shrink-0" />
                 <select
                   value={selectedDeviceId}
                   onChange={(e) => handleDeviceChange(e.target.value)}
@@ -325,7 +325,7 @@ export function CameraCapture({
               <button
                 type="button"
                 onClick={handleTakeSnapshot}
-                className="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white px-5 py-2.5 rounded-full font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/60 border border-emerald-400/40 transition transform active:scale-95 cursor-pointer"
+                className="bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white px-5 py-2.5 rounded-full font-bold text-xs flex items-center gap-2 shadow-lg shadow-sky-950/40 border border-[#87CEEB]/50 transition transform active:scale-95 cursor-pointer"
               >
                 <Camera className="w-4 h-4" />
                 <span>Ambil Foto Wajah</span>

@@ -73,7 +73,7 @@ export function Navbar() {
               </div>
               <div>
                 <span className="font-extrabold text-base tracking-tight text-slate-900 block leading-none">
-                  PRESENSI<span className="text-emerald-600">STIMI</span>
+                  PRESENSI<span className="text-sky-600">STIMI</span>
                 </span>
                 <span className="text-[9px] text-slate-500 font-bold tracking-wider uppercase block mt-0.5">
                   PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
@@ -93,7 +93,7 @@ export function Navbar() {
                   href={item.href}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
                     isActive
-                      ? 'bg-indigo-50 text-indigo-700 font-bold'
+                      ? 'bg-sky-50 text-sky-700 font-bold border border-sky-200/60'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
@@ -171,7 +171,7 @@ export function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold ${
                     isActive
-                      ? 'bg-indigo-50 text-indigo-700 font-bold'
+                      ? 'bg-sky-50 text-sky-700 font-bold border border-sky-200/60'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
