@@ -35,6 +35,16 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
+  // Jangan sentuh atau cegat request saat di localhost atau IP lokal development
+  if (
+    url.hostname === 'localhost' ||
+    url.hostname === '127.0.0.1' ||
+    url.hostname === '::1' ||
+    url.hostname.startsWith('192.168.')
+  ) {
+    return;
+  }
+
   // Jangan cache request API, Server Actions, NextAuth, atau metode POST/PUT/DELETE
   if (
     event.request.method !== 'GET' ||

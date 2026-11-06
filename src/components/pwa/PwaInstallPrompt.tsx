@@ -16,16 +16,30 @@ export function PwaInstallPrompt() {
   const [showIosGuide, setShowIosGuide] = useState(false);
 
   useEffect(() => {
-    // 1. Daftarkan Service Worker
+    // 1. Daftarkan Service Worker hanya di domain produksi (bukan localhost)
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((reg) => {
-          console.log('✅ Service Worker PRESENSISTIMI aktif:', reg.scope);
-        })
-        .catch((err) => {
-          console.warn('Service Worker registration skipped:', err);
+      const isLocalhost =
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname.startsWith('192.168.');
+
+      if (!isLocalhost && process.env.NODE_ENV === 'production') {
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then((reg) => {
+            console.log('✅ Service Worker PRESENSISTIMI aktif:', reg.scope);
+          })
+          .catch((err) => {
+            console.warn('Service Worker registration skipped:', err);
+          });
+      } else {
+        // Hapus Service Worker di lingkungan localhost agar tidak menimbulkan ERR_FAILED
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const reg of registrations) {
+            reg.unregister();
+          }
         });
+      }
     }
 
     // 2. Cek apakah sudah dalam mode standalone (sudah terinstal)
