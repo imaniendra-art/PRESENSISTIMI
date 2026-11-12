@@ -28,6 +28,9 @@ import {
   Users,
   Building2,
   MapPin,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { User as UserType, CampusLocation } from '@prisma/client';
 
@@ -49,10 +52,24 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
   const [selectedUser, setSelectedUser] = useState<(UserType & { assignedLocation?: CampusLocation | null }) | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserType | null>(null);
 
-  // Search & Filter
+  // Search & Filter & Sorting
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<string>('ALL');
   const [filterLocation, setFilterLocation] = useState<string>('ALL');
+
+  type SortField = 'nip' | 'name' | 'role' | 'jabatan' | 'unitKerja' | 'location' | 'status';
+  type SortDirection = 'asc' | 'desc';
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
 
   // Async states
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,9 +80,9 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
   const [importFileName, setImportFileName] = useState('');
   const [importErrors, setImportErrors] = useState<string[]>([]);
 
-  // Filtered users list
+  // Filtered & Sorted users list
   const filteredUsers = useMemo(() => {
-    return users.filter((u) => {
+    const list = users.filter((u) => {
       const matchQuery =
         u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.nip.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -81,7 +98,100 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
 
       return matchQuery && matchRole && matchLoc;
     });
-  }, [users, searchQuery, filterRole, filterLocation]);
+
+    return list.sort((a, b) => {
+      let valA = '';
+      let valB = '';
+
+      switch (sortField) {
+        case 'nip':
+          valA = a.nip.toLowerCase();
+          valB = b.nip.toLowerCase();
+          break;
+        case 'name':
+          valA = a.name.toLowerCase();
+          valB = b.name.toLowerCase();
+          break;
+        case 'role':
+          valA = a.role;
+          valB = b.role;
+          break;
+        case 'jabatan':
+          valA = a.jabatan.toLowerCase();
+          valB = b.jabatan.toLowerCase();
+          break;
+        case 'unitKerja':
+          valA = a.unitKerja.toLowerCase();
+          valB = b.unitKerja.toLowerCase();
+          break;
+        case 'location':
+          valA = (a.assignedLocation?.name || 'Semua Gedung').toLowerCase();
+          valB = (b.assignedLocation?.name || 'Semua Gedung').toLowerCase();
+          break;
+        case 'status':
+          valA = a.isActive ? '1' : '0';
+          valB = b.isActive ? '1' : '0';
+          break;
+        default:
+          valA = a.name.toLowerCase();
+          valB = b.name.toLowerCase();
+      }
+
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [users, searchQuery, filterRole, filterLocation, sortField, sortDirection]);
+
+  // Handler: Ekspor Data Pegawai ke Excel (.xlsx)
+  const handleExportEmployees = () => {
+    const dataToExport = filteredUsers.map((u, index) => {
+      const roleLabel =
+        u.role === 'ADMIN'
+          ? 'Administrator SDM'
+          : u.role === 'ATASAN'
+          ? 'Atasan Langsung / Kaprodi'
+          : 'Dosen / Tenaga Kependidikan';
+
+      const locationLabel = u.assignedLocation
+        ? `${u.assignedLocation.name}${u.assignedLocation.code ? ` (${u.assignedLocation.code})` : ''}`
+        : 'Semua Gedung (Fleksibel)';
+
+      return {
+        No: index + 1,
+        NIP: u.nip,
+        'Nama Lengkap': u.name,
+        Peran: roleLabel,
+        Jabatan: u.jabatan,
+        'Unit Kerja': u.unitKerja,
+        'Lokasi Penugasan': locationLabel,
+        'Atasan Langsung': u.atasan?.name || '-',
+        'Email / Akun': u.email || '-',
+        Status: u.isActive ? 'Aktif' : 'Nonaktif',
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    worksheet['!cols'] = [
+      { wch: 6 },
+      { wch: 16 },
+      { wch: 32 },
+      { wch: 26 },
+      { wch: 30 },
+      { wch: 30 },
+      { wch: 35 },
+      { wch: 28 },
+      { wch: 28 },
+      { wch: 14 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Pegawai STIMI');
+
+    const dateStr = new Date().toISOString().split('T')[0];
+    const fileName = `Data_Pegawai_STIMI_${dateStr}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
 
   // Handler: Tambah Pegawai Tunggal
   const handleCreateEmployee = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -338,6 +448,17 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* Tombol Ekspor Excel */}
+          <button
+            type="button"
+            onClick={handleExportEmployees}
+            title="Unduh seluruh data pegawai ke format Excel (.xlsx)"
+            className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 border border-slate-300/80 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+          >
+            <Download className="w-4 h-4 text-slate-600" />
+            <span>Ekspor Data Excel</span>
+          </button>
+
           {/* Tombol Import Excel */}
           <button
             type="button"
@@ -347,7 +468,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
               setImportFileName('');
               setImportErrors([]);
             }}
-            className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-200"
+            className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-200 cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>Import Excel / CSV</span>
@@ -360,7 +481,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
               setIsAddModalOpen(true);
               setAlert(null);
             }}
-            className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20"
+            className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
             <span>Tambah Pegawai</span>
@@ -417,27 +538,111 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider text-[11px] border-b border-slate-200">
               <tr>
-                <th className="py-3.5 px-4 font-bold">NIP & Nama Pegawai</th>
-                <th className="py-3.5 px-4 font-bold">Peran (Role)</th>
-                <th className="py-3.5 px-4 font-bold">Jabatan & Unit Kerja</th>
-                <th className="py-3.5 px-4 font-bold">Lokasi Penugasan Presensi</th>
+                <th className="py-3.5 px-3 font-bold text-center w-12">No</th>
+                <th
+                  onClick={() => handleSort('name')}
+                  className="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-100/80 transition select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>NIP & Nama Pegawai</span>
+                    {sortField === 'name' ? (
+                      sortDirection === 'asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-sky-600" />
+                      ) : (
+                        <ArrowDown className="w-3.5 h-3.5 text-sky-600" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition" />
+                    )}
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort('role')}
+                  className="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-100/80 transition select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Peran (Role)</span>
+                    {sortField === 'role' ? (
+                      sortDirection === 'asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-sky-600" />
+                      ) : (
+                        <ArrowDown className="w-3.5 h-3.5 text-sky-600" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition" />
+                    )}
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort('jabatan')}
+                  className="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-100/80 transition select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Jabatan & Unit Kerja</span>
+                    {sortField === 'jabatan' ? (
+                      sortDirection === 'asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-sky-600" />
+                      ) : (
+                        <ArrowDown className="w-3.5 h-3.5 text-sky-600" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition" />
+                    )}
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleSort('location')}
+                  className="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-100/80 transition select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Lokasi Penugasan Presensi</span>
+                    {sortField === 'location' ? (
+                      sortDirection === 'asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-sky-600" />
+                      ) : (
+                        <ArrowDown className="w-3.5 h-3.5 text-sky-600" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition" />
+                    )}
+                  </div>
+                </th>
                 <th className="py-3.5 px-4 font-bold">Atasan Langsung</th>
-                <th className="py-3.5 px-4 font-bold text-center">Status</th>
+                <th
+                  onClick={() => handleSort('status')}
+                  className="py-3.5 px-4 font-bold text-center cursor-pointer hover:bg-slate-100/80 transition select-none group"
+                >
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span>Status</span>
+                    {sortField === 'status' ? (
+                      sortDirection === 'asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-sky-600" />
+                      ) : (
+                        <ArrowDown className="w-3.5 h-3.5 text-sky-600" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition" />
+                    )}
+                  </div>
+                </th>
                 <th className="py-3.5 px-4 font-bold text-center w-28">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
                     <Users className="w-10 h-10 mx-auto mb-2 text-slate-300" />
                     <p className="font-semibold text-slate-600">Tidak Ada Pegawai yang Sesuai</p>
                     <p className="text-[11px] mt-0.5">Coba ubah kata kunci pencarian atau filter lokasi Anda.</p>
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
+                filteredUsers.map((user, idx) => (
                   <tr key={user.id} className="hover:bg-slate-50/60 transition">
+                    <td className="py-3.5 px-3 font-mono font-bold text-slate-500 text-center text-xs">
+                      {idx + 1}
+                    </td>
                     <td className="py-3.5 px-4">
                       <p className="font-bold text-slate-900">{user.name}</p>
                       <p className="text-[11px] text-slate-500 font-mono">NIP: {user.nip}</p>
