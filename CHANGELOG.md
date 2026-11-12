@@ -6,6 +6,40 @@ Format pencatatan mengacu pada [Keep a Changelog](https://keepachangelog.com/id-
 
 ---
 
+## [1.4.2] - 2026-11-12
+
+### Ditingkatkan (Enhanced - Absen Cepat Single-Screen / Zero-Scroll)
+- **Desain Layar Tunggal Tanpa Gulir (*Single-Screen / Zero-Scroll*) pada `/absen-cepat`**:
+  - Merefaktor tata letak antarmuka [`AbsenCepatPage`](file:///c:/Users/imani/OneDrive/Dokumen/GitHub/PRESENSISTIMI/src/app/absen-cepat/page.tsx) dan [`QuickPresenceCard`](file:///c:/Users/imani/OneDrive/Dokumen/GitHub/PRESENSISTIMI/src/components/presence/QuickPresenceCard.tsx) agar 100% pas dalam satu bidang layar smartphone (~480-520px) tanpa perlu *scrolling*.
+  - **Pemberian Identitas Pegawai Kompak (*Inline Recognition Pill*)**: Menggantikan kartu profil besar dengan pill ringkas (`[Foto Inisial] Nama Lengkap (NIP) • Status Hari Ini [Ganti]`) yang menghemat ruang vertikal hingga ~100px.
+  - **Penghapusan Input PIN Redundan**: Menghapus kolom input PIN/Sandi verifikasi opsional secara permanen untuk memangkas langkah pengisian dan memprioritaskan kecepatan presensi di lobi/pintu masuk.
+  - **Kamera Selfie Kompak Terbuka Otomatis**: Memasang mode `compact={true}` pada [`CameraCapture`](file:///c:/Users/imani/OneDrive/Dokumen/GitHub/PRESENSISTIMI/src/components/presence/CameraCapture.tsx) (`h-44 sm:h-48`) yang langsung tampil bersama tombol jepret tanpa terdorong ke bawah layar.
+  - **Header & Jam Digital WITA Menonjol**: Judul dan logo ditempatkan rapat di atas kartu layaknya halaman login, dengan jam digital WITA font monospaced tabular berukuran besar dan jelas.
+  - **Penyederhanaan Navigasi Masuk Akun**: Menghapus teks *"Bukan presensi cepat? Masuk ke Akun Pribadi / Admin →"* dan pembatas teks berlebih, digantikan langsung oleh tombol tegas bertuliskan **"Masuk Akun"**.
+  - **Pembersihan Elemen Uji Coba Produksi**: Menghapus banner peringatan dan tombol *[Aktifkan Uji Coba]* sepenuhnya untuk merapikan antarmuka murni siap pakai di lingkungan kampus.
+  - **Penyatuan Tombol Shutter Kamera dengan Tombol Aksi Bawah**: Menghilangkan tombol mengambang di dalam gambar video kamera agar viewfinder bersih bebas halangan; tombol solid utama di bawah kamera kini langsung difungsikan untuk mengambil foto wajah (*shutter*), kemudian bertransformasi seketika menjadi tombol eksekusi *"Presensi Masuk/Pulang Sekarang"*.
+  - **Pencegahan Pemblokiran Layar oleh PWA Banner**: Menonaktifkan banner instalasi PWA pada rute `/absen-cepat` dan `/kiosk` agar tombol aksi tidak terhalang.
+
+---
+
+## [1.4.1] - 2026-11-11
+
+### Ditingkatkan (Enhanced - Mobile UX Perfection)
+- **Kartu Metrik KPI Responsif 2-Kolom Ponsel**:
+  - Merefaktor tata letak 4 kartu KPI di [`AdminDashboardPage`](file:///c:/Users/imani/OneDrive/Dokumen/GitHub/PRESENSISTIMI/src/app/admin/dashboard/page.tsx) dan [`AdminMonitoringPage`](file:///c:/Users/imani/OneDrive/Dokumen/GitHub/PRESENSISTIMI/src/app/admin/monitoring/page.tsx) dari inline rigid 4 kolom menjadi `grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4`.
+  - Pada layar smartphone (<640px), kartu tampil lega dalam 2 kolom x 2 baris tanpa pemotongan teks atau angka metrik.
+- **Tampilan Khusus Mobile (*Card-List View*) untuk Riwayat Presensi Pegawai**:
+  - Pada [`RiwayatPegawaiPage`](file:///c:/Users/imani/OneDrive/Dokumen/GitHub/PRESENSISTIMI/src/app/pegawai/riwayat/page.tsx), menambahkan tampilan kartu vertikal terstruktur (`block sm:hidden`) khusus layar ponsel.
+  - Setiap kartu menampilkan tanggal, badge status kedisiplinan, jam masuk & pulang (font mono), jarak GPS, catatan dinas, serta tombol tautan foto selfie verifikasi tanpa perlu *scrolling* horizontal.
+  - Tampilan tabel desktop tetap dipertahankan penuh (`hidden sm:block overflow-x-auto`).
+- **Tampilan Khusus Mobile (*Card-List View*) untuk Monitoring Admin**:
+  - Pada [`AdminMonitoringPage`](file:///c:/Users/imani/OneDrive/Dokumen/GitHub/PRESENSISTIMI/src/app/admin/monitoring/page.tsx), menambahkan kartu pemantauan per pegawai pada ponsel (`block md:hidden`) yang memuat identitas dosen/staf, gedung penugasan, jam presensi, status kedisiplinan, dan foto selfie masuk/pulang.
+- **Migrasi Konvensi Next.js 16 (`middleware.ts` ➔ `proxy.ts`)**:
+  - Memigrasikan berkas proteksi rute dari konvensi lawas `middleware.ts` ke [`src/proxy.ts`](file:///c:/Users/imani/OneDrive/Dokumen/GitHub/PRESENSISTIMI/src/proxy.ts) sesuai standar Next.js 16 (Turbopack).
+  - Menghilangkan pesan peringatan kuning deprecation sehingga terminal bersih 100%.
+
+---
+
 ## [1.4.0] - 2026-11-06
 
 ### Ditambahkan & Ditingkatkan (Added & Enhanced)

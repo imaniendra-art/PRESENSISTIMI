@@ -194,59 +194,53 @@ export default async function AdminDashboardPage() {
           </Link>
         </div>
 
-        {/* Metrik Utama (4 Card 1 Baris Sejajar) */}
-        <div
-          className="grid gap-3.5 w-full"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-          }}
-        >
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-indigo-200 transition">
+        {/* Metrik Utama (Responsif: 2 kolom di HP, 4 kolom di layar lebar) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-indigo-200 transition">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Pegawai</span>
-              <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+              <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Pegawai</span>
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shrink-0">
                 <Users className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-2xl font-extrabold text-slate-900 font-mono tabular-nums">{totalPegawai}</p>
-            <p className="text-[11px] text-slate-500 mt-1">{totalAtasan} Pejabat Penilai</p>
+            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums">{totalPegawai}</p>
+            <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1 truncate">{totalAtasan} Pejabat Penilai</p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-emerald-200 transition">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-emerald-200 transition">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hadir Hari Ini</span>
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+              <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Hadir Hari Ini</span>
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-2xl font-extrabold text-slate-900 font-mono tabular-nums">
+            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums">
               {hadirMasuk}{' '}
               <span className="text-xs font-semibold text-emerald-600 font-sans">({persentaseHadir}%)</span>
             </p>
-            <p className="text-[11px] text-slate-500 mt-1">{tepatWaktu} Tepat Waktu</p>
+            <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1 truncate">{tepatWaktu} Tepat Waktu</p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-amber-200 transition">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-amber-200 transition">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Terlambat Masuk</span>
-              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+              <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Terlambat Masuk</span>
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shrink-0">
                 <ClockAlert className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-2xl font-extrabold text-slate-900 font-mono tabular-nums">{terlambat}</p>
-            <p className="text-[11px] text-slate-500 mt-1">{dinasLuar} Tugas Dinas Luar</p>
+            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums">{terlambat}</p>
+            <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1 truncate">{dinasLuar} Tugas Dinas Luar</p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-rose-200 transition">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-rose-200 transition">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Belum Presensi</span>
-              <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
+              <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Belum Presensi</span>
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100 shrink-0">
                 <Users className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-2xl font-extrabold text-slate-900 font-mono tabular-nums">{belumHadir}</p>
-            <p className="text-[11px] text-slate-500 mt-1">{pendingLeaves} Izin Menunggu</p>
+            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums">{belumHadir}</p>
+            <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1 truncate">{pendingLeaves} Izin Menunggu</p>
           </div>
         </div>
 

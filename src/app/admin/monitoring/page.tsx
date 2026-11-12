@@ -100,15 +100,9 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
           isToday={isToday}
         />
 
-        {/* Kartu Ringkasan Statistik (1 Baris Berjejer 4 Card) */}
-        <div
-          className="grid gap-3 w-full"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-          }}
-        >
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-sky-200 transition">
+        {/* Kartu Ringkasan Statistik (Responsif: 2 kolom di HP, 4 kolom di laptop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+          <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-sky-200 transition">
             <div className="flex items-center gap-1.5 text-slate-500 text-[11px] sm:text-xs font-semibold truncate">
               <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-600 shrink-0" />
               <span className="truncate">Total Pegawai</span>
@@ -117,7 +111,7 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
             <p className="text-[10px] text-slate-400 mt-0.5 truncate">Terdaftar aktif di sistem</p>
           </div>
 
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-emerald-200 transition">
+          <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-emerald-200 transition">
             <div className="flex items-center gap-1.5 text-emerald-600 text-[11px] sm:text-xs font-semibold truncate">
               <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span className="truncate">Hadir (Tepat Waktu)</span>
@@ -128,7 +122,7 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
             </p>
           </div>
 
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-rose-200 transition">
+          <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-rose-200 transition">
             <div className="flex items-center gap-1.5 text-rose-600 text-[11px] sm:text-xs font-semibold truncate">
               <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span className="truncate">Terlambat</span>
@@ -137,7 +131,7 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
             <p className="text-[10px] text-rose-600 mt-0.5 truncate">Melewati batas jam masuk</p>
           </div>
 
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-amber-200 transition">
+          <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-amber-200 transition">
             <div className="flex items-center gap-1.5 text-amber-600 text-[11px] sm:text-xs font-semibold truncate">
               <UserX className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span className="truncate">Belum Presensi</span>
@@ -149,7 +143,7 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
           </div>
         </div>
 
-        {/* Tabel Monitoring */}
+        {/* Daftar Presensi Pegawai */}
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
@@ -160,7 +154,115 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Tampilan Mobile: Kartu Ringkas (md:hidden) */}
+          <div className="block md:hidden divide-y divide-slate-100">
+            {users.map((user) => {
+              const att = user.attendances[0];
+              return (
+                <div key={`mob-${user.id}`} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">{user.name}</p>
+                      <p className="text-[11px] text-slate-500 font-mono">
+                        NIP: {user.nip} • {user.unitKerja}
+                      </p>
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-600 mt-1">
+                        <Building2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                        <span>{att?.locationName || att?.location?.name || user.assignedLocation?.name || 'Semua Gedung'}</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      {!att ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                          Belum Presensi
+                        </span>
+                      ) : att.isDinasLuar ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                          <Briefcase className="w-3 h-3" /> Dinas Luar
+                        </span>
+                      ) : att.clockInStatus === 'TEPAT_WAKTU' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                          <CheckCircle2 className="w-3 h-3" /> Tepat Waktu
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">
+                          <AlertTriangle className="w-3 h-3" /> Terlambat
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Jam & Jarak */}
+                  <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block font-semibold uppercase">Masuk</span>
+                      <span className="font-bold text-slate-800 font-mono">
+                        {att?.clockInTime
+                          ? new Date(att.clockInTime).toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })
+                          : '-'}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-slate-400 block font-semibold uppercase">Pulang</span>
+                      <span className="font-bold text-slate-800 font-mono">
+                        {att?.clockOutTime
+                          ? new Date(att.clockOutTime).toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })
+                          : '-'}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-slate-400 block font-semibold uppercase">Jarak GPS</span>
+                      <span className="font-mono text-slate-600">
+                        {att?.clockInDistance !== null && att?.clockInDistance !== undefined
+                          ? `±${Math.round(att.clockInDistance)}m`
+                          : '-'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Foto Bukti */}
+                  {(att?.clockInPhoto || att?.clockOutPhoto) && (
+                    <div className="flex items-center justify-end gap-2 pt-0.5">
+                      {att?.clockInPhoto && (
+                        <a
+                          href={att.clockInPhoto}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-lg inline-flex items-center gap-1 text-[10px] font-bold transition border border-sky-200/60"
+                        >
+                          <Camera className="w-3 h-3" />
+                          <span>Selfie Masuk</span>
+                        </a>
+                      )}
+                      {att?.clockOutPhoto && (
+                        <a
+                          href={att.clockOutPhoto}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg inline-flex items-center gap-1 text-[10px] font-bold transition border border-slate-200"
+                        >
+                          <Camera className="w-3 h-3" />
+                          <span>Selfie Pulang</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Tampilan Desktop / Tablet: Tabel Lengkap (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50/80 text-slate-500 uppercase tracking-wider text-[11px] border-b border-slate-200">
                 <tr>

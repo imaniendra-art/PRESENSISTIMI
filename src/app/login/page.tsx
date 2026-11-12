@@ -67,28 +67,14 @@ function LoginForm() {
 
       {/* Form Card */}
       <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xl">
-        {/* Tombol Pintas Presensi Cepat Tanpa Login */}
-        <div className="mb-6 p-4 rounded-2xl bg-sky-50/70 border border-sky-200">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold text-sky-800 uppercase tracking-widest flex items-center gap-1">
-              <Zap className="w-3.5 h-3.5 text-sky-600" />
-              Presensi Cepat di Kantor
-            </span>
-            <span className="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full border border-sky-300 font-semibold">
-              Cukup NIP & Selfie
-            </span>
-          </div>
-          <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-            Sedang di kampus? Anda dapat langsung absen masuk atau pulang tanpa perlu login akun.
-          </p>
-          <Link
-            href="/absen-cepat"
-            className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-sky-950/20 transition group cursor-pointer"
-          >
-            <Zap className="w-4 h-4 text-sky-200 group-hover:scale-110 transition-transform" />
-            <span>⚡ Buka Presensi Cepat (NIP & Selfie)</span>
-          </Link>
-        </div>
+        {/* Tombol Pintas Absen Cepat Tanpa Login */}
+        <Link
+          href="/absen-cepat"
+          className="w-full mb-6 py-3.5 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-extrabold rounded-xl text-sm flex items-center justify-center gap-2 shadow-md shadow-sky-950/20 transition group cursor-pointer"
+        >
+          <Zap className="w-4 h-4 text-sky-200 group-hover:scale-110 transition-transform" />
+          <span>Absen Cepat</span>
+        </Link>
 
         <div className="relative flex items-center justify-center mb-6">
           <div className="border-t border-slate-200 w-full" />
@@ -100,9 +86,6 @@ function LoginForm() {
 
         <div className="mb-5">
           <h2 className="text-lg font-bold text-slate-900">Masuk ke Akun</h2>
-          <p className="text-slate-500 text-xs mt-0.5">
-            Gunakan NIP dan kata sandi resmi STIMI Anda
-          </p>
         </div>
 
         {errorMessage && (

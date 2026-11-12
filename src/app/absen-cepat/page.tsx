@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { QuickPresenceCard } from '@/components/presence/QuickPresenceCard';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -35,41 +34,39 @@ export default async function AbsenCepatPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-between py-6 px-4 sm:px-6">
-      {/* Header Institusi - 100% Setema dengan Halaman Login */}
-      <div className="w-full max-w-md mx-auto text-center mb-6">
-        <div className="inline-flex items-center justify-center mb-3">
-          <Image
-            src="/logo.png"
-            alt="Logo STIMI Makassar"
-            width={72}
-            height={72}
-            priority
-            className="w-16 h-16 sm:w-18 sm:h-18 object-contain drop-shadow-xs"
-          />
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center py-3 px-3 sm:p-6">
+      <div className="w-full max-w-md mx-auto">
+        {/* Header Institusi - Dekat Kolom & Proporsional Layar Tunggal HP */}
+        <div className="text-center mb-3">
+          <div className="inline-flex items-center justify-center mb-1.5">
+            <Image
+              src="/logo.png"
+              alt="Logo STIMI Makassar"
+              width={56}
+              height={56}
+              priority
+              className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs"
+            />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-none">
+            PRESENSI<span className="text-sky-600">STIMI</span>
+          </h1>
+          <p className="text-slate-500 text-[10px] sm:text-[11px] font-bold tracking-wider uppercase mt-1">
+            PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          PRESENSI<span className="text-sky-600">STIMI</span>
-        </h1>
-        <p className="text-slate-500 text-xs sm:text-[11px] font-bold tracking-wider uppercase mt-1">
-          PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
+
+        {/* Main Card Component */}
+        <QuickPresenceCard
+          campusSetting={campusSetting}
+          campusLocations={campusLocations}
+        />
+
+        {/* Footer */}
+        <p className="text-center text-[10px] sm:text-xs text-slate-400 mt-3 sm:mt-4">
+          &copy; {new Date().getFullYear()} STIMI YAPMI Makassar. Seluruh Hak Cipta Dilindungi.
         </p>
       </div>
-
-      {/* Main Card Component */}
-      <main className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-md">
-          <QuickPresenceCard
-            campusSetting={campusSetting}
-            campusLocations={campusLocations}
-          />
-        </div>
-      </main>
-
-      {/* Footer */}
-      <p className="text-center text-xs text-slate-400 mt-6">
-        &copy; {new Date().getFullYear()} Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) YAPMI Makassar. Seluruh Hak Cipta Dilindungi.
-      </p>
     </div>
   );
 }

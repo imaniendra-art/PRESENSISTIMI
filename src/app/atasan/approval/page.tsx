@@ -56,7 +56,7 @@ export default async function AtasanApprovalPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-800">
-            Persetujuan Permohonan Tim (*Approval Inbox*)
+            Persetujuan Permohonan Tim
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             Verifikasi dan berikan keputusan atas permohonan cuti, izin, dan dinas luar kota staf

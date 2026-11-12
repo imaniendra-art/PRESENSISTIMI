@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { Download, X, Share2, PlusSquare, Smartphone } from 'lucide-react';
 
@@ -10,6 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function PwaInstallPrompt() {
+  const pathname = usePathname();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isIos, setIsIos] = useState(false);
@@ -103,7 +105,7 @@ export function PwaInstallPrompt() {
     localStorage.setItem('presensi_pwa_dismissed', Date.now().toString());
   };
 
-  if (!isVisible) return null;
+  if (pathname === '/absen-cepat' || pathname === '/kiosk' || !isVisible) return null;
 
   return (
     <aside
