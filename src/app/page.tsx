@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import AbsenCepatPage, { metadata } from './absen-cepat/page';
 
-export default function HomePage() {
-  redirect('/dashboard');
-}
+export const dynamic = 'force-dynamic';
+export { metadata };
+export default AbsenCepatPage;
