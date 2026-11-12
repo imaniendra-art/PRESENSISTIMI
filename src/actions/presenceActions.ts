@@ -563,6 +563,8 @@ export async function submitQuickPresence(data: {
   photoBase64: string;
   pin?: string;
   isSimulation?: boolean;
+  isDinasLuar?: boolean;
+  note?: string;
 }) {
   if (!data.nip || !data.nip.trim()) {
     return { success: false, message: 'NIP wajib diisi.' };
@@ -660,7 +662,25 @@ export async function submitQuickPresence(data: {
   let resolvedLocationName: string = campusSetting.campusName;
   let recordedDistance = 0;
 
-  if (data.isSimulation) {
+  const isFriday = now.getDay() === 5;
+  const isDinasLuar = Boolean(data.isDinasLuar);
+
+  if (isDinasLuar) {
+    if (!data.note || data.note.trim().length < 5) {
+      return {
+        success: false,
+        message: 'Keterangan agenda/lokasi dinas luar wajib diisi (minimal 5 karakter).',
+      };
+    }
+    resolvedLocationId = null;
+    resolvedLocationName = `Dinas Luar: ${data.note.trim()}`;
+    recordedDistance = 0;
+  } else if (isFriday) {
+    // Pada hari Jumat, institusi STIMI menerapkan sistem WFA (Work From Anywhere)
+    resolvedLocationId = null;
+    resolvedLocationName = 'WFA (Work From Anywhere)';
+    recordedDistance = 0;
+  } else if (data.isSimulation) {
     // Mode Simulasi / Pengujian Mandiri
     const targetLoc = user.assignedLocation || (campusLocations.length > 0 ? campusLocations[0] : null);
     resolvedLocationId = targetLoc ? targetLoc.id : null;
@@ -761,12 +781,20 @@ export async function submitQuickPresence(data: {
       return { success: false, message: 'Gagal memproses dan mengompres foto selfie' };
     }
 
-    const clockInStatus = evaluateClockInStatus(
-      now,
-      campusSetting.workStart,
-      campusSetting.gracePeriodMinutes,
-      false
-    );
+    const clockInStatus = isDinasLuar
+      ? 'DINAS_LUAR'
+      : evaluateClockInStatus(
+          now,
+          campusSetting.workStart,
+          campusSetting.gracePeriodMinutes,
+          false
+        );
+
+    const clockInNote = isDinasLuar
+      ? `[Dinas Luar] ${data.note?.trim() || ''}`
+      : isFriday
+      ? 'Presensi Cepat WFA (Jumat)'
+      : 'Presensi Cepat Kiosk / HP (Tanpa Login)';
 
     await prisma.attendance.upsert({
       where: {
@@ -778,26 +806,28 @@ export async function submitQuickPresence(data: {
       update: {
         locationId: resolvedLocationId,
         locationName: resolvedLocationName,
+        isDinasLuar,
         clockInTime: now,
         clockInLat: data.latitude,
         clockInLng: data.longitude,
         clockInPhoto: photoPath,
         clockInDistance: recordedDistance,
         clockInStatus,
-        clockInNote: 'Presensi Cepat Kiosk / HP (Tanpa Login)',
+        clockInNote,
       },
       create: {
         userId: user.id,
         date: today,
         locationId: resolvedLocationId,
         locationName: resolvedLocationName,
+        isDinasLuar,
         clockInTime: now,
         clockInLat: data.latitude,
         clockInLng: data.longitude,
         clockInPhoto: photoPath,
         clockInDistance: recordedDistance,
         clockInStatus,
-        clockInNote: 'Presensi Cepat Kiosk / HP (Tanpa Login)',
+        clockInNote,
       },
     });
 
@@ -829,18 +859,28 @@ export async function submitQuickPresence(data: {
       return { success: false, message: 'Gagal memproses foto selfie kepulangan' };
     }
 
-    const clockOutStatus = evaluateClockOutStatus(now, campusSetting.workEnd, false);
+    const isDinasLuarOut = isDinasLuar || existing.isDinasLuar;
+    const clockOutStatus = isDinasLuarOut
+      ? 'DINAS_LUAR'
+      : evaluateClockOutStatus(now, campusSetting.workEnd, false);
+
+    const clockOutNote = isDinasLuarOut
+      ? `[Dinas Luar] ${data.note?.trim() || existing.clockInNote || ''}`
+      : isFriday
+      ? 'Presensi Cepat WFA (Jumat)'
+      : 'Presensi Cepat Kiosk / HP (Tanpa Login)';
 
     await prisma.attendance.update({
       where: { id: existing.id },
       data: {
+        isDinasLuar: isDinasLuarOut,
         clockOutTime: now,
         clockOutLat: data.latitude,
         clockOutLng: data.longitude,
         clockOutPhoto: photoPath,
         clockOutDistance: recordedDistance,
         clockOutStatus,
-        clockOutNote: 'Presensi Cepat Kiosk / HP (Tanpa Login)',
+        clockOutNote,
       },
     });
 

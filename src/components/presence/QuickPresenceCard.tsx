@@ -18,6 +18,7 @@ import {
   Camera,
   LogIn,
   LogOut,
+  Briefcase,
 } from 'lucide-react';
 import { CampusSetting, CampusLocation } from '@prisma/client';
 import Link from 'next/link';
@@ -71,6 +72,8 @@ export function QuickPresenceCard({
 
   // Camera & Submission State
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
+  const [isDinasLuar, setIsDinasLuar] = useState(false);
+  const [dinasLuarNote, setDinasLuarNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -202,7 +205,8 @@ export function QuickPresenceCard({
     };
   }, [coords, employee, campusLocations, campusSetting]);
 
-  const isInsideRadius = locationEval ? locationEval.isInside : false;
+  const isFriday = currentTime ? currentTime.getDay() === 5 : new Date().getDay() === 5;
+  const isInsideRadius = isFriday || (locationEval ? locationEval.isInside : false);
 
   // Pencarian NIP Pegawai
   const handleSearchNip = async (customNip?: string) => {
@@ -249,6 +253,8 @@ export function QuickPresenceCard({
     setLookupError(null);
     setSuccessData(null);
     setCountdown(4);
+    setIsDinasLuar(false);
+    setDinasLuarNote('');
   }, []);
 
   // Submit Presensi Cepat
@@ -263,12 +269,20 @@ export function QuickPresenceCard({
       return;
     }
 
-    if (!isInsideRadius) {
+    if (!isInsideRadius && !isDinasLuar) {
       setAlert({
         type: 'error',
         message: `Presensi ditolak. Anda berada di luar batas gedung ${locationEval?.targetName} (${Math.round(
           locationEval?.distance || 0
-        )}m). Presensi cepat wajib dilakukan di area kampus STIMI.`,
+        )}m). Jika sedang bertugas dinas luar, silakan aktifkan opsi Dinas Luar di bawah.`,
+      });
+      return;
+    }
+
+    if (isDinasLuar && dinasLuarNote.trim().length < 5) {
+      setAlert({
+        type: 'error',
+        message: 'Keterangan agenda/lokasi dinas luar wajib diisi (minimal 5 karakter).',
       });
       return;
     }
@@ -289,6 +303,8 @@ export function QuickPresenceCard({
         accuracy: coords?.accuracy || 10,
         photoBase64,
         isSimulation: false,
+        isDinasLuar,
+        note: dinasLuarNote.trim(),
       });
 
       if (res.success && res.actionType) {
@@ -452,12 +468,12 @@ export function QuickPresenceCard({
             <span className="relative flex h-2.5 w-2.5 shrink-0">
               <span
                 className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  isInsideRadius ? 'bg-sky-400' : 'bg-rose-400'
+                  isInsideRadius || isDinasLuar ? 'bg-sky-400' : 'bg-rose-400'
                 }`}
               />
               <span
                 className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
-                  isInsideRadius ? 'bg-sky-500' : 'bg-rose-500'
+                  isInsideRadius || isDinasLuar ? 'bg-sky-500' : 'bg-rose-500'
                 }`}
               />
             </span>
@@ -465,13 +481,21 @@ export function QuickPresenceCard({
               <span className="font-bold text-slate-800 block text-xs truncate">
                 {isLocating
                   ? 'Mengunci titik GPS...'
+                  : isFriday
+                  ? 'Pola WFA (Jumat - Bebas Lokasi)'
+                  : isDinasLuar
+                  ? 'Mode Dinas Luar Aktif'
                   : isInsideRadius
                   ? `Di Dalam Radius: ${locationEval?.targetName}`
                   : `Di Luar Radius: ${locationEval?.targetName || 'Kampus'}`}
               </span>
               {locationEval && (
                 <span className="text-[10px] text-slate-500 font-mono block">
-                  Jarak: ±{Math.round(locationEval.distance)}m (Batas: {locationEval.maxRadius}m)
+                  {isFriday
+                    ? 'Hari Jumat: Presensi fleksibel WFA STIMI'
+                    : isDinasLuar
+                    ? 'Bebas radius geofence (wajib isi agenda tugas)'
+                    : `Jarak: ±${Math.round(locationEval.distance)}m (Batas: ${locationEval.maxRadius}m)`}
                 </span>
               )}
             </div>
@@ -613,78 +637,167 @@ export function QuickPresenceCard({
                 <Camera className="w-4 h-4" />
                 <span>Ambil Foto Wajah</span>
               </button>
-            ) : !attendance?.hasClockedIn ? (
-              /* TAHAP 2A: FOTO SUDAH DIAMBIL & BELUM PRESENSI MASUK */
-              <button
-                type="button"
-                disabled={isSubmitting || !isInsideRadius}
-                onClick={handleSubmit}
-                className={`w-full py-3.5 px-4 font-extrabold rounded-xl shadow-md text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
-                  !isInsideRadius
-                    ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed shadow-none'
-                    : 'bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white shadow-sky-600/20'
-                }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Mencatat Presensi Masuk...</span>
-                  </>
-                ) : !isInsideRadius ? (
-                  <>
-                    <AlertTriangle className="w-4 h-4" />
-                    <span>Di Luar Radius Kampus</span>
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="w-4 h-4" />
-                    <span>⚡ Presensi Masuk Sekarang</span>
-                  </>
-                )}
-              </button>
-            ) : !attendance?.hasClockedOut ? (
-              /* TAHAP 2B: FOTO SUDAH DIAMBIL & SIAP PRESENSI PULANG */
-              <button
-                type="button"
-                disabled={isSubmitting || !isInsideRadius}
-                onClick={handleSubmit}
-                className={`w-full py-3.5 px-4 font-extrabold rounded-xl shadow-md text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
-                  !isInsideRadius
-                    ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed shadow-none'
-                    : 'bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white shadow-rose-950/20'
-                }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Mencatat Presensi Pulang...</span>
-                  </>
-                ) : !isInsideRadius ? (
-                  <>
-                    <AlertTriangle className="w-4 h-4" />
-                    <span>Di Luar Radius Kampus</span>
-                  </>
-                ) : (
-                  <>
-                    <LogOut className="w-4 h-4" />
-                    <span>⚡ Presensi Pulang Sekarang</span>
-                  </>
-                )}
-              </button>
             ) : (
-              <div className="p-3 bg-sky-50 rounded-2xl border border-sky-200 text-center">
-                <CheckCircle2 className="w-6 h-6 text-sky-600 mx-auto mb-1" />
-                <p className="text-xs font-bold text-sky-900">
-                  Presensi Hari Ini Sudah Lengkap
-                </p>
-                <button
-                  type="button"
-                  onClick={handleResetForm}
-                  className="mt-2 text-xs text-sky-700 underline font-semibold cursor-pointer"
-                >
-                  Ganti ke Pegawai Lain
-                </button>
-              </div>
+              <>
+                {/* Opsi Dinas Luar jika berada di luar radius (Senin - Kamis) */}
+                {!isInsideRadius && !isFriday && (
+                  <div className="p-3.5 bg-amber-50/90 rounded-2xl border border-amber-200 text-left space-y-2.5 animate-slide-up shadow-2xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 border border-amber-200">
+                          <Briefcase className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold text-amber-950 block truncate">
+                            Sedang Tugas Dinas Luar?
+                          </span>
+                          <span className="text-[10px] text-amber-700 block truncate">
+                            Aktifkan jika bertugas di luar kampus
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsDinasLuar(!isDinasLuar);
+                          if (isDinasLuar) setDinasLuarNote('');
+                        }}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer ${
+                          isDinasLuar
+                            ? 'bg-amber-600 text-white shadow-xs'
+                            : 'bg-amber-200 hover:bg-amber-300 text-amber-900 border border-amber-300'
+                        }`}
+                      >
+                        {isDinasLuar ? '✓ Mode Aktif' : 'Aktifkan'}
+                      </button>
+                    </div>
+
+                    {isDinasLuar && (
+                      <div className="space-y-1.5 pt-2 border-t border-amber-200/80 animate-slide-up">
+                        <label className="block text-[11px] font-bold text-amber-950">
+                          Keterangan Agenda / Lokasi Dinas Luar (Wajib):
+                        </label>
+                        <input
+                          type="text"
+                          value={dinasLuarNote}
+                          onChange={(e) => setDinasLuarNote(e.target.value)}
+                          placeholder="Contoh: Rapat Koordinasi di LLDIKTI IX / Sosialisasi..."
+                          className="w-full px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+                        />
+                        <p className="text-[10px] text-amber-700">
+                          *Wajib diisi min. 5 karakter. Status tercatat resmi untuk verifikasi Atasan & Admin.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!attendance?.hasClockedIn ? (
+                  /* TAHAP 2A: FOTO SUDAH DIAMBIL & BELUM PRESENSI MASUK */
+                  <button
+                    type="button"
+                    disabled={
+                      isSubmitting ||
+                      (!isInsideRadius && (!isDinasLuar || dinasLuarNote.trim().length < 5))
+                    }
+                    onClick={handleSubmit}
+                    className={`w-full py-3.5 px-4 font-extrabold rounded-xl shadow-md text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+                      !isInsideRadius && !isDinasLuar
+                        ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed shadow-none'
+                        : isDinasLuar && dinasLuarNote.trim().length < 5
+                        ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none'
+                        : isDinasLuar
+                        ? 'bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white shadow-amber-900/20'
+                        : 'bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white shadow-sky-600/20'
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Mencatat Presensi Masuk...</span>
+                      </>
+                    ) : !isInsideRadius && !isDinasLuar ? (
+                      <>
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>Di Luar Radius Kampus</span>
+                      </>
+                    ) : isDinasLuar ? (
+                      <>
+                        <Briefcase className="w-4 h-4" />
+                        <span>
+                          {dinasLuarNote.trim().length < 5
+                            ? 'Tulis Keterangan Dinas Luar'
+                            : '⚡ Presensi Masuk (Dinas Luar)'}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="w-4 h-4" />
+                        <span>⚡ Presensi Masuk Sekarang</span>
+                      </>
+                    )}
+                  </button>
+                ) : !attendance?.hasClockedOut ? (
+                  /* TAHAP 2B: FOTO SUDAH DIAMBIL & SIAP PRESENSI PULANG */
+                  <button
+                    type="button"
+                    disabled={
+                      isSubmitting ||
+                      (!isInsideRadius && (!isDinasLuar || dinasLuarNote.trim().length < 5))
+                    }
+                    onClick={handleSubmit}
+                    className={`w-full py-3.5 px-4 font-extrabold rounded-xl shadow-md text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+                      !isInsideRadius && !isDinasLuar
+                        ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed shadow-none'
+                        : isDinasLuar && dinasLuarNote.trim().length < 5
+                        ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none'
+                        : isDinasLuar
+                        ? 'bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white shadow-amber-900/20'
+                        : 'bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white shadow-rose-950/20'
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Mencatat Presensi Pulang...</span>
+                      </>
+                    ) : !isInsideRadius && !isDinasLuar ? (
+                      <>
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>Di Luar Radius Kampus</span>
+                      </>
+                    ) : isDinasLuar ? (
+                      <>
+                        <Briefcase className="w-4 h-4" />
+                        <span>
+                          {dinasLuarNote.trim().length < 5
+                            ? 'Tulis Keterangan Dinas Luar'
+                            : '⚡ Presensi Pulang (Dinas Luar)'}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="w-4 h-4" />
+                        <span>⚡ Presensi Pulang Sekarang</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <div className="p-3 bg-sky-50 rounded-2xl border border-sky-200 text-center">
+                    <CheckCircle2 className="w-6 h-6 text-sky-600 mx-auto mb-1" />
+                    <p className="text-xs font-bold text-sky-900">
+                      Presensi Hari Ini Sudah Lengkap
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleResetForm}
+                      className="mt-2 text-xs text-sky-700 underline font-semibold cursor-pointer"
+                    >
+                      Ganti ke Pegawai Lain
+                    </button>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Tombol Masuk Akun Langsung */}
