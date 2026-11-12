@@ -6,6 +6,23 @@ Format pencatatan mengacu pada [Keep a Changelog](https://keepachangelog.com/id-
 
 ---
 
+## [1.4.3] - 2026-11-12
+
+### Ditambahkan & Ditingkatkan (Added & Enhanced - Rekap Laporan Lengkap Multi-Sheet & PDF Landscape)
+- **Rekapitulasi Kehadiran Bulanan Komprehensif Sesuai Pola Kerja STIMI Makassar**:
+  - Menerapkan pola 5 hari kerja institusi resmi: **Senin s/d Kamis WFO (di kampus)** dan **Jumat WFA (Work From Anywhere)**.
+  - Perhitungan hari kerja efektif otomatis dengan mekanisme *cutoff* berjalan cerdas untuk bulan berjalan (mencegah Alfa palsu untuk tanggal yang belum tiba).
+  - Mengintegrasikan permohonan izin, cuti tahunan/melahirkan, dan sakit (`LeaveRequest` status `APPROVED`) ke dalam kolom perizinan resmi.
+  - Perhitungan otomatis metrik: **Hari Kerja Efektif**, **Total Hadir**, **Hadir WFO**, **Hadir WFA**, **Tepat Waktu**, **Terlambat**, **Pulang Cepat**, **Dinas Luar**, **Izin/Cuti/Sakit**, **Alfa (Mangkir)**, dan **Tingkat Kehadiran (%)**.
+- **Ekspor Excel Multi-Sheet (.xlsx) Dua Dimensi**:
+  - **Sheet 1 (`Rekap Bulanan Pegawai`)**: Rangkuman seluruh pegawai dalam 1 bulan dengan lebar kolom terformat proporsional dan baris rata-rata / total di bagian bawah.
+  - **Sheet 2 (`Log Presensi Harian`)**: Rincian audit presensi tanggal demi tanggal (No, Tanggal, Hari, Mode Kerja WFO/WFA/Dinas, Jam Masuk, Status Masuk, Jam Pulang, Status Pulang, Durasi Kerja, dan Lokasi Kampus).
+- **Format Dokumen Resmi Cetak / PDF Landscape (A4)**:
+  - Konfigurasi `@page { size: landscape; margin: 8mm; }` agar seluruh kolom laporan tampil penuh tanpa terpotong.
+  - Menampilkan Kop Surat Resmi STIMI Makassar bergaris ganda, kartu ringkasan KPI institusi, dan kolom tanda tangan pengesahan resmi dua pihak (Ketua STIMI Makassar dan Kepala Bagian SDM).
+
+---
+
 ## [1.4.2] - 2026-11-12
 
 ### Ditingkatkan (Enhanced - Absen Cepat Single-Screen / Zero-Scroll)
