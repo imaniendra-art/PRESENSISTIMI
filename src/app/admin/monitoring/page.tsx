@@ -13,7 +13,6 @@ import {
   Camera,
   Building2,
   Users,
-  Clock,
   UserX,
 } from 'lucide-react';
 

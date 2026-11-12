@@ -29,7 +29,6 @@ async function main() {
   // 2. Inisialisasi Lokasi Gedung Kampus STIMI
   const existingLocations = await prisma.campusLocation.count();
   let loc1Id: string | null = null;
-  let loc2Id: string | null = null;
 
   if (existingLocations === 0) {
     const loc1 = await prisma.campusLocation.create({
@@ -57,12 +56,10 @@ async function main() {
         isActive: true,
       },
     });
-    loc2Id = loc2.id;
     console.log('✅ Lokasi Gedung 2 dibuat:', loc2.name);
   } else {
     const locs = await prisma.campusLocation.findMany({ take: 2 });
     loc1Id = locs[0]?.id || null;
-    loc2Id = locs[1]?.id || null;
     console.log('ℹ️ Lokasi Gedung sudah ada:', existingLocations, 'gedung terdaftar');
   }
 

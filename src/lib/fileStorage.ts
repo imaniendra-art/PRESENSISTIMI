@@ -44,7 +44,7 @@ async function ensureSupabaseBucket(supabase: SupabaseClient, bucketName: string
         allowedMimeTypes: ['image/webp', 'image/jpeg', 'image/png', 'application/pdf'],
       });
     }
-  } catch (err) {
+  } catch {
     // Abaikan jika tidak memiliki izin admin untuk list/create bucket (misal memakai anon key)
   }
 }

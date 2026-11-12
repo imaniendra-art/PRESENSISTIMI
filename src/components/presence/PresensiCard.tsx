@@ -6,7 +6,6 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { calculateHaversineDistance } from '@/lib/geo';
 import { submitClockIn, submitClockOut } from '@/actions/presenceActions';
 import {
-  MapPin,
   Clock,
   Briefcase,
   LogIn,
@@ -54,11 +53,16 @@ export function PresensiCard({
 
   // Jam digital live berdetak setiap detik
   useEffect(() => {
-    setCurrentTime(new Date());
+    const timeout = setTimeout(() => {
+      setCurrentTime(new Date());
+    }, 0);
     const interval = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, []);
 
   const refreshLocation = useCallback(() => {

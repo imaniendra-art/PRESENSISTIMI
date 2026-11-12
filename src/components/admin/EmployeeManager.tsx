@@ -700,7 +700,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
                   ))}
                 </select>
                 <p className="text-[10px] text-slate-500 mt-1">
-                  Pilih gedung tertentu jika pegawai wajib hadir di lokasi tersebut, atau pilih 'Semua Gedung' jika bebas.
+                  Pilih gedung tertentu jika pegawai wajib hadir di lokasi tersebut, atau pilih &apos;Semua Gedung&apos; jika bebas.
                 </p>
               </div>
 

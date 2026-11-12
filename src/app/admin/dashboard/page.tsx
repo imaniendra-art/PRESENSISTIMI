@@ -17,8 +17,6 @@ import {
   Activity,
   Building2,
   TrendingUp,
-  Sparkles,
-  Radio,
   ArrowUpRight,
 } from 'lucide-react';
 

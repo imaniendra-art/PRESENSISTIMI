@@ -87,9 +87,14 @@ export function QuickPresenceCard({
 
   // Jam berdetak live setiap 1 detik
   useEffect(() => {
-    setCurrentTime(new Date());
+    const timeout = setTimeout(() => {
+      setCurrentTime(new Date());
+    }, 0);
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(timer);
+    };
   }, []);
 
   // GPS Refresher
@@ -122,7 +127,10 @@ export function QuickPresenceCard({
   }, []);
 
   useEffect(() => {
-    refreshLocation();
+    const timer = setTimeout(() => {
+      refreshLocation();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [refreshLocation]);
 
   // Evaluasi Geofence Dinamis

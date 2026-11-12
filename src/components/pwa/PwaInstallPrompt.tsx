@@ -63,10 +63,13 @@ export function PwaInstallPrompt() {
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     if (isIosDevice) {
-      setIsIos(true);
+      const iosTimer = setTimeout(() => setIsIos(true), 0);
       // Tampilkan banner setelah jeda sejenak (2 detik) agar tidak mengagetkan
       const timer = setTimeout(() => setIsVisible(true), 2000);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(iosTimer);
+        clearTimeout(timer);
+      };
     }
 
     // 5. Tangkap event beforeinstallprompt untuk Android / Chromium / Edge

@@ -13,7 +13,6 @@ import {
   Building2,
   MapPin,
   Clock,
-  ShieldCheck,
   CheckCircle2,
   AlertCircle,
   LocateFixed,
@@ -24,7 +23,6 @@ import {
   ToggleRight,
   X,
   Users,
-  Compass,
 } from 'lucide-react';
 
 interface CampusSettingsFormProps {
