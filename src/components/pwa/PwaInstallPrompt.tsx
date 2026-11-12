@@ -110,7 +110,7 @@ export function PwaInstallPrompt() {
   return (
     <aside
       aria-label="Prompt Pemasangan Aplikasi"
-      className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 animate-slide-up"
+      className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 animate-slide-up print:hidden"
     >
       <div className="bg-slate-900/95 backdrop-blur-md text-white p-4 rounded-3xl shadow-2xl border border-indigo-500/30 flex flex-col gap-3">
         <div className="flex items-start gap-3">

@@ -205,7 +205,7 @@ export function ReportGenerator({
   return (
     <div className="space-y-6">
       {/* CSS Khusus Mode Cetak A4 Landscape & Print Optimization */}
-      <style jsx global>{`
+      <style>{`
         @media print {
           @page {
             size: landscape;
@@ -216,7 +216,12 @@ export function ReportGenerator({
             print-color-adjust: exact !important;
             background: white !important;
           }
-          .print-hidden {
+          header,
+          nav,
+          footer,
+          aside,
+          .print-hidden,
+          [data-bottom-nav] {
             display: none !important;
           }
           .print-landscape-container {
@@ -231,7 +236,7 @@ export function ReportGenerator({
       `}</style>
 
       {/* Panel Kontrol & Filter Interaktif (Disembunyikan saat cetak) */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-xs space-y-4 print-hidden">
+      <div className="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-xs space-y-4 print-hidden print:hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200">
@@ -335,8 +340,8 @@ export function ReportGenerator({
         </div>
       </div>
 
-      {/* Ringkasan Kartu Metrik KPI Institusi (Tampil di Layar & Cetak) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+      {/* Ringkasan Kartu Metrik KPI Institusi (Tampil di Layar Monitor Saja, Sembunyi Saat Cetak) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 print-hidden print:hidden">
         <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs">
           <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
             <Users className="w-3.5 h-3.5 text-sky-600" />
@@ -401,7 +406,7 @@ export function ReportGenerator({
       </div>
 
       {/* Dokumen Formal Rekapitulasi (Siap Cetak / Print Ready Landscape) */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 print-landscape-container">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 print-landscape-container print:border-none print:shadow-none print:p-0 print:m-0 print:rounded-none">
         {/* Kop Surat Resmi Institusi STIMI */}
         <div className="flex items-center justify-center gap-5 pb-5 border-b-2 border-slate-900 mb-6">
           <div className="relative w-16 h-16 shrink-0">
