@@ -6,7 +6,10 @@ async function main() {
   console.log('🚀 Memulai simulasi pembuatan data presensi bulan Oktober 2026...');
 
   const users = await prisma.user.findMany({
-    where: { isActive: true },
+    where: {
+      isActive: true,
+      role: { not: 'ADMIN' },
+    },
     include: { assignedLocation: true },
   });
 

@@ -99,6 +99,13 @@ export async function submitClockIn(data: {
     return { success: false, message: 'Sesi berakhir, silakan login kembali' };
   }
 
+  if (session.user.role === 'ADMIN') {
+    return {
+      success: false,
+      message: 'Akun Administrator adalah pengelola sistem dan tidak perlu melakukan presensi kehadiran.',
+    };
+  }
+
   // Validasi koordinat numerik aman (Anti-Spoofing Guard)
   if (
     typeof data.latitude !== 'number' ||
@@ -329,6 +336,13 @@ export async function submitClockOut(data: {
     return { success: false, message: 'Sesi berakhir, silakan login kembali' };
   }
 
+  if (session.user.role === 'ADMIN') {
+    return {
+      success: false,
+      message: 'Akun Administrator adalah pengelola sistem dan tidak perlu melakukan presensi kehadiran.',
+    };
+  }
+
   // Validasi koordinat numerik aman (Anti-Spoofing Guard)
   if (
     typeof data.latitude !== 'number' ||
@@ -498,6 +512,13 @@ export async function lookupEmployeeByNip(nip: string) {
     };
   }
 
+  if (user.role === 'ADMIN') {
+    return {
+      success: false,
+      message: `NIP "${cleanNip}" adalah akun Administrator (Pengelola Sistem). Administrator tidak masuk dalam daftar presensi.`,
+    };
+  }
+
   // Cek catatan presensi hari ini
   const attendance = await prisma.attendance.findUnique({
     where: {
@@ -593,6 +614,13 @@ export async function submitQuickPresence(data: {
 
   if (!user) {
     return { success: false, message: `NIP "${cleanNip}" tidak ditemukan di sistem STIMI.` };
+  }
+
+  if (user.role === 'ADMIN') {
+    return {
+      success: false,
+      message: `Akun Administrator (${cleanNip}) adalah pengelola aplikasi dan tidak perlu melakukan presensi kehadiran.`,
+    };
   }
 
   // Verifikasi PIN / 4 angka singkat jika diisi pengguna

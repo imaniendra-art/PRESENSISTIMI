@@ -63,7 +63,10 @@ export default async function AdminLaporanPage({ searchParams }: AdminLaporanPag
   const [campusSetting, users, attendances, leaveRequests] = await Promise.all([
     prisma.campusSetting.findFirst(),
     prisma.user.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        role: { not: 'ADMIN' },
+      },
       include: { assignedLocation: true },
       orderBy: { name: 'asc' },
     }),
@@ -72,6 +75,9 @@ export default async function AdminLaporanPage({ searchParams }: AdminLaporanPag
         date: {
           gte: firstDay,
           lte: lastDay,
+        },
+        user: {
+          role: { not: 'ADMIN' },
         },
       },
       include: {

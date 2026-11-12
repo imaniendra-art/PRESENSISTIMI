@@ -59,6 +59,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/unauthorized', request.url));
   }
 
+  // Admin tidak mengakses area presensi personal pegawai (arahkan ke admin dashboard)
+  if (pathname.startsWith('/pegawai') && token?.role === 'ADMIN') {
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+  }
+
   return NextResponse.next();
 }
 

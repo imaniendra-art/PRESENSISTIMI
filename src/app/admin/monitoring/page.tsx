@@ -52,9 +52,12 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
     year: 'numeric',
   });
 
-  // Ambil semua pegawai aktif beserta presensi pada tanggal target
+  // Ambil semua pegawai aktif (Dosen & Tendik, bukan admin) beserta presensi pada tanggal target
   const users = await prisma.user.findMany({
-    where: { isActive: true },
+    where: {
+      isActive: true,
+      role: { not: 'ADMIN' },
+    },
     include: {
       assignedLocation: true,
       attendances: {

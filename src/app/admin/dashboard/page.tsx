@@ -48,7 +48,7 @@ export default async function AdminDashboardPage() {
   const weekEnd = new Date(weekDays[4]);
   weekEnd.setHours(23, 59, 59, 999);
 
-  // Ambil seluruh data analitik secara konkuren
+  // Ambil seluruh data analitik secara konkuren (khusus civitas Dosen & Tendik, exclude Admin)
   const [
     totalPegawai,
     totalAtasan,
@@ -58,10 +58,13 @@ export default async function AdminDashboardPage() {
     weeklyAttendances,
     allActiveUsers,
   ] = await Promise.all([
-    prisma.user.count({ where: { isActive: true } }),
+    prisma.user.count({ where: { isActive: true, role: { not: 'ADMIN' } } }),
     prisma.user.count({ where: { role: 'ATASAN', isActive: true } }),
     prisma.attendance.findMany({
-      where: { date: today },
+      where: {
+        date: today,
+        user: { role: { not: 'ADMIN' } },
+      },
       include: {
         user: {
           select: {
@@ -83,6 +86,7 @@ export default async function AdminDashboardPage() {
           gte: weekDays[0],
           lte: weekEnd,
         },
+        user: { role: { not: 'ADMIN' } },
       },
       select: {
         date: true,
@@ -91,7 +95,7 @@ export default async function AdminDashboardPage() {
       },
     }),
     prisma.user.findMany({
-      where: { isActive: true },
+      where: { isActive: true, role: { not: 'ADMIN' } },
       select: { id: true, unitKerja: true },
     }),
   ]);
