@@ -205,7 +205,7 @@ export async function createEmployee(formData: FormData) {
   const assignedLocationId = (formData.get('assignedLocationId') as string) || null;
 
   if (!nip || !name || !password || !jabatan || !unitKerja) {
-    return { success: false, message: 'Semua kolom bertanda bintang (NIP, Nama, Password, Jabatan, Unit Kerja) wajib diisi' };
+    return { success: false, message: 'Semua kolom bertanda bintang (No. ID, Nama, Password, Jabatan, Unit Kerja) wajib diisi' };
   }
 
   // Cek duplikasi NIP
@@ -214,7 +214,7 @@ export async function createEmployee(formData: FormData) {
   });
 
   if (existingNip) {
-    return { success: false, message: `NIP ${nip} sudah terdaftar di sistem` };
+    return { success: false, message: `No. ID ${nip} sudah terdaftar di sistem` };
   }
 
   // Cek duplikasi Email (jika diisi)
@@ -281,7 +281,7 @@ export async function updateEmployee(formData: FormData) {
   });
 
   if (conflictNip) {
-    return { success: false, message: `NIP ${nip} sudah digunakan oleh pegawai lain` };
+    return { success: false, message: `No. ID ${nip} sudah digunakan oleh pegawai lain` };
   }
 
   // Cek duplikasi Email pada pengguna lain (jika diisi)

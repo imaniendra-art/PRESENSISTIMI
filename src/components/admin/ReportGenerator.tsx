@@ -113,7 +113,7 @@ export function ReportGenerator({
     // SHEET 1: REKAPITULASI BULANAN SEMUA PEGAWAI
     const summaryRows = reportData.map((row, idx) => ({
       No: idx + 1,
-      NIP: row.nip,
+      'No. ID': row.nip,
       'Nama Pegawai': row.name,
       Jabatan: row.jabatan,
       'Unit Kerja': row.unitKerja,
@@ -160,7 +160,7 @@ export function ReportGenerator({
       Tanggal: log.tanggal,
       Hari: log.hari,
       'Mode Kerja': log.modeKerja,
-      NIP: log.nip,
+      'No. ID': log.nip,
       'Nama Pegawai': log.name,
       'Unit Kerja': log.unitKerja,
       'Jam Masuk (WITA)': log.jamMasuk,
@@ -439,7 +439,7 @@ export function ReportGenerator({
             <thead>
               <tr className="bg-slate-100 text-slate-700 border-y-2 border-slate-300">
                 <th className="py-2.5 px-2.5 font-bold text-center w-8">No</th>
-                <th className="py-2.5 px-2.5 font-bold">NIP</th>
+                <th className="py-2.5 px-2.5 font-bold">No. ID</th>
                 <th className="py-2.5 px-2.5 font-bold">Nama Pegawai</th>
                 <th className="py-2.5 px-2.5 font-bold">Jabatan</th>
                 <th className="py-2.5 px-2.5 font-bold">Unit Kerja</th>
@@ -577,7 +577,7 @@ export function ReportGenerator({
             <p className="font-bold">Kepala Bagian SDM & Kepegawaian</p>
             <div className="h-20" />
             <p className="font-bold underline">( Administrator Kepegawaian STIMI )</p>
-            <p className="text-[11px] text-slate-500">NIP. ADMIN001</p>
+            <p className="text-[11px] text-slate-500">No. ID: ADMIN001</p>
           </div>
         </div>
       </div>

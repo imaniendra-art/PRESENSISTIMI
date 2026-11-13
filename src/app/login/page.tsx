@@ -98,7 +98,7 @@ function LoginForm() {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Nomor Induk Pegawai (NIP)
+              Nomor ID (No. ID)
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -109,7 +109,7 @@ function LoginForm() {
                 required
                 value={nip}
                 onChange={(e) => setNip(e.target.value)}
-                placeholder="Contoh: DSN01, TNK01"
+                placeholder="Masukkan No. ID (contoh: DSN01, TNK01)"
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition"
               />
             </div>

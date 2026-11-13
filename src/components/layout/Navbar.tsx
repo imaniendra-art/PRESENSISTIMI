@@ -112,7 +112,7 @@ export function Navbar() {
               </p>
               <div className="flex items-center justify-end gap-1.5 mt-0.5">
                 <span className="text-[10px] text-slate-500 font-mono">
-                  NIP: {session.user.nip}
+                  No. ID: {session.user.nip}
                 </span>
                 <span
                   className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
@@ -158,7 +158,7 @@ export function Navbar() {
             <div className="px-3 py-2 bg-slate-50 rounded-xl mb-2 sm:hidden">
               <p className="text-xs font-bold text-slate-800">{session.user.name}</p>
               <p className="text-[10px] text-slate-500">
-                NIP: {session.user.nip} • {session.user.jabatan}
+                No. ID: {session.user.nip} • {session.user.jabatan}
               </p>
             </div>
             {navLinks.map((item) => {

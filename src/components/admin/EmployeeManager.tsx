@@ -159,7 +159,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
 
       return {
         No: index + 1,
-        NIP: u.nip,
+        'No. ID': u.nip,
         'Nama Lengkap': u.name,
         Peran: roleLabel,
         Jabatan: u.jabatan,
@@ -364,13 +364,13 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
           };
 
           return {
-            nip: findVal('nip', 'nidn', 'nomor induk'),
+            nip: findVal('no id', 'no. id', 'noid', 'id', 'nip', 'nidn', 'nomor induk'),
             name: findVal('nama', 'name', 'nama lengkap'),
             email: findVal('email', 'surel', 'e-mail'),
             role: findVal('peran', 'role', 'posisi_peran') || 'PEGAWAI',
             jabatan: findVal('jabatan', 'position', 'fungsional') || 'Dosen / Tendik',
             unitKerja: findVal('unitkerja', 'unit_kerja', 'departemen', 'jurusan') || 'STIMI Makassar',
-            atasanNip: findVal('nip_atasan', 'nipatasan', 'atasan_nip', 'atasan'),
+            atasanNip: findVal('no_id_atasan', 'id_atasan', 'nip_atasan', 'nipatasan', 'atasan_nip', 'atasan'),
             lokasiGedung: findVal('lokasi_gedung', 'lokasigedung', 'gedung', 'kampus', 'lokasi'),
             password: findVal('password', 'katasandi', 'sandi') || 'stimi123',
           };
@@ -497,7 +497,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari NIP, nama, jabatan, unit kerja..."
+            placeholder="Cari No. ID, nama, jabatan, unit kerja..."
             className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
           />
         </div>
@@ -544,7 +544,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
                   className="py-3.5 px-4 font-bold cursor-pointer hover:bg-slate-100/80 transition select-none group"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>NIP & Nama Pegawai</span>
+                    <span>No. ID & Nama Pegawai</span>
                     {sortField === 'name' ? (
                       sortDirection === 'asc' ? (
                         <ArrowUp className="w-3.5 h-3.5 text-sky-600" />
@@ -645,7 +645,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
                     </td>
                     <td className="py-3.5 px-4">
                       <p className="font-bold text-slate-900">{user.name}</p>
-                      <p className="text-[11px] text-slate-500 font-mono">NIP: {user.nip}</p>
+                      <p className="text-[11px] text-slate-500 font-mono">No. ID: {user.nip}</p>
                       <p className="text-[10px] text-slate-400 font-mono">{user.email || 'Tanpa Email'}</p>
                     </td>
                     <td className="py-3.5 px-4 whitespace-nowrap">
@@ -683,7 +683,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
                         <div>
                           <p className="font-medium text-slate-800">{user.atasan.name}</p>
                           <p className="text-[10px] text-slate-400 font-mono">
-                            NIP: {user.atasan.nip}
+                            No. ID: {user.atasan.nip}
                           </p>
                         </div>
                       ) : (
@@ -793,7 +793,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    NIP / NIDN *
+                    No. ID / NIDN *
                   </label>
                   <input
                     type="text"
@@ -920,7 +920,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
                   <option value="none">-- Tanpa Atasan (Langsung ke Pimpinan/Admin) --</option>
                   {superiors.map((sup) => (
                     <option key={sup.id} value={sup.id}>
-                      {sup.name} ({sup.jabatan} - {sup.nip})
+                      {sup.name} ({sup.jabatan} - No. ID: {sup.nip})
                     </option>
                   ))}
                 </select>
@@ -974,7 +974,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    NIP / NIDN *
+                    No. ID / NIDN *
                   </label>
                   <input
                     type="text"
@@ -1089,7 +1089,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
                     .filter((sup) => sup.id !== selectedUser.id)
                     .map((sup) => (
                       <option key={sup.id} value={sup.id}>
-                        {sup.name} ({sup.jabatan} - {sup.nip})
+                        {sup.name} ({sup.jabatan} - No. ID: {sup.nip})
                       </option>
                     ))}
                 </select>
@@ -1202,7 +1202,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
               <p className="font-semibold text-rose-900">Apakah Anda yakin ingin menghapus akun pegawai ini?</p>
               <div className="text-[11px] text-rose-800 bg-white/70 p-2.5 rounded-xl border border-rose-200 space-y-0.5 font-medium">
                 <p><span className="text-slate-500">Nama:</span> <strong className="font-bold text-slate-900">{userToDelete.name}</strong></p>
-                <p><span className="text-slate-500">NIP:</span> <span className="font-mono font-bold text-slate-900">{userToDelete.nip}</span></p>
+                <p><span className="text-slate-500">No. ID:</span> <span className="font-mono font-bold text-slate-900">{userToDelete.nip}</span></p>
                 <p><span className="text-slate-500">Jabatan:</span> {userToDelete.jabatan}</p>
                 <p><span className="text-slate-500">Unit Kerja:</span> {userToDelete.unitKerja}</p>
               </div>
@@ -1273,7 +1273,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
                     1. Unduh Format Template Resmi STIMI
                   </h4>
                   <p className="text-[11px] text-emerald-700 mt-1 leading-relaxed">
-                    Template menyertakan kolom NIP, Nama, Email, Jabatan, Unit Kerja, NIP Atasan, dan Lokasi Gedung (misal: KAMPUS_1 atau Semua Gedung).
+                    Template menyertakan kolom No. ID, Nama, Email, Jabatan, Unit Kerja, No. ID Atasan, dan Lokasi Gedung (misal: KAMPUS_1 atau Semua Gedung).
                   </p>
                 </div>
                 <button

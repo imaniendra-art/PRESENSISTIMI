@@ -508,14 +508,14 @@ export async function lookupEmployeeByNip(nip: string) {
   if (!user) {
     return {
       success: false,
-      message: `NIP "${cleanNip}" tidak terdaftar dalam database civitas STIMI.`,
+      message: `No. ID "${cleanNip}" tidak terdaftar dalam database civitas STIMI.`,
     };
   }
 
   if (user.role === 'ADMIN') {
     return {
       success: false,
-      message: `NIP "${cleanNip}" adalah akun Administrator (Pengelola Sistem). Administrator tidak masuk dalam daftar presensi.`,
+      message: `No. ID "${cleanNip}" adalah akun Administrator (Pengelola Sistem). Administrator tidak masuk dalam daftar presensi.`,
     };
   }
 
@@ -567,7 +567,7 @@ export async function submitQuickPresence(data: {
   note?: string;
 }) {
   if (!data.nip || !data.nip.trim()) {
-    return { success: false, message: 'NIP wajib diisi.' };
+    return { success: false, message: 'No. ID wajib diisi.' };
   }
 
   // Validasi koordinat GPS
@@ -615,7 +615,7 @@ export async function submitQuickPresence(data: {
   });
 
   if (!user) {
-    return { success: false, message: `NIP "${cleanNip}" tidak ditemukan di sistem STIMI.` };
+    return { success: false, message: `No. ID "${cleanNip}" tidak ditemukan di sistem STIMI.` };
   }
 
   if (user.role === 'ADMIN') {
@@ -642,7 +642,7 @@ export async function submitQuickPresence(data: {
     if (!isPinMatch && !isPasswordMatch) {
       return {
         success: false,
-        message: 'PIN verifikasi tidak sesuai. Gunakan 4 digit terakhir NIP atau kata sandi Anda.',
+        message: 'PIN verifikasi tidak sesuai. Gunakan 4 digit terakhir No. ID atau kata sandi Anda.',
       };
     }
   }

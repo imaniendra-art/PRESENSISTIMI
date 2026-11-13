@@ -166,7 +166,7 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
                     <div>
                       <p className="font-bold text-slate-900 text-sm">{user.name}</p>
                       <p className="text-[11px] text-slate-500 font-mono">
-                        NIP: {user.nip} • {user.unitKerja}
+                        No. ID: {user.nip} • {user.unitKerja}
                       </p>
                       <div className="flex items-center gap-1.5 text-[11px] text-slate-600 mt-1">
                         <Building2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
@@ -285,7 +285,7 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
                     <tr key={user.id} className="hover:bg-slate-50/60 transition">
                       <td className="py-3.5 px-4">
                         <p className="font-bold text-slate-900">{user.name}</p>
-                        <p className="text-[11px] text-slate-500 font-mono">NIP: {user.nip}</p>
+                        <p className="text-[11px] text-slate-500 font-mono">No. ID: {user.nip}</p>
                       </td>
                       <td className="py-3.5 px-4">
                         <p className="font-medium text-slate-800">{user.unitKerja}</p>

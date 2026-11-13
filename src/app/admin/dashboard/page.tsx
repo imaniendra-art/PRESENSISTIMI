@@ -432,7 +432,7 @@ export default async function AdminDashboardPage() {
                               {att.user.name}
                             </p>
                             <p className="text-[11px] text-slate-500 truncate">
-                              {att.user.jabatan} • NIP: {att.user.nip}
+                              {att.user.jabatan} • No. ID: {att.user.nip}
                             </p>
                             <span className="text-[10px] text-emerald-800 font-medium inline-block mt-0.5">
                               {att.locationName || 'Kampus STIMI'}

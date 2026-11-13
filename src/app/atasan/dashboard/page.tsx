@@ -61,7 +61,7 @@ export default async function AtasanDashboardPage() {
               Selamat Datang, {user.name}
             </h1>
             <p className="text-sky-100 text-xs mt-1">
-              {user.jabatan} • {user.unitKerja} (NIP: {user.nip})
+              {user.jabatan} • {user.unitKerja} (No. ID: {user.nip})
             </p>
           </div>
 

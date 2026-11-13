@@ -19,6 +19,8 @@ import {
   LogIn,
   LogOut,
   Briefcase,
+  Sparkles,
+  X,
 } from 'lucide-react';
 import { CampusSetting, CampusLocation } from '@prisma/client';
 import Link from 'next/link';
@@ -47,10 +49,19 @@ interface TodayAttendanceStatus {
   clockOutStatus: string | null;
 }
 
+interface SavedEmployee {
+  nip: string;
+  name: string;
+}
+
+const STORAGE_KEY = 'presensi_stimi_saved_ids';
+
 export function QuickPresenceCard({
   campusSetting,
   campusLocations = [],
 }: QuickPresenceCardProps) {
+  // Saved IDs di Perangkat (localStorage)
+  const [savedEmployees, setSavedEmployees] = useState<SavedEmployee[]>([]);
   // GPS State
   const [coords, setCoords] = useState<{
     lat: number;
@@ -98,6 +109,54 @@ export function QuickPresenceCard({
       clearTimeout(timeout);
       clearInterval(timer);
     };
+  }, []);
+
+  // Muat No. ID yang tersimpan di perangkat (localStorage)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            setSavedEmployees(parsed);
+          }
+        }
+      } catch {
+        // Abaikan error storage
+      }
+    }
+  }, []);
+
+  // Simpan No. ID ke memori perangkat
+  const saveEmployeeToLocal = useCallback((nip: string, name: string) => {
+    if (typeof window === 'undefined' || !nip) return;
+    try {
+      const clean = nip.trim().toUpperCase();
+      setSavedEmployees((prev) => {
+        const filtered = prev.filter((p) => p.nip.toUpperCase() !== clean);
+        const updated = [{ nip: clean, name: name.trim() }, ...filtered].slice(0, 5);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        return updated;
+      });
+    } catch {
+      // Abaikan error storage
+    }
+  }, []);
+
+  // Hapus No. ID dari memori perangkat
+  const handleRemoveSavedEmployee = useCallback((nip: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const clean = nip.trim().toUpperCase();
+      setSavedEmployees((prev) => {
+        const updated = prev.filter((p) => p.nip.toUpperCase() !== clean);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        return updated;
+      });
+    } catch {
+      // Abaikan error storage
+    }
   }, []);
 
   // GPS Refresher
@@ -208,7 +267,7 @@ export function QuickPresenceCard({
   const isFriday = currentTime ? currentTime.getDay() === 5 : new Date().getDay() === 5;
   const isInsideRadius = isFriday || (locationEval ? locationEval.isInside : false);
 
-  // Pencarian NIP Pegawai
+  // Pencarian No. ID Pegawai
   const handleSearchNip = async (customNip?: string) => {
     const targetNip = customNip || nipInput;
     if (!targetNip.trim()) {
@@ -227,13 +286,14 @@ export function QuickPresenceCard({
       if (res.success && res.user && res.attendance) {
         setEmployee(res.user);
         setAttendance(res.attendance);
+        saveEmployeeToLocal(res.user.nip, res.user.name);
       } else {
         setEmployee(null);
         setAttendance(null);
-        setLookupError(res.message || 'NIP tidak terdaftar di sistem STIMI.');
+        setLookupError(res.message || 'No. ID tidak terdaftar di sistem STIMI.');
       }
     } catch {
-      setLookupError('Terjadi kendala saat memeriksa NIP. Coba lagi.');
+      setLookupError('Terjadi kendala saat memeriksa No. ID. Coba lagi.');
     } finally {
       setIsSearchingNip(false);
     }
@@ -260,7 +320,7 @@ export function QuickPresenceCard({
   // Submit Presensi Cepat
   const handleSubmit = async () => {
     if (!employee) {
-      setAlert({ type: 'error', message: 'Harap masukkan NIP pegawai yang valid terlebih dahulu.' });
+      setAlert({ type: 'error', message: 'Harap masukkan No. ID pegawai yang valid terlebih dahulu.' });
       return;
     }
 
@@ -314,6 +374,9 @@ export function QuickPresenceCard({
           time: res.time || 'WITA',
           locationName: res.locationName || locationEval?.targetName || 'Kampus STIMI',
         });
+
+        // Simpan No. ID ke memori perangkat
+        saveEmployeeToLocal(employee.nip, employee.name);
 
         // Haptic feedback pada HP
         if (typeof window !== 'undefined' && 'vibrate' in navigator) {
@@ -512,11 +575,11 @@ export function QuickPresenceCard({
           </button>
         </div>
 
-        {/* Input NIP Pegawai (Tampil saat pegawai belum dipilih) */}
+        {/* Input No. ID Pegawai (Tampil saat pegawai belum dipilih) */}
         {!employee ? (
           <div className="space-y-2 pt-1">
             <label className="block text-xs font-bold text-slate-700 flex items-center justify-between">
-              <span>Nomor Induk Pegawai (NIP)</span>
+              <span>Nomor ID (No. ID)</span>
               <span className="text-[11px] text-slate-400 font-normal">Contoh: DSN01, TNK01</span>
             </label>
 
@@ -539,7 +602,7 @@ export function QuickPresenceCard({
                   }
                 }}
                 onBlur={() => handleSearchNip()}
-                placeholder="Contoh: DSN01, TNK01"
+                placeholder="Masukkan No. ID (contoh: DSN01)..."
                 autoCapitalize="characters"
                 className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition uppercase tracking-wider"
               />
@@ -557,6 +620,55 @@ export function QuickPresenceCard({
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{lookupError}</span>
               </p>
+            )}
+
+            {/* Quick Picker: No. ID yang Tersimpan di Perangkat Ini */}
+            {savedEmployees.length > 0 && (
+              <div className="pt-1 pb-1">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+                    Pilih No. ID Tersimpan:
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium">Tersimpan di HP ini</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {savedEmployees.map((saved) => (
+                    <div
+                      key={saved.nip}
+                      className="group inline-flex items-center gap-1.5 pl-2.5 pr-1 py-1 bg-white border border-slate-200 hover:border-sky-400 hover:bg-sky-50/70 rounded-xl text-xs transition shadow-2xs"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNipInput(saved.nip);
+                          handleSearchNip(saved.nip);
+                        }}
+                        className="flex items-center gap-1.5 font-bold text-slate-800 hover:text-sky-700 text-left cursor-pointer"
+                      >
+                        <span className="w-5 h-5 rounded-md bg-sky-100 text-sky-800 text-[10px] font-mono font-black flex items-center justify-center">
+                          {saved.nip.slice(0, 2)}
+                        </span>
+                        <span className="font-mono text-[11px] text-sky-700 font-extrabold">{saved.nip}</span>
+                        <span className="text-[11px] text-slate-600 font-medium truncate max-w-[110px] sm:max-w-[140px]">
+                          {saved.name}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveSavedEmployee(saved.nip);
+                        }}
+                        title="Hapus No. ID ini dari perangkat"
+                        className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
 
             {/* Tombol Masuk Akun Langsung */}
@@ -583,7 +695,7 @@ export function QuickPresenceCard({
                     {employee.name}
                   </span>
                   <span className="px-1.5 py-0.2 bg-sky-200/70 text-sky-900 border border-sky-300 rounded text-[9px] font-mono font-bold shrink-0">
-                    {employee.nip}
+                    No. ID: {employee.nip}
                   </span>
                 </div>
                 <p className="text-[10px] text-sky-800 font-medium truncate mt-0.5">
