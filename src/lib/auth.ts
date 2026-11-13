@@ -50,6 +50,7 @@ export const authOptions: AuthOptions = {
           nip: user.nip,
           name: user.name,
           email: user.email,
+          phone: user.phone,
           role: user.role as Role,
           jabatan: user.jabatan,
           unitKerja: user.unitKerja,
@@ -66,6 +67,8 @@ export const authOptions: AuthOptions = {
         token.role = (user as { role: Role }).role;
         token.jabatan = (user as { jabatan: string }).jabatan;
         token.unitKerja = (user as { unitKerja: string }).unitKerja;
+        token.phone = (user as { phone?: string | null }).phone;
+        token.picture = user.image;
       }
       return token;
     },
@@ -76,6 +79,8 @@ export const authOptions: AuthOptions = {
         session.user.role = token.role;
         session.user.jabatan = token.jabatan;
         session.user.unitKerja = token.unitKerja;
+        session.user.phone = token.phone;
+        session.user.image = (token.picture as string) || session.user.image;
       }
       return session;
     },

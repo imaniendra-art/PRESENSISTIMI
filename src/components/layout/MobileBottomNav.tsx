@@ -11,6 +11,7 @@ import {
   BarChart3,
   Users,
   Settings,
+  User,
 } from 'lucide-react';
 
 export function MobileBottomNav() {
@@ -28,14 +29,15 @@ export function MobileBottomNav() {
           { href: '/admin/dashboard', label: 'Ringkasan', icon: BarChart3 },
           { href: '/admin/monitoring', label: 'Monitoring', icon: Clock },
           { href: '/admin/pegawai', label: 'Pegawai', icon: Users },
-          { href: '/admin/pengaturan', label: 'Gedung', icon: Settings },
           { href: '/admin/laporan', label: 'Laporan', icon: FileText },
+          { href: '/profil', label: 'Profil', icon: User },
         ];
       case 'ATASAN':
         return [
           { href: '/atasan/dashboard', label: 'Presensi', icon: CalendarCheck },
           { href: '/atasan/approval', label: 'Persetujuan', icon: ShieldAlert },
           { href: '/pegawai/riwayat', label: 'Riwayat', icon: Clock },
+          { href: '/profil', label: 'Profil', icon: User },
         ];
       case 'PEGAWAI':
       default:
@@ -43,6 +45,7 @@ export function MobileBottomNav() {
           { href: '/pegawai/dashboard', label: 'Presensi', icon: CalendarCheck },
           { href: '/pegawai/pengajuan', label: 'Cuti & Dinas', icon: FileText },
           { href: '/pegawai/riwayat', label: 'Riwayat', icon: Clock },
+          { href: '/profil', label: 'Profil', icon: User },
         ];
     }
   };

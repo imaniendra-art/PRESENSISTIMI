@@ -14,6 +14,7 @@ import {
   Clock,
   ShieldAlert,
   ChevronDown,
+  User,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -105,34 +106,60 @@ export function Navbar() {
           </nav>
 
           {/* User Profile & Sign Out */}
-          <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-slate-800 leading-tight">
-                {session.user.name}
-              </p>
-              <div className="flex items-center justify-end gap-1.5 mt-0.5">
-                <span className="text-[10px] text-slate-500 font-mono">
-                  No. ID: {session.user.nip}
-                </span>
-                <span
-                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
-                    role === 'ADMIN'
-                      ? 'bg-purple-100 text-purple-700'
-                      : role === 'ATASAN'
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-indigo-100 text-indigo-700'
-                  }`}
-                >
-                  {role}
-                </span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/profil"
+              className={`flex items-center gap-2.5 p-1 sm:p-1.5 sm:pr-2.5 rounded-2xl transition border group ${
+                pathname === '/profil'
+                  ? 'bg-sky-50 border-sky-300 text-sky-800'
+                  : 'hover:bg-slate-50 border-transparent hover:border-slate-200'
+              }`}
+              title="Buka Profil & Pengaturan Akun"
+            >
+              {session.user.image ? (
+                <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-slate-100">
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || 'User'}
+                    fill
+                    sizes="32px"
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase shadow-2xs">
+                  {(session.user.name || 'U').slice(0, 2)}
+                </div>
+              )}
+
+              <div className="text-left hidden sm:block">
+                <p className="text-xs font-bold text-slate-800 group-hover:text-sky-700 transition leading-tight">
+                  {session.user.name}
+                </p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    No. ID: {session.user.nip}
+                  </span>
+                  <span
+                    className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
+                      role === 'ADMIN'
+                        ? 'bg-purple-100 text-purple-700'
+                        : role === 'ATASAN'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-indigo-100 text-indigo-700'
+                    }`}
+                  >
+                    {role}
+                  </span>
+                </div>
               </div>
-            </div>
+            </Link>
 
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: '/login' })}
               title="Keluar dari Akun"
-              className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition border border-slate-200/60"
+              className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition border border-slate-200/60 cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -141,7 +168,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition border border-slate-200"
+              className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition border border-slate-200 cursor-pointer"
             >
               <ChevronDown
                 className={`w-4 h-4 transform transition-transform ${
@@ -155,12 +182,39 @@ export function Navbar() {
         {/* Mobile Dropdown Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden py-3 border-t border-slate-100 space-y-1">
-            <div className="px-3 py-2 bg-slate-50 rounded-xl mb-2 sm:hidden">
-              <p className="text-xs font-bold text-slate-800">{session.user.name}</p>
-              <p className="text-[10px] text-slate-500">
-                No. ID: {session.user.nip} • {session.user.jabatan}
-              </p>
-            </div>
+            <Link
+              href="/profil"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="px-3 py-2.5 bg-sky-50/70 border border-sky-100 rounded-xl mb-2 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2.5">
+                {session.user.image ? (
+                  <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-slate-200 shrink-0">
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || 'User'}
+                      fill
+                      sizes="32px"
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-xl bg-sky-600 text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase">
+                    {(session.user.name || 'U').slice(0, 2)}
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs font-bold text-slate-800">{session.user.name}</p>
+                  <p className="text-[10px] text-slate-500">
+                    No. ID: {session.user.nip} • {session.user.jabatan}
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] text-sky-700 font-bold bg-sky-100 px-2 py-0.5 rounded-md">
+                Profil
+              </span>
+            </Link>
+
             {navLinks.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;

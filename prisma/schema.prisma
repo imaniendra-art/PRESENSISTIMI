@@ -62,6 +62,7 @@ model User {
   nip                String          @unique
   name               String
   email              String?
+  phone              String?
   password           String
   role               Role            @default(PEGAWAI)
   jabatan            String

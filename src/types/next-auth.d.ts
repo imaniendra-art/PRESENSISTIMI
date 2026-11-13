@@ -9,6 +9,7 @@ declare module 'next-auth' {
     role: Role;
     jabatan: string;
     unitKerja: string;
+    phone?: string | null;
   }
 
   interface Session extends DefaultSession {
@@ -18,6 +19,7 @@ declare module 'next-auth' {
       role: Role;
       jabatan: string;
       unitKerja: string;
+      phone?: string | null;
     } & DefaultSession['user'];
   }
 }
@@ -29,5 +31,6 @@ declare module 'next-auth/jwt' {
     role: Role;
     jabatan: string;
     unitKerja: string;
+    phone?: string | null;
   }
 }

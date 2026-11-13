@@ -194,3 +194,71 @@ export async function saveUploadedFile(file: File, folder: string): Promise<stri
 
   return localUrl;
 }
+
+/**
+ * Menyimpan foto avatar profil pegawai dengan auto-crop persegi (square 320x320) & kompresi WebP.
+ * Bekerja secara HYBRID (Lokal + Supabase Storage).
+ */
+export async function saveAvatarImage(
+  base64OrBuffer: string | Buffer,
+  nip: string
+): Promise<string> {
+  let rawBuffer: Buffer;
+  if (typeof base64OrBuffer === 'string') {
+    const matches = base64OrBuffer.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+    const data = matches ? matches[2] : base64OrBuffer;
+    rawBuffer = Buffer.from(data, 'base64');
+  } else {
+    rawBuffer = base64OrBuffer;
+  }
+
+  // Auto-crop cover 320x320 dan kompresi WebP
+  const optimizedBuffer = await sharp(rawBuffer)
+    .resize(320, 320, {
+      fit: 'cover',
+      position: 'center',
+    })
+    .webp({ quality: 80, effort: 4 })
+    .toBuffer();
+
+  const timestamp = Date.now();
+  const filename = `avatar_${nip}_${timestamp}.webp`;
+
+  // 1. Simpan salinan lokal di /public/uploads/avatar
+  const localUploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatar');
+  await fs.mkdir(localUploadDir, { recursive: true });
+  const localFilePath = path.join(localUploadDir, filename);
+  await fs.writeFile(localFilePath, optimizedBuffer);
+  const localUrl = `/uploads/avatar/${filename}`;
+
+  // 2. Unggah ke Supabase jika dikonfigurasi
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    try {
+      await ensureSupabaseBucket(supabase, DEFAULT_BUCKET);
+      const remotePath = `avatar/${filename}`;
+      const { error: uploadError } = await supabase.storage
+        .from(DEFAULT_BUCKET)
+        .upload(remotePath, optimizedBuffer, {
+          contentType: 'image/webp',
+          upsert: true,
+        });
+
+      if (!uploadError) {
+        const { data: publicUrlData } = supabase.storage
+          .from(DEFAULT_BUCKET)
+          .getPublicUrl(remotePath);
+
+        if (publicUrlData?.publicUrl) {
+          return publicUrlData.publicUrl;
+        }
+      } else {
+        console.warn('[Hybrid Storage] Supabase avatar upload failed, using local copy:', uploadError.message);
+      }
+    } catch (supaErr) {
+      console.warn('[Hybrid Storage] Supabase avatar exception, fallback to local:', supaErr);
+    }
+  }
+
+  return localUrl;
+}
