@@ -5,7 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/layout/Navbar';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getStartOfDay } from '@/lib/time';
+import { getStartOfDay, getTimezoneFromCoordinates } from '@/lib/time';
+import { getRegionDescription } from '@/lib/geo';
 import {
   Users,
   CheckCircle2,
@@ -434,23 +435,68 @@ export default async function AdminDashboardPage() {
                             <p className="text-[11px] text-slate-500 truncate">
                               {att.user.jabatan} • No. ID: {att.user.nip}
                             </p>
-                            <span className="text-[10px] text-emerald-800 font-medium inline-block mt-0.5">
-                              {att.locationName || 'Kampus STIMI'}
-                            </span>
+                            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                              <span className="text-[10px] text-emerald-800 font-medium">
+                                {att.locationName || 'Kampus STIMI'}
+                              </span>
+                              {att.clockInLat && att.clockInLng && (
+                                <span className="text-[10px] text-slate-500 font-mono">
+                                  • {getRegionDescription(att.clockInLat, att.clockInLng)}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
 
                         <div className="text-right shrink-0">
-                          <span className="font-mono tabular-nums text-xs font-bold text-slate-900 block">
-                            {timeStr} <span className="text-[10px] font-sans font-normal text-slate-500">WITA</span>
-                          </span>
+                          {(() => {
+                            const tz = getTimezoneFromCoordinates(att.clockInLng);
+                            const isWib = tz === 'Asia/Jakarta';
+                            const isWit = tz === 'Asia/Jayapura';
+                            const tzLabel = isWib ? 'WIB' : isWit ? 'WIT' : 'WITA';
+                            const localTime = new Date(att.clockInTime!).toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              timeZone: tz,
+                            });
+                            const witaTime = new Date(att.clockInTime!).toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              timeZone: 'Asia/Makassar',
+                            });
+
+                            if (tzLabel === 'WITA') {
+                              return (
+                                <span className="font-mono tabular-nums text-xs font-bold text-slate-900 block">
+                                  {witaTime}{' '}
+                                  <span className="text-[10px] font-sans font-normal text-slate-500">
+                                    WITA
+                                  </span>
+                                </span>
+                              );
+                            }
+
+                            return (
+                              <div>
+                                <span className="font-mono tabular-nums text-xs font-bold text-slate-900 flex items-center justify-end gap-1">
+                                  {localTime}{' '}
+                                  <span className="text-[9px] px-1 py-0.2 rounded bg-amber-100 text-amber-800 font-sans font-bold uppercase">
+                                    {tzLabel}
+                                  </span>
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-mono block">
+                                  ({witaTime} WITA)
+                                </span>
+                              </div>
+                            );
+                          })()}
                           <span
                             className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-bold mt-1 ${
                               att.isDinasLuar
                                 ? 'bg-purple-100 text-purple-800'
                                 : att.clockInStatus === 'TEPAT_WAKTU'
                                 ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-amber-100 text-amber-800'
+                                : 'bg-rose-100 text-rose-800'
                             }`}
                           >
                             {att.isDinasLuar ? 'Dinas Luar' : att.clockInStatus === 'TEPAT_WAKTU' ? 'Tepat Waktu' : 'Terlambat'}

@@ -3,7 +3,8 @@ import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/layout/Navbar';
-import { getStartOfDay } from '@/lib/time';
+import { getStartOfDay, getTimezoneFromCoordinates } from '@/lib/time';
+import { formatDistance, getRegionDescription, calculateHaversineDistance } from '@/lib/geo';
 import { MonitoringDateFilter } from '@/components/admin/MonitoringDateFilter';
 import {
   MapPin,
@@ -14,6 +15,7 @@ import {
   Building2,
   Users,
   UserX,
+  ExternalLink,
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -50,6 +52,8 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
     month: 'long',
     year: 'numeric',
   });
+
+  const campusSetting = await prisma.campusSetting.findFirst();
 
   // Ambil semua pegawai aktif (Dosen & Tendik, bukan admin) beserta presensi pada tanggal target
   const users = await prisma.user.findMany({
@@ -168,9 +172,26 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
                       <p className="text-[11px] text-slate-500 font-mono">
                         No. ID: {user.nip} • {user.unitKerja}
                       </p>
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-600 mt-1">
-                        <Building2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                        <span>{att?.locationName || att?.location?.name || user.assignedLocation?.name || 'Semua Gedung'}</span>
+                      <div className="flex flex-col gap-0.5 mt-1">
+                        <div className="flex items-center gap-1.5 text-[11px] text-slate-700 font-medium">
+                          <Building2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                          <span>{att?.locationName || att?.location?.name || user.assignedLocation?.name || 'Semua Gedung'}</span>
+                        </div>
+                        {att?.clockInLat && att?.clockInLng && (
+                          <a
+                            href={`https://www.google.com/maps?q=${att.clockInLat},${att.clockInLng}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[10px] text-sky-600 hover:text-sky-800 hover:underline flex items-center gap-1 font-mono"
+                            title="Buka titik GPS di Google Maps"
+                          >
+                            <MapPin className="w-2.5 h-2.5 text-rose-500 shrink-0" />
+                            <span>
+                              {getRegionDescription(att.clockInLat, att.clockInLng) || `${att.clockInLat.toFixed(4)}, ${att.clockInLng.toFixed(4)}`}
+                            </span>
+                            <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
+                          </a>
+                        )}
                       </div>
                     </div>
 
@@ -199,35 +220,101 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
                   <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs">
                     <div>
                       <span className="text-[10px] text-slate-400 block font-semibold uppercase">Masuk</span>
-                      <span className="font-bold text-slate-800 font-mono">
-                        {att?.clockInTime
-                          ? new Date(att.clockInTime).toLocaleTimeString('id-ID', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : '-'}
-                      </span>
+                      {att?.clockInTime ? (
+                        (() => {
+                          const tz = getTimezoneFromCoordinates(att.clockInLng);
+                          const isWib = tz === 'Asia/Jakarta';
+                          const isWit = tz === 'Asia/Jayapura';
+                          const tzLabel = isWib ? 'WIB' : isWit ? 'WIT' : 'WITA';
+                          const localTime = new Date(att.clockInTime).toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZone: tz,
+                          });
+                          const witaTime = new Date(att.clockInTime).toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZone: 'Asia/Makassar',
+                          });
+
+                          return (
+                            <div>
+                              <span className="font-bold text-slate-800 font-mono block">
+                                {localTime} <span className="text-[9px] font-sans font-extrabold text-amber-700">{tzLabel}</span>
+                              </span>
+                              {tzLabel !== 'WITA' && (
+                                <span className="text-[9px] text-slate-400 font-mono block">
+                                  ({witaTime} WITA)
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()
+                      ) : (
+                        <span className="font-bold text-slate-400 font-mono">-</span>
+                      )}
                     </div>
 
                     <div>
                       <span className="text-[10px] text-slate-400 block font-semibold uppercase">Pulang</span>
-                      <span className="font-bold text-slate-800 font-mono">
-                        {att?.clockOutTime
-                          ? new Date(att.clockOutTime).toLocaleTimeString('id-ID', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : '-'}
-                      </span>
+                      {att?.clockOutTime ? (
+                        (() => {
+                          const tz = getTimezoneFromCoordinates(att.clockOutLng || att.clockInLng);
+                          const isWib = tz === 'Asia/Jakarta';
+                          const isWit = tz === 'Asia/Jayapura';
+                          const tzLabel = isWib ? 'WIB' : isWit ? 'WIT' : 'WITA';
+                          const localTime = new Date(att.clockOutTime).toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZone: tz,
+                          });
+                          const witaTime = new Date(att.clockOutTime).toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZone: 'Asia/Makassar',
+                          });
+
+                          return (
+                            <div>
+                              <span className="font-bold text-slate-800 font-mono block">
+                                {localTime} <span className="text-[9px] font-sans font-extrabold text-amber-700">{tzLabel}</span>
+                              </span>
+                              {tzLabel !== 'WITA' && (
+                                <span className="text-[9px] text-slate-400 font-mono block">
+                                  ({witaTime} WITA)
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()
+                      ) : (
+                        <span className="font-bold text-slate-400 font-mono">-</span>
+                      )}
                     </div>
 
                     <div>
                       <span className="text-[10px] text-slate-400 block font-semibold uppercase">Jarak GPS</span>
-                      <span className="font-mono text-slate-600">
-                        {att?.clockInDistance !== null && att?.clockInDistance !== undefined
-                          ? `±${Math.round(att.clockInDistance)}m`
-                          : '-'}
-                      </span>
+                      {(() => {
+                        let dist = att?.clockInDistance;
+                        if (
+                          (dist === null || dist === undefined || dist === 0) &&
+                          att?.clockInLat &&
+                          att?.clockInLng &&
+                          campusSetting
+                        ) {
+                          dist = calculateHaversineDistance(
+                            att.clockInLat,
+                            att.clockInLng,
+                            campusSetting.latitude,
+                            campusSetting.longitude
+                          );
+                        }
+                        return (
+                          <span className="font-mono font-semibold text-slate-700 block">
+                            {formatDistance(dist)}
+                          </span>
+                        );
+                      })()}
                     </div>
                   </div>
 
@@ -293,9 +380,26 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         {att ? (
-                          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-                            <Building2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                            <span>{att.locationName || att.location?.name || 'Kampus STIMI'}</span>
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+                              <Building2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                              <span>{att.locationName || att.location?.name || 'Kampus STIMI'}</span>
+                            </div>
+                            {att.clockInLat && att.clockInLng && (
+                              <a
+                                href={`https://www.google.com/maps?q=${att.clockInLat},${att.clockInLng}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[10px] text-sky-600 hover:text-sky-800 hover:underline flex items-center gap-1 font-mono"
+                                title="Buka titik koordinat GPS di Google Maps"
+                              >
+                                <MapPin className="w-2.5 h-2.5 text-rose-500 shrink-0" />
+                                <span>
+                                  {getRegionDescription(att.clockInLat, att.clockInLng) || `${att.clockInLat.toFixed(4)}, ${att.clockInLng.toFixed(4)}`}
+                                </span>
+                                <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
+                              </a>
+                            )}
                           </div>
                         ) : user.assignedLocation ? (
                           <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
@@ -327,37 +431,131 @@ export default async function AdminMonitoringPage({ searchParams }: AdminMonitor
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         {att?.clockInTime ? (
-                          <span className="font-mono font-bold text-slate-800">
-                            {new Date(att.clockInTime).toLocaleTimeString('id-ID', {
+                          (() => {
+                            const tz = getTimezoneFromCoordinates(att.clockInLng);
+                            const isWib = tz === 'Asia/Jakarta';
+                            const isWit = tz === 'Asia/Jayapura';
+                            const tzLabel = isWib ? 'WIB' : isWit ? 'WIT' : 'WITA';
+                            const localTime = new Date(att.clockInTime).toLocaleTimeString('id-ID', {
                               hour: '2-digit',
                               minute: '2-digit',
-                            })}
-                          </span>
+                              timeZone: tz,
+                            });
+                            const witaTime = new Date(att.clockInTime).toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              timeZone: 'Asia/Makassar',
+                            });
+
+                            if (tzLabel === 'WITA') {
+                              return (
+                                <span className="font-mono font-bold text-slate-800">
+                                  {witaTime}{' '}
+                                  <span className="text-[10px] font-sans font-medium text-slate-500">
+                                    WITA
+                                  </span>
+                                </span>
+                              );
+                            }
+
+                            return (
+                              <div className="flex flex-col">
+                                <span className="font-mono font-bold text-slate-900 flex items-center gap-1">
+                                  {localTime}{' '}
+                                  <span className="text-[9px] px-1 py-0.5 rounded bg-amber-100 text-amber-800 font-sans font-extrabold uppercase">
+                                    {tzLabel}
+                                  </span>
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-mono">
+                                  ({witaTime} WITA)
+                                </span>
+                              </div>
+                            );
+                          })()
                         ) : (
                           <span className="text-slate-400">-</span>
                         )}
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         {att?.clockOutTime ? (
-                          <span className="font-mono font-bold text-slate-800">
-                            {new Date(att.clockOutTime).toLocaleTimeString('id-ID', {
+                          (() => {
+                            const tz = getTimezoneFromCoordinates(att.clockOutLng || att.clockInLng);
+                            const isWib = tz === 'Asia/Jakarta';
+                            const isWit = tz === 'Asia/Jayapura';
+                            const tzLabel = isWib ? 'WIB' : isWit ? 'WIT' : 'WITA';
+                            const localTime = new Date(att.clockOutTime).toLocaleTimeString('id-ID', {
                               hour: '2-digit',
                               minute: '2-digit',
-                            })}
-                          </span>
+                              timeZone: tz,
+                            });
+                            const witaTime = new Date(att.clockOutTime).toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              timeZone: 'Asia/Makassar',
+                            });
+
+                            if (tzLabel === 'WITA') {
+                              return (
+                                <span className="font-mono font-bold text-slate-800">
+                                  {witaTime}{' '}
+                                  <span className="text-[10px] font-sans font-medium text-slate-500">
+                                    WITA
+                                  </span>
+                                </span>
+                              );
+                            }
+
+                            return (
+                              <div className="flex flex-col">
+                                <span className="font-mono font-bold text-slate-900 flex items-center gap-1">
+                                  {localTime}{' '}
+                                  <span className="text-[9px] px-1 py-0.5 rounded bg-amber-100 text-amber-800 font-sans font-extrabold uppercase">
+                                    {tzLabel}
+                                  </span>
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-mono">
+                                  ({witaTime} WITA)
+                                </span>
+                              </div>
+                            );
+                          })()
                         ) : (
                           <span className="text-slate-400 italic">Belum</span>
                         )}
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        {att?.clockInDistance !== null && att?.clockInDistance !== undefined ? (
-                          <span className="flex items-center gap-1 font-mono text-slate-600">
-                            <MapPin className="w-3 h-3 text-slate-400" />
-                            ±{Math.round(att.clockInDistance)}m
-                          </span>
-                        ) : (
-                          '-'
-                        )}
+                        {(() => {
+                          let dist = att?.clockInDistance;
+                          if (
+                            (dist === null || dist === undefined || dist === 0) &&
+                            att?.clockInLat &&
+                            att?.clockInLng &&
+                            campusSetting
+                          ) {
+                            dist = calculateHaversineDistance(
+                              att.clockInLat,
+                              att.clockInLng,
+                              campusSetting.latitude,
+                              campusSetting.longitude
+                            );
+                          }
+                          if (dist !== null && dist !== undefined) {
+                            return (
+                              <div className="flex flex-col">
+                                <span className="flex items-center gap-1 font-mono text-slate-700 font-semibold">
+                                  <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                                  {formatDistance(dist)}
+                                </span>
+                                {dist > 1000 && (
+                                  <span className="text-[9px] text-slate-400 font-sans">
+                                    dari Kampus Makassar
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          }
+                          return <span className="text-slate-400">-</span>;
+                        })()}
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center gap-1.5">

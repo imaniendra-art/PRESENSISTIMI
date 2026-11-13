@@ -176,10 +176,16 @@ export async function submitClockIn(data: {
   let recordedDistance = 0;
 
   if (data.isDinasLuar) {
-    // Bebas validasi radius geofence
+    // Bebas validasi radius geofence, namun simpan jarak sebenarnya ke kampus utama STIMI
+    const distanceToCampus = calculateHaversineDistance(
+      data.latitude,
+      data.longitude,
+      campusSetting.latitude,
+      campusSetting.longitude
+    );
     resolvedLocationId = null;
     resolvedLocationName = 'Dinas Luar Kota';
-    recordedDistance = 0;
+    recordedDistance = distanceToCampus;
   } else if (user?.assignedLocationId && user.assignedLocation) {
     // KASUS 1: Pegawai Terkunci di 1 Gedung Spesifik
     const targetLoc = user.assignedLocation;
@@ -403,7 +409,13 @@ export async function submitClockOut(data: {
   let recordedDistance = 0;
 
   if (existing.isDinasLuar) {
-    recordedDistance = 0;
+    const distanceToCampus = calculateHaversineDistance(
+      data.latitude,
+      data.longitude,
+      campusSetting.latitude,
+      campusSetting.longitude
+    );
+    recordedDistance = distanceToCampus;
   } else if (user?.assignedLocationId && user.assignedLocation) {
     const targetLoc = user.assignedLocation;
     const distance = calculateHaversineDistance(
@@ -673,14 +685,27 @@ export async function submitQuickPresence(data: {
         message: 'Keterangan agenda/lokasi dinas luar wajib diisi (minimal 5 karakter).',
       };
     }
+    const distToCampus = calculateHaversineDistance(
+      data.latitude,
+      data.longitude,
+      campusSetting.latitude,
+      campusSetting.longitude
+    );
     resolvedLocationId = null;
     resolvedLocationName = `Dinas Luar: ${data.note.trim()}`;
-    recordedDistance = 0;
+    recordedDistance = distToCampus;
   } else if (isFriday) {
     // Pada hari Jumat, institusi STIMI menerapkan sistem WFA (Work From Anywhere)
+    // Tetap hitung dan rekam jarak nyata pegawai dari kampus STIMI Makassar
+    const distToCampus = calculateHaversineDistance(
+      data.latitude,
+      data.longitude,
+      campusSetting.latitude,
+      campusSetting.longitude
+    );
     resolvedLocationId = null;
     resolvedLocationName = 'WFA (Work From Anywhere)';
-    recordedDistance = 0;
+    recordedDistance = distToCampus;
   } else if (data.isSimulation) {
     // Mode Simulasi / Pengujian Mandiri
     const targetLoc = user.assignedLocation || (campusLocations.length > 0 ? campusLocations[0] : null);
