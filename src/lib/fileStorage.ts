@@ -14,7 +14,13 @@ function getSupabaseClient(): SupabaseClient | null {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('your-project-ref')) {
+  if (
+    !supabaseUrl ||
+    !supabaseKey ||
+    supabaseUrl.includes('your-project') ||
+    supabaseUrl.includes('your-supabase-url') ||
+    supabaseKey.includes('your-')
+  ) {
     return null;
   }
 

@@ -46,10 +46,11 @@ DEFAULT_CAMPUS_LAT="-5.147665"
 DEFAULT_CAMPUS_LNG="119.432732"
 DEFAULT_CAMPUS_RADIUS="100"
 
-# Cloud Hybrid Storage (Supabase)
-NEXT_PUBLIC_SUPABASE_URL="https://your-supabase-url.supabase.co"
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="your-supabase-publishable-key"
-SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-secret-key"
+# Cloud Hybrid Storage (Supabase Storage untuk Foto Selfie & Dokumen)
+# Salin konfigurasi persis seperti pada file .env di laptop lokal Anda:
+NEXT_PUBLIC_SUPABASE_URL="https://qwprmurafwmrzqclopwk.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="<lihat_pada_file_.env_asli_anda>"
+SUPABASE_SERVICE_ROLE_KEY="<lihat_pada_file_.env_asli_anda>"
 SUPABASE_STORAGE_BUCKET="presensistimi"
 ```
 
