@@ -293,6 +293,8 @@ export function QuickPresenceCard({
     setIsSearchingNip(true);
     setLookupError(null);
     setAlert(null);
+    setIsDinasLuar(false);
+    setDinasLuarNote('');
 
     try {
       const res = await lookupEmployeeByNip(targetNip.trim());
@@ -679,20 +681,20 @@ export function QuickPresenceCard({
               <span className="font-bold text-slate-800 block text-xs truncate">
                 {isLocating
                   ? 'Mengunci titik GPS...'
-                  : isFriday
-                  ? 'Pola WFA (Jumat - Bebas Lokasi)'
                   : isDinasLuar
                   ? 'Mode Dinas Luar Aktif'
+                  : isFriday
+                  ? 'Pola WFA (Jumat - Bebas Lokasi)'
                   : isInsideRadius
                   ? `Di Dalam Radius: ${locationEval?.targetName}`
                   : `Di Luar Radius: ${locationEval?.targetName || 'Kampus'}`}
               </span>
               {locationEval && (
                 <span className="text-[10px] text-slate-500 font-mono block">
-                  {isFriday
-                    ? 'Hari Jumat: Presensi fleksibel WFA STIMI'
-                    : isDinasLuar
+                  {isDinasLuar
                     ? 'Bebas radius geofence (wajib isi agenda tugas)'
+                    : isFriday
+                    ? 'Hari Jumat: Presensi fleksibel WFA STIMI'
                     : `Jarak: ±${Math.round(locationEval.distance)}m (Batas: ${locationEval.maxRadius}m)`}
                 </span>
               )}
@@ -886,149 +888,202 @@ export function QuickPresenceCard({
               </button>
             ) : (
               <>
-                {/* Opsi Dinas Luar jika berada di luar radius (Senin - Kamis) */}
-                {!isInsideRadius && !isFriday && (
-                  <div className="p-3.5 bg-amber-50/90 rounded-2xl border border-amber-200 text-left space-y-2.5 animate-slide-up shadow-2xs">
+                {/* Mode Dinas Luar Aktif -> Form Input Keterangan */}
+                {isDinasLuar && (
+                  <div className="p-3.5 bg-amber-50/95 rounded-2xl border border-amber-300 text-left space-y-2.5 animate-slide-up shadow-xs">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 border border-amber-200">
+                        <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
                           <Briefcase className="w-3.5 h-3.5" />
                         </div>
                         <div className="min-w-0">
                           <span className="text-xs font-bold text-amber-950 block truncate">
-                            Sedang Tugas Dinas Luar?
+                            Mode Dinas Luar Aktif
                           </span>
-                          <span className="text-[10px] text-amber-700 block truncate">
-                            Aktifkan jika bertugas di luar kampus
+                          <span className="text-[10px] text-amber-800 block truncate">
+                            Bebas radius lokasi kampus STIMI
                           </span>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => {
-                          setIsDinasLuar(!isDinasLuar);
-                          if (isDinasLuar) setDinasLuarNote('');
+                          setIsDinasLuar(false);
+                          setDinasLuarNote('');
                         }}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer ${
-                          isDinasLuar
-                            ? 'bg-amber-600 text-white shadow-xs'
-                            : 'bg-amber-200 hover:bg-amber-300 text-amber-900 border border-amber-300'
-                        }`}
+                        className="px-2.5 py-1 bg-amber-200/80 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-semibold transition shrink-0 cursor-pointer"
                       >
-                        {isDinasLuar ? '✓ Mode Aktif' : 'Aktifkan'}
+                        Batal
                       </button>
                     </div>
 
-                    {isDinasLuar && (
-                      <div className="space-y-1.5 pt-2 border-t border-amber-200/80 animate-slide-up">
-                        <label className="block text-[11px] font-bold text-amber-950">
-                          Keterangan Agenda / Lokasi Dinas Luar (Wajib):
-                        </label>
-                        <input
-                          type="text"
-                          value={dinasLuarNote}
-                          onChange={(e) => setDinasLuarNote(e.target.value)}
-                          placeholder="Contoh: Rapat Koordinasi di LLDIKTI IX / Sosialisasi..."
-                          className="w-full px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
-                        />
-                        <p className="text-[10px] text-amber-700">
-                          *Wajib diisi min. 5 karakter. Status tercatat resmi untuk verifikasi Atasan & Admin.
-                        </p>
-                      </div>
-                    )}
+                    <div className="space-y-1.5 pt-1.5 border-t border-amber-200">
+                      <label className="block text-[11px] font-bold text-amber-950">
+                        Keterangan Agenda / Lokasi Dinas Luar (Wajib):
+                      </label>
+                      <input
+                        type="text"
+                        value={dinasLuarNote}
+                        onChange={(e) => setDinasLuarNote(e.target.value)}
+                        placeholder="Contoh: Rapat Koordinasi di LLDIKTI IX / Sosialisasi..."
+                        className="w-full px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+                        autoFocus
+                      />
+                      <p className="text-[10px] text-amber-700">
+                        *Wajib diisi min. 5 karakter. Status tercatat resmi untuk verifikasi Atasan & Admin.
+                      </p>
+                    </div>
                   </div>
                 )}
 
                 {!attendance?.hasClockedIn ? (
                   /* TAHAP 2A: FOTO SUDAH DIAMBIL & BELUM PRESENSI MASUK */
-                  <button
-                    type="button"
-                    disabled={
-                      isSubmitting ||
-                      (!isInsideRadius && (!isDinasLuar || dinasLuarNote.trim().length < 5))
-                    }
-                    onClick={handleSubmit}
-                    className={`w-full py-3.5 px-4 font-extrabold rounded-xl shadow-md text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
-                      !isInsideRadius && !isDinasLuar
-                        ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed shadow-none'
-                        : isDinasLuar && dinasLuarNote.trim().length < 5
-                        ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none'
-                        : isDinasLuar
-                        ? 'bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white shadow-amber-900/20'
-                        : 'bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white shadow-sky-600/20'
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Mencatat Presensi Masuk...</span>
-                      </>
-                    ) : !isInsideRadius && !isDinasLuar ? (
-                      <>
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>Di Luar Radius Kampus</span>
-                      </>
-                    ) : isDinasLuar ? (
-                      <>
-                        <Briefcase className="w-4 h-4" />
-                        <span>
-                          {dinasLuarNote.trim().length < 5
-                            ? 'Tulis Keterangan Dinas Luar'
-                            : '⚡ Presensi Masuk (Dinas Luar)'}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <LogIn className="w-4 h-4" />
-                        <span>⚡ Presensi Masuk Sekarang</span>
-                      </>
-                    )}
-                  </button>
+                  isDinasLuar ? (
+                    /* Tombol Submit Presensi Masuk (Dinas Luar) */
+                    <button
+                      type="button"
+                      disabled={isSubmitting || dinasLuarNote.trim().length < 5}
+                      onClick={handleSubmit}
+                      className={`w-full py-3.5 px-4 font-extrabold rounded-xl shadow-md text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+                        dinasLuarNote.trim().length < 5
+                          ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none'
+                          : 'bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white shadow-amber-900/20'
+                      }`}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Mencatat Presensi Masuk (Dinas Luar)...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Briefcase className="w-4 h-4" />
+                          <span>
+                            {dinasLuarNote.trim().length < 5
+                              ? 'Tulis Keterangan Dinas Luar'
+                              : '⚡ Presensi Masuk (Dinas Luar)'}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    /* Dua Tombol Berdampingan: Presensi Masuk & Tombol Kecil Dinas Luar */
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={isSubmitting || !isInsideRadius}
+                        onClick={handleSubmit}
+                        className={`flex-1 py-3.5 px-3 sm:px-4 font-extrabold rounded-xl shadow-md text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+                          !isInsideRadius
+                            ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed shadow-none'
+                            : 'bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white shadow-sky-600/20'
+                        }`}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Mencatat...</span>
+                          </>
+                        ) : !isInsideRadius ? (
+                          <>
+                            <AlertTriangle className="w-4 h-4 shrink-0" />
+                            <span className="truncate">Di Luar Radius Kampus</span>
+                          </>
+                        ) : (
+                          <>
+                            <LogIn className="w-4 h-4 shrink-0" />
+                            <span className="truncate">⚡ Presensi Masuk</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* Tombol Sekunder Berdampingan: Dinas Luar */}
+                      <button
+                        type="button"
+                        onClick={() => setIsDinasLuar(true)}
+                        disabled={isSubmitting}
+                        title="Presensi Tugas Dinas Luar Kampus"
+                        className="py-3.5 px-3.5 sm:px-4 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 border border-amber-300 text-amber-900 font-bold rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
+                      >
+                        <Briefcase className="w-4 h-4 text-amber-700 shrink-0" />
+                        <span className="whitespace-nowrap">Dinas Luar</span>
+                      </button>
+                    </div>
+                  )
                 ) : !attendance?.hasClockedOut ? (
                   /* TAHAP 2B: FOTO SUDAH DIAMBIL & SIAP PRESENSI PULANG */
-                  <button
-                    type="button"
-                    disabled={
-                      isSubmitting ||
-                      (!isInsideRadius && (!isDinasLuar || dinasLuarNote.trim().length < 5))
-                    }
-                    onClick={handleSubmit}
-                    className={`w-full py-3.5 px-4 font-extrabold rounded-xl shadow-md text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
-                      !isInsideRadius && !isDinasLuar
-                        ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed shadow-none'
-                        : isDinasLuar && dinasLuarNote.trim().length < 5
-                        ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none'
-                        : isDinasLuar
-                        ? 'bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white shadow-amber-900/20'
-                        : 'bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white shadow-rose-950/20'
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Mencatat Presensi Pulang...</span>
-                      </>
-                    ) : !isInsideRadius && !isDinasLuar ? (
-                      <>
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>Di Luar Radius Kampus</span>
-                      </>
-                    ) : isDinasLuar ? (
-                      <>
-                        <Briefcase className="w-4 h-4" />
-                        <span>
-                          {dinasLuarNote.trim().length < 5
-                            ? 'Tulis Keterangan Dinas Luar'
-                            : '⚡ Presensi Pulang (Dinas Luar)'}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <LogOut className="w-4 h-4" />
-                        <span>⚡ Presensi Pulang Sekarang</span>
-                      </>
-                    )}
-                  </button>
+                  isDinasLuar ? (
+                    /* Tombol Submit Presensi Pulang (Dinas Luar) */
+                    <button
+                      type="button"
+                      disabled={isSubmitting || dinasLuarNote.trim().length < 5}
+                      onClick={handleSubmit}
+                      className={`w-full py-3.5 px-4 font-extrabold rounded-xl shadow-md text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+                        dinasLuarNote.trim().length < 5
+                          ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed shadow-none'
+                          : 'bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white shadow-amber-900/20'
+                      }`}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Mencatat Presensi Pulang (Dinas Luar)...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Briefcase className="w-4 h-4" />
+                          <span>
+                            {dinasLuarNote.trim().length < 5
+                              ? 'Tulis Keterangan Dinas Luar'
+                              : '⚡ Presensi Pulang (Dinas Luar)'}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    /* Dua Tombol Berdampingan: Presensi Pulang & Tombol Kecil Dinas Luar */
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={isSubmitting || !isInsideRadius}
+                        onClick={handleSubmit}
+                        className={`flex-1 py-3.5 px-3 sm:px-4 font-extrabold rounded-xl shadow-md text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+                          !isInsideRadius
+                            ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed shadow-none'
+                            : 'bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white shadow-rose-950/20'
+                        }`}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Mencatat...</span>
+                          </>
+                        ) : !isInsideRadius ? (
+                          <>
+                            <AlertTriangle className="w-4 h-4 shrink-0" />
+                            <span className="truncate">Di Luar Radius Kampus</span>
+                          </>
+                        ) : (
+                          <>
+                            <LogOut className="w-4 h-4 shrink-0" />
+                            <span className="truncate">⚡ Presensi Pulang</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* Tombol Sekunder Berdampingan: Dinas Luar */}
+                      <button
+                        type="button"
+                        onClick={() => setIsDinasLuar(true)}
+                        disabled={isSubmitting}
+                        title="Presensi Tugas Dinas Luar Kampus"
+                        className="py-3.5 px-3.5 sm:px-4 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 border border-amber-300 text-amber-900 font-bold rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
+                      >
+                        <Briefcase className="w-4 h-4 text-amber-700 shrink-0" />
+                        <span className="whitespace-nowrap">Dinas Luar</span>
+                      </button>
+                    </div>
+                  )
                 ) : (
                   <div className="p-3 bg-sky-50 rounded-2xl border border-sky-200 text-center">
                     <CheckCircle2 className="w-6 h-6 text-sky-600 mx-auto mb-1" />

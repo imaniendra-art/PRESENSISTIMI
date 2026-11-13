@@ -34,24 +34,24 @@ export default async function AbsenCepatPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center py-3 px-3 sm:p-6">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md mx-auto">
-        {/* Header Institusi - Dekat Kolom & Proporsional Layar Tunggal HP */}
-        <div className="text-center mb-3">
-          <div className="inline-flex items-center justify-center mb-1.5">
+        {/* Header Institusi - Disamakan 1:1 dengan Halaman Login */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center mb-3">
             <Image
               src="/logo.png"
               alt="Logo STIMI Makassar"
-              width={56}
-              height={56}
+              width={72}
+              height={72}
               priority
-              className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-xs"
+              className="w-16 h-16 sm:w-18 sm:h-18 object-contain drop-shadow-xs"
             />
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-none">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             PRESENSI<span className="text-sky-600">STIMI</span>
           </h1>
-          <p className="text-slate-500 text-[10px] sm:text-[11px] font-bold tracking-wider uppercase mt-1">
+          <p className="text-slate-500 text-xs sm:text-[11px] font-bold tracking-wider uppercase mt-1">
             PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
           </p>
         </div>
@@ -63,8 +63,8 @@ export default async function AbsenCepatPage() {
         />
 
         {/* Footer */}
-        <p className="text-center text-[10px] sm:text-xs text-slate-400 mt-3 sm:mt-4">
-          &copy; {new Date().getFullYear()} STIMI YAPMI Makassar. Seluruh Hak Cipta Dilindungi.
+        <p className="text-center text-xs text-slate-400 mt-6">
+          &copy; {new Date().getFullYear()} Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) YAPMI Makassar. Seluruh Hak Cipta Dilindungi.
         </p>
       </div>
     </div>
