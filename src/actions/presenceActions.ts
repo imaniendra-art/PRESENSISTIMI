@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { calculateHaversineDistance } from '@/lib/geo';
-import { getStartOfDay, evaluateClockInStatus, evaluateClockOutStatus } from '@/lib/time';
+import { getStartOfDay, evaluateClockInStatus, evaluateClockOutStatus, getTimezoneFromCoordinates } from '@/lib/time';
 import { saveSelfieImage } from '@/lib/fileStorage';
 import { revalidatePath } from 'next/cache';
 import { RequestStatus } from '@prisma/client';
@@ -272,7 +272,8 @@ export async function submitClockIn(data: {
     now,
     campusSetting.workStart,
     campusSetting.gracePeriodMinutes,
-    data.isDinasLuar
+    data.isDinasLuar,
+    data.longitude
   );
 
   // Simpan catatan presensi ke MongoDB
@@ -454,7 +455,7 @@ export async function submitClockOut(data: {
   }
 
   // Evaluasi status kepulangan (Normal vs Pulang Cepat)
-  const status = evaluateClockOutStatus(now, campusSetting.workEnd, existing.isDinasLuar);
+  const status = evaluateClockOutStatus(now, campusSetting.workEnd, existing.isDinasLuar, data.longitude);
 
   await prisma.attendance.update({
     where: {
@@ -787,7 +788,8 @@ export async function submitQuickPresence(data: {
           now,
           campusSetting.workStart,
           campusSetting.gracePeriodMinutes,
-          false
+          false,
+          data.longitude
         );
 
     const clockInNote = isDinasLuar
@@ -834,7 +836,11 @@ export async function submitQuickPresence(data: {
     revalidatePath('/admin/monitoring');
     revalidatePath('/admin/dashboard');
 
-    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const userTimezone = getTimezoneFromCoordinates(data.longitude);
+    const tzLabel = userTimezone === 'Asia/Jakarta' ? 'WIB' : userTimezone === 'Asia/Jayapura' ? 'WIT' : 'WITA';
+    const localTimeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: userTimezone });
+    const witaTimeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Makassar' });
+    const displayTime = tzLabel === 'WITA' ? `${witaTimeStr} WITA` : `${localTimeStr} ${tzLabel} (${witaTimeStr} WITA)`;
 
     return {
       success: true,
@@ -842,7 +848,7 @@ export async function submitQuickPresence(data: {
       employeeName: user.name,
       nip: user.nip,
       jabatan: user.jabatan,
-      time: `${timeStr} WITA`,
+      time: displayTime,
       status: clockInStatus,
       locationName: resolvedLocationName,
       message: `Presensi Masuk Berhasil! Selamat beraktivitas, ${user.name}.`,
@@ -862,7 +868,7 @@ export async function submitQuickPresence(data: {
     const isDinasLuarOut = isDinasLuar || existing.isDinasLuar;
     const clockOutStatus = isDinasLuarOut
       ? 'DINAS_LUAR'
-      : evaluateClockOutStatus(now, campusSetting.workEnd, false);
+      : evaluateClockOutStatus(now, campusSetting.workEnd, false, data.longitude);
 
     const clockOutNote = isDinasLuarOut
       ? `[Dinas Luar] ${data.note?.trim() || existing.clockInNote || ''}`
@@ -887,7 +893,11 @@ export async function submitQuickPresence(data: {
     revalidatePath('/admin/monitoring');
     revalidatePath('/admin/dashboard');
 
-    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const userTimezone = getTimezoneFromCoordinates(data.longitude);
+    const tzLabel = userTimezone === 'Asia/Jakarta' ? 'WIB' : userTimezone === 'Asia/Jayapura' ? 'WIT' : 'WITA';
+    const localTimeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: userTimezone });
+    const witaTimeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Makassar' });
+    const displayTime = tzLabel === 'WITA' ? `${witaTimeStr} WITA` : `${localTimeStr} ${tzLabel} (${witaTimeStr} WITA)`;
 
     return {
       success: true,
@@ -895,7 +905,7 @@ export async function submitQuickPresence(data: {
       employeeName: user.name,
       nip: user.nip,
       jabatan: user.jabatan,
-      time: `${timeStr} WITA`,
+      time: displayTime,
       status: clockOutStatus,
       locationName: resolvedLocationName,
       message: `Presensi Pulang Berhasil! Terima kasih atas dedikasi Anda hari ini, ${user.name}.`,

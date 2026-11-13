@@ -21,6 +21,11 @@ import {
   Briefcase,
   Sparkles,
   X,
+  MapPin,
+  Calendar,
+  Clock,
+  ShieldCheck,
+  Check,
 } from 'lucide-react';
 import { CampusSetting, CampusLocation } from '@prisma/client';
 import Link from 'next/link';
@@ -88,14 +93,22 @@ export function QuickPresenceCard({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  // Auto-Reset 4 Detik
+  // Data Struk Sukses
   const [successData, setSuccessData] = useState<{
     employeeName: string;
+    nip: string;
     actionType: 'IN' | 'OUT';
     time: string;
+    dateStr: string;
     locationName: string;
+    status?: string;
+    latitude?: number;
+    longitude?: number;
+    distance?: number;
+    isDinasLuar?: boolean;
+    photoUrl?: string;
   } | null>(null);
-  const [countdown, setCountdown] = useState(4);
+  const [countdown, setCountdown] = useState(25);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const cameraRef = useRef<CameraCaptureHandle>(null);
 
@@ -368,11 +381,26 @@ export function QuickPresenceCard({
       });
 
       if (res.success && res.actionType) {
+        const todayDateFormatted = new Date().toLocaleDateString('id-ID', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+
         setSuccessData({
           employeeName: res.employeeName || employee.name,
+          nip: employee.nip,
           actionType: res.actionType,
           time: res.time || 'WITA',
+          dateStr: todayDateFormatted,
           locationName: res.locationName || locationEval?.targetName || 'Kampus STIMI',
+          status: res.status,
+          latitude: coords?.lat,
+          longitude: coords?.lng,
+          distance: Math.round(locationEval?.distance || 0),
+          isDinasLuar,
+          photoUrl: photoBase64 || undefined,
         });
 
         // Simpan No. ID ke memori perangkat
@@ -385,15 +413,15 @@ export function QuickPresenceCard({
           } catch {}
         }
 
-        // Mulai hitung mundur 4 detik untuk auto-reset
-        setCountdown(4);
+        // Mulai hitung mundur santai 25 detik untuk auto-reset
+        setCountdown(25);
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         countdownIntervalRef.current = setInterval(() => {
           setCountdown((prev) => {
             if (prev <= 1) {
               if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
               handleResetForm();
-              return 4;
+              return 25;
             }
             return prev - 1;
           });
@@ -417,51 +445,158 @@ export function QuickPresenceCard({
       })
     : '--:--:--';
 
-  // JIKA SUDAH SUKSES: Tampilkan Layar Sukses & Countdown Auto-Reset
+  // JIKA SUDAH SUKSES: Tampilkan Struk Digital Bukti Presensi Lengkap
   if (successData) {
-    return (
-      <div className="bg-white rounded-3xl shadow-xl border border-slate-200/90 overflow-hidden max-w-md mx-auto p-5 sm:p-6 text-center animate-slide-up space-y-4">
-        <div className="w-14 h-14 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mx-auto border-2 border-sky-200 shadow-xs">
-          <CheckCircle2 className="w-8 h-8" />
-        </div>
+    const isMasuk = successData.actionType === 'IN';
+    const statusLabel =
+      successData.status === 'TEPAT_WAKTU'
+        ? 'Tepat Waktu'
+        : successData.status === 'TERLAMBAT'
+        ? 'Terlambat'
+        : successData.status === 'DINAS_LUAR'
+        ? 'Dinas Luar'
+        : 'Tercatat Resmi';
 
-        <div>
-          <span className="px-3 py-0.5 rounded-full bg-sky-100 text-sky-800 text-xs font-bold font-mono uppercase tracking-wider inline-block mb-1.5">
-            {successData.actionType === 'IN' ? '✓ Presensi Masuk Berhasil' : '✓ Presensi Pulang Berhasil'}
+    return (
+      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden max-w-md mx-auto p-5 sm:p-6 text-left animate-slide-up space-y-4">
+        {/* Header Struk Resmi */}
+        <div className="text-center pb-3.5 border-b border-slate-100">
+          <div className="w-13 h-13 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border-2 border-emerald-200 shadow-xs mb-2">
+            <CheckCircle2 className="w-7 h-7" />
+          </div>
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black tracking-wide uppercase">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Presensi Berhasil Terekam</span>
           </span>
-          <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 leading-tight">
-            {successData.employeeName}
+          <h2 className="text-base sm:text-lg font-black text-slate-900 mt-2">
+            BUKTI PRESENSI RESMI
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
-            Tercatat di {successData.locationName} pukul{' '}
-            <strong className="text-slate-800 font-mono">{successData.time}</strong>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+            PORTAL KEHADIRAN STIMI YAPMI MAKASSAR
           </p>
         </div>
 
-        {/* Progress Bar Countdown Auto-Reset */}
-        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-          <div className="flex items-center justify-between text-xs text-slate-600 font-medium">
-            <span>Siap untuk pegawai berikutnya:</span>
-            <span className="font-mono font-bold text-sky-700 tabular-nums">
-              {countdown} detik
+        {/* Kartu Rincian Struk */}
+        <div className="bg-slate-50/90 rounded-2xl p-4 border border-slate-200/80 space-y-3 text-xs">
+          {/* Data Pegawai */}
+          <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/70">
+            <div className="min-w-0 pr-2">
+              <span className="text-[10px] font-bold text-slate-400 block uppercase">Pegawai</span>
+              <p className="font-extrabold text-slate-900 text-sm truncate">{successData.employeeName}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-[10px] font-bold text-slate-400 block uppercase">No. ID</span>
+              <span className="font-mono font-bold text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-lg text-xs">
+                {successData.nip}
+              </span>
+            </div>
+          </div>
+
+          {/* Jenis Presensi & Status */}
+          <div className="grid grid-cols-2 gap-2 pb-2.5 border-b border-slate-200/70">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 block uppercase">Jenis Presensi</span>
+              <span className={`inline-flex items-center gap-1 font-bold mt-0.5 ${isMasuk ? 'text-sky-700' : 'text-amber-700'}`}>
+                {isMasuk ? 'Presensi Masuk' : 'Presensi Pulang'}
+              </span>
+            </div>
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 block uppercase">Status Kehadiran</span>
+              <span className={`inline-block px-2 py-0.5 rounded-md font-bold text-[11px] mt-0.5 ${
+                successData.status === 'TEPAT_WAKTU'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : successData.status === 'DINAS_LUAR'
+                  ? 'bg-purple-100 text-purple-800'
+                  : 'bg-amber-100 text-amber-800'
+              }`}>
+                {statusLabel}
+              </span>
+            </div>
+          </div>
+
+          {/* Waktu & Tanggal */}
+          <div className="grid grid-cols-2 gap-2 pb-2.5 border-b border-slate-200/70">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase">
+                <Calendar className="w-3 h-3 text-slate-400" />
+                Tanggal
+              </span>
+              <p className="font-medium text-slate-800 mt-0.5">{successData.dateStr}</p>
+            </div>
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase">
+                <Clock className="w-3 h-3 text-slate-400" />
+                Waktu Rekam
+              </span>
+              <p className="font-mono font-bold text-slate-900 mt-0.5">{successData.time}</p>
+            </div>
+          </div>
+
+          {/* Lokasi Gedung & Koordinat Titik GPS */}
+          <div className="space-y-1.5 pb-2.5 border-b border-slate-200/70">
+            <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase">
+              <MapPin className="w-3 h-3 text-slate-400" />
+              Titik Lokasi & Radius
             </span>
+            <p className="font-bold text-slate-900 text-xs">{successData.locationName}</p>
+            {typeof successData.latitude === 'number' && typeof successData.longitude === 'number' && (
+              <div className="p-2 rounded-xl bg-white border border-slate-200 text-[11px] font-mono text-slate-600 flex items-center justify-between">
+                <span>
+                  {successData.latitude.toFixed(6)}, {successData.longitude.toFixed(6)}
+                </span>
+                <span className="font-sans font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px]">
+                  {successData.isDinasLuar
+                    ? 'Dinas Luar'
+                    : `Radius: ${successData.distance ?? 0}m`}
+                </span>
+              </div>
+            )}
           </div>
-          <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-            <div
-              style={{ width: `${(countdown / 4) * 100}%` }}
-              className="h-full bg-sky-600 transition-all duration-1000 ease-linear rounded-full"
-            />
-          </div>
+
+          {/* Foto Selfie (Jika Ada) */}
+          {successData.photoUrl && (
+            <div className="pt-0.5">
+              <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase mb-1.5">
+                <Camera className="w-3 h-3 text-slate-400" />
+                Foto Selfie Terekam
+              </span>
+              <div className="relative w-20 h-24 rounded-xl overflow-hidden border border-slate-200 shadow-2xs">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={successData.photoUrl}
+                  alt="Selfie Presensi"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
-        <button
-          type="button"
-          onClick={handleResetForm}
-          className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-sky-950/20 transition cursor-pointer"
-        >
-          <RotateCcw className="w-4 h-4" />
-          <span>Presensi Pegawai Lain Sekarang</span>
-        </button>
+        {/* Petunjuk Tangkapan Layar */}
+        <p className="text-[11px] text-center text-slate-400 font-medium">
+          💡 Anda dapat mengambil <strong>Screenshot</strong> halaman ini sebagai bukti kehadiran Anda.
+        </p>
+
+        {/* Tombol Aksi */}
+        <div className="space-y-2 pt-1">
+          <button
+            type="button"
+            onClick={handleResetForm}
+            className="w-full py-3.5 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-sky-600/20 transition cursor-pointer"
+          >
+            <Check className="w-4 h-4" />
+            <span>Selesai (Tutup Struk)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleResetForm}
+            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Presensi Pegawai Lain ({countdown}s)</span>
+          </button>
+        </div>
       </div>
     );
   }
