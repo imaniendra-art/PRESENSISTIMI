@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Calendar,
@@ -42,6 +42,21 @@ export function MonitoringHeader({
     const dd = String(current.getDate()).padStart(2, '0');
     handleDateChange(`${yyyy}-${mm}-${dd}`);
   };
+
+  // Format tanggal ringkas selaras dengan Overview untuk versi mobile (contoh: 14 Nov 2026)
+  const mobileFormattedDate = useMemo(() => {
+    try {
+      const [y, m, d] = currentDateStr.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      return dateObj.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
+    } catch {
+      return currentDateStr;
+    }
+  }, [currentDateStr]);
 
   // Shortcut ke Hari Ini
   const handleGoToday = () => {
@@ -161,29 +176,40 @@ export function MonitoringHeader({
         </button>
       </div>
 
-      {/* Sisi Bawah Mobile: Kontrol Tanggal & Tombol Segarkan 1-Baris Rapi */}
+      {/* Sisi Bawah Mobile: Kontrol Tanggal & Tombol Segarkan 1-Baris Simetris Selaras Overview */}
       <div className="grid grid-cols-12 gap-1.5 pt-2 border-t border-sky-100/80 lg:hidden w-full items-center">
-        <div className="col-span-8 flex items-center justify-between bg-white/90 border border-sky-100 rounded-xl px-1.5 py-1 shadow-2xs">
+        {/* Pill Box Tanggal dengan Format Rapi & Terintegrasi Kalender */}
+        <div className="col-span-8 flex items-center justify-between bg-white/95 border border-sky-100 rounded-xl px-1.5 py-1 shadow-2xs relative">
           <button
             type="button"
             onClick={() => shiftDay(-1)}
-            className="p-1 hover:bg-sky-50 text-slate-600 rounded-lg transition"
+            className="p-1 hover:bg-sky-50 text-slate-600 rounded-lg transition shrink-0 z-20 cursor-pointer"
             title="Kemarin"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
 
-          <input
-            type="date"
-            value={currentDateStr}
-            onChange={(e) => handleDateChange(e.target.value)}
-            className="bg-transparent text-[11px] font-bold font-mono text-slate-800 focus:outline-none cursor-pointer flex-1 min-w-0 text-center"
-          />
+          {/* Label Tanggal Ringkas (Ukuran dan font selaras menu ringkasan) */}
+          <div className="relative flex items-center justify-center gap-1.5 flex-1 min-w-0 px-1">
+            <Calendar className="w-3 h-3 text-sky-600 shrink-0 pointer-events-none" />
+            <span className="text-[10px] font-bold text-slate-800 font-mono tracking-tight whitespace-nowrap pointer-events-none">
+              {mobileFormattedDate}
+            </span>
+
+            {/* Hidden Native Date Input untuk Tap Langsung Membuka Kalender */}
+            <input
+              type="date"
+              value={currentDateStr}
+              onChange={(e) => handleDateChange(e.target.value)}
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+              aria-label="Pilih tanggal presensi"
+            />
+          </div>
 
           <button
             type="button"
             onClick={() => shiftDay(1)}
-            className="p-1 hover:bg-sky-50 text-slate-600 rounded-lg transition"
+            className="p-1 hover:bg-sky-50 text-slate-600 rounded-lg transition shrink-0 z-20 cursor-pointer"
             title="Besok"
           >
             <ChevronRight className="w-3.5 h-3.5" />
@@ -196,7 +222,7 @@ export function MonitoringHeader({
             <button
               type="button"
               onClick={handleGoToday}
-              className="flex-1 py-1.5 px-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 shadow-2xs"
+              className="flex-1 py-1 px-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-[9.5px] font-bold flex items-center justify-center gap-1 shadow-2xs transition"
             >
               <RotateCcw className="w-3 h-3" />
               <span>Hari Ini</span>
@@ -206,7 +232,7 @@ export function MonitoringHeader({
               type="button"
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="flex-1 py-1.5 px-2 bg-white/90 text-slate-700 border border-sky-100 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1 shadow-2xs"
+              className="flex-1 py-1 px-1.5 bg-white/95 hover:bg-sky-50 text-slate-700 border border-sky-100 rounded-xl text-[9.5px] font-bold flex items-center justify-center gap-1 shadow-2xs transition disabled:opacity-60"
             >
               <RefreshCw
                 className={`w-3 h-3 text-sky-600 ${isRefreshing ? 'animate-spin' : ''}`}

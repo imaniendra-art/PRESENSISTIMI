@@ -294,24 +294,24 @@ export function MonitoringTableClient({
           </div>
 
           {/* Controls Bar: Search Input, Unit Dropdown, Status Dropdown (2-Kolom Rapi di Mobile) */}
-          <div className="grid grid-cols-2 sm:grid-cols-12 gap-2 pt-1">
+          <div className="grid grid-cols-2 sm:grid-cols-12 gap-1.5 sm:gap-2 pt-1">
             {/* Search Input: Lebar Penuh di Mobile (col-span-2) */}
             <div className="col-span-2 sm:col-span-6 lg:col-span-5 relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari nama atau No. ID pegawai..."
-                className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs"
+                className="w-full pl-8 sm:pl-9 pr-7 sm:pr-8 py-1.5 sm:py-2 bg-white border border-slate-200 rounded-xl text-[11px] sm:text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                  className="absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </button>
               )}
             </div>
@@ -321,7 +321,7 @@ export function MonitoringTableClient({
               <select
                 value={unitFilter}
                 onChange={(e) => setUnitFilter(e.target.value)}
-                className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+                className="w-full px-2 sm:px-2.5 py-1.5 sm:py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
               >
                 <option value="ALL">Semua Unit ({totalEmployees})</option>
                 {unitList.map((unit) => (
@@ -337,9 +337,9 @@ export function MonitoringTableClient({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+                className="w-full px-2 sm:px-2.5 py-1.5 sm:py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
               >
-                <option value="ALL">Semua Status ({totalEmployees})</option>
+                <option value="ALL">Semua Status</option>
                 <option value="HADIR">Hadir ({totalHadir})</option>
                 <option value="TEPAT">Tepat ({countTepat})</option>
                 <option value="LAMBAT">Lambat ({countLambat})</option>
