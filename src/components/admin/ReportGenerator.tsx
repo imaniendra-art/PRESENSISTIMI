@@ -22,6 +22,8 @@ import {
   Timer,
   AlertTriangle,
   Award,
+  X,
+  ClockAlert,
 } from 'lucide-react';
 import { CampusSetting } from '@prisma/client';
 import { LiveClock } from '@/components/common/LiveClock';
@@ -383,7 +385,7 @@ export function ReportGenerator({
         <div className="flex items-center justify-between gap-2 w-full lg:w-auto">
           <div className="min-w-0">
             <h1 className="text-sm sm:text-2xl font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap">
-              Laporan & Rekapitulasi Presensi
+              Rekapitulasi Kehadiran
             </h1>
             <p className="text-xs sm:text-lg font-extrabold text-slate-700 tracking-tight mt-0.5 leading-tight whitespace-nowrap">
               STIMI YAPMI Makassar
@@ -445,25 +447,25 @@ export function ReportGenerator({
           <LiveClock />
         </div>
 
-        {/* Sisi Bawah Mobile: Tombol Aksi 1-Baris Penuh Simetris */}
+        {/* Sisi Bawah Mobile: Tombol Aksi 1-Baris Penuh Simetris Selaras Monitoring */}
         <div className="grid grid-cols-2 gap-1.5 pt-1.5 sm:pt-2 border-t border-sky-100/80 lg:hidden w-full">
           {activeTab === 'REKAP_SEMUA' ? (
             <>
               <button
                 type="button"
                 onClick={handleExportExcelAll}
-                className="px-2.5 py-1.5 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                className="w-full py-1 px-2 bg-emerald-600 active:bg-emerald-700 text-white border border-emerald-700 rounded-xl text-[9.5px] font-bold transition flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
               >
-                <FileSpreadsheet className="w-3 h-3" />
+                <FileSpreadsheet className="w-3 h-3 text-white" />
                 <span>Ekspor Excel</span>
               </button>
 
               <button
                 type="button"
                 onClick={handlePrintPDF}
-                className="px-2.5 py-1.5 bg-sky-600 active:bg-sky-700 text-white rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                className="w-full py-1 px-2 bg-sky-600 active:bg-sky-700 text-white border border-sky-700 rounded-xl text-[9.5px] font-bold transition flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
               >
-                <Printer className="w-3 h-3" />
+                <Printer className="w-3 h-3 text-white" />
                 <span>Cetak PDF</span>
               </button>
             </>
@@ -472,18 +474,18 @@ export function ReportGenerator({
               <button
                 type="button"
                 onClick={handleExportExcelIndividual}
-                className="px-2.5 py-1.5 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                className="w-full py-1 px-2 bg-emerald-600 active:bg-emerald-700 text-white border border-emerald-700 rounded-xl text-[9.5px] font-bold transition flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
               >
-                <FileSpreadsheet className="w-3 h-3" />
+                <FileSpreadsheet className="w-3 h-3 text-white" />
                 <span>Ekspor Excel</span>
               </button>
 
               <button
                 type="button"
                 onClick={handlePrintPDF}
-                className="px-2.5 py-1.5 bg-sky-600 active:bg-sky-700 text-white rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                className="w-full py-1 px-2 bg-sky-600 active:bg-sky-700 text-white border border-sky-700 rounded-xl text-[9.5px] font-bold transition flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
               >
-                <Printer className="w-3 h-3" />
+                <Printer className="w-3 h-3 text-white" />
                 <span>Cetak Lembar</span>
               </button>
             </>
@@ -491,194 +493,233 @@ export function ReportGenerator({
         </div>
       </div>
 
-      {/* 2. GRID METRIK KPI INSTITUSI: Langsung di Bawah Hero (Selaras dengan Menu Lain) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 print-hidden print:hidden">
-        <div className="p-3 sm:p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-          <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <div className="w-6 h-6 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
-              <Users className="w-3.5 h-3.5" />
+      {/* 2. 4 KARTU METRIK UTAMA - 1 Baris 4 Kolom Identik dengan Overview, Monitoring & Data Pegawai */}
+      <div className="grid grid-cols-4 gap-1.5 sm:gap-4 w-full print-hidden print:hidden">
+        {/* Card 1: Total Pegawai */}
+        <div className="bg-white p-2 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:border-indigo-200 transition">
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <span className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+              <span className="sm:hidden">Total</span>
+              <span className="hidden sm:inline">Total Pegawai</span>
+            </span>
+            <div className="w-5 h-5 sm:w-9 sm:h-9 rounded-md sm:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shrink-0">
+              <Users className="w-3 h-3 sm:w-4 sm:h-4" />
             </div>
-            <span>Total Pegawai</span>
           </div>
-          <p className="font-mono text-xl font-extrabold text-slate-900 tabular-nums">
-            {kpiStats.totalPegawai} <span className="text-xs font-normal text-slate-500">Orang</span>
+          <p className="text-sm sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+            {reportData.length}
+          </p>
+          <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
+            {kpiStats.effectiveWorkingDays} <span className="hidden sm:inline">Hari Kerja Efektif</span><span className="sm:hidden">Hari Kerja</span>
           </p>
         </div>
 
-        <div className="p-3 sm:p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-          <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <div className="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+        {/* Card 2: Rata Kehadiran */}
+        <div className="bg-white p-2 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:border-emerald-200 transition">
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <span className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+              <span className="sm:hidden">Hadir</span>
+              <span className="hidden sm:inline">Rata Kehadiran</span>
+            </span>
+            <div className="w-5 h-5 sm:w-9 sm:h-9 rounded-md sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
+              <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4" />
             </div>
-            <span>Rata Kehadiran</span>
           </div>
-          <p className="font-mono text-xl font-extrabold text-emerald-600 tabular-nums">
-            {kpiStats.avgKehadiran}%
+          <p className="text-sm sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight flex items-baseline gap-1">
+            <span>{kpiStats.avgKehadiran}%</span>
+          </p>
+          <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
+            {kpiStats.totalHadirWfo + kpiStats.totalHadirWfa} <span className="hidden sm:inline">Hadir (WFO/WFA)</span><span className="sm:hidden">Total Hadir</span>
           </p>
         </div>
 
-        <div className="p-3 sm:p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-          <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Building className="w-3.5 h-3.5" />
+        {/* Card 3: Terlambat Masuk */}
+        <div className="bg-white p-2 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:border-amber-200 transition">
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <span className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+              <span className="sm:hidden">Lambat</span>
+              <span className="hidden sm:inline">Total Terlambat</span>
+            </span>
+            <div className="w-5 h-5 sm:w-9 sm:h-9 rounded-md sm:rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shrink-0">
+              <ClockAlert className="w-3 h-3 sm:w-4 sm:h-4" />
             </div>
-            <span>Hadir WFO / WFA</span>
           </div>
-          <p className="font-mono text-xl font-extrabold text-slate-900 tabular-nums">
-            {kpiStats.totalHadirWfo}{' '}
-            <span className="text-xs font-bold text-sky-600">/ {kpiStats.totalHadirWfa}</span>
+          <p className="text-sm sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+            {kpiStats.totalTerlambat}
+          </p>
+          <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
+            {kpiStats.totalPulangCepat} <span className="hidden sm:inline">Pulang Cepat</span><span className="sm:hidden">Plg Cepat</span>
           </p>
         </div>
 
-        <div className="p-3 sm:p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-          <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Clock className="w-3.5 h-3.5" />
+        {/* Card 4: Alfa & Izin */}
+        <div className="bg-white p-2 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:border-rose-200 transition">
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <span className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+              <span className="sm:hidden">Alfa</span>
+              <span className="hidden sm:inline">Alfa (Mangkir)</span>
+            </span>
+            <div className="w-5 h-5 sm:w-9 sm:h-9 rounded-md sm:rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100 shrink-0">
+              <UserX className="w-3 h-3 sm:w-4 sm:h-4" />
             </div>
-            <span>Terlambat / Plg Cpt</span>
           </div>
-          <p className="font-mono text-xl font-extrabold text-amber-700 tabular-nums">
-            {kpiStats.totalTerlambat}{' '}
-            <span className="text-xs font-normal text-slate-400">/ {kpiStats.totalPulangCepat}</span>
+          <p className="text-sm sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+            {kpiStats.totalAlfa}
           </p>
-        </div>
-
-        <div className="p-3 sm:p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-          <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <FileText className="w-3.5 h-3.5" />
-            </div>
-            <span>Izin / Cuti / Sakit</span>
-          </div>
-          <p className="font-mono text-xl font-extrabold text-indigo-700 tabular-nums">
-            {kpiStats.totalIzinCuti} <span className="text-xs font-normal text-slate-400">Hari</span>
-          </p>
-        </div>
-
-        <div className="p-3 sm:p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
-          <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <div className="w-6 h-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-              <UserX className="w-3.5 h-3.5" />
-            </div>
-            <span>Alfa (Mangkir)</span>
-          </div>
-          <p className="font-mono text-xl font-extrabold text-rose-600 tabular-nums">
-            {kpiStats.totalAlfa} <span className="text-xs font-normal text-slate-400">Hari</span>
+          <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
+            {kpiStats.totalIzinCuti} <span className="hidden sm:inline">Izin / Cuti / Sakit</span><span className="sm:hidden">Izin/Cuti</span>
           </p>
         </div>
       </div>
 
-      {/* 3. WADAH TABEL UTAMA TERPADU: TAB SWITCHER & FILTER DI HEADER (Persis Seperti Menu Lain) */}
+      {/* 3. WADAH TABEL UTAMA TERPADU: TAB SWITCHER & FILTER DI HEADER (Persis Seperti Menu Pegawai & Monitoring) */}
       <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden w-full print-landscape-container print:border-none print:shadow-none print:p-0 print:m-0 print:rounded-none">
-        {/* Toolbar Header Terpadu: Pilihan Tab di Kiri & Filter Periode di Kanan */}
-        <div className="p-3 sm:p-4 bg-slate-50/80 border-b border-slate-200/90 flex flex-col lg:flex-row lg:items-center justify-between gap-3 print-hidden print:hidden">
-          {/* Tab Switcher Segmented */}
-          <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 bg-white rounded-xl border border-slate-200 shadow-2xs w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={() => setActiveTab('REKAP_SEMUA')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                activeTab === 'REKAP_SEMUA'
-                  ? 'bg-sky-50 text-sky-800 shadow-2xs border border-sky-200/80 font-black'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Building className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-              <span className="sm:hidden">Rekap Semua</span>
-              <span className="hidden sm:inline">Rekap Seluruh SDM</span>
-            </button>
+        {/* Toolbar Header Terpadu: Judul, Tab Switcher & Filter Controls */}
+        <div className="p-2.5 sm:p-5 border-b border-slate-100 bg-slate-50/50 space-y-2 sm:space-y-3 print-hidden print:hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h3 className="text-[10px] sm:text-sm font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <span className="truncate">Rekapitulasi SDM</span>
+              <span className="text-slate-300 font-normal">|</span>
+              <span className="text-sky-700 font-semibold normal-case font-sans text-[9.5px] sm:text-sm shrink-0">
+                {activeTab === 'REKAP_SEMUA'
+                  ? `${filteredReportData.length} dari ${reportData.length} pegawai`
+                  : (currentIndividual?.name || '')}
+              </span>
+            </h3>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab('RINCIAN_PERORANGAN')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                activeTab === 'RINCIAN_PERORANGAN'
-                  ? 'bg-sky-50 text-sky-800 shadow-2xs border border-sky-200/80 font-black'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Users className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-              <span className="sm:hidden">Perorangan</span>
-              <span className="hidden sm:inline">Rincian Perorangan (1 SDM per Bulan)</span>
-            </button>
+            {/* Tab Switcher Segmented */}
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-1 p-0.5 sm:p-1 bg-white rounded-xl border border-slate-200 shadow-2xs w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => setActiveTab('REKAP_SEMUA')}
+                className={`py-1 px-2.5 sm:py-1.5 sm:px-3 rounded-lg text-[10px] sm:text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activeTab === 'REKAP_SEMUA'
+                    ? 'bg-sky-50 text-sky-800 shadow-2xs border border-sky-200/80 font-black'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Building className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-sky-600 shrink-0" />
+                <span className="sm:hidden">Rekap Semua</span>
+                <span className="hidden sm:inline">Rekap Seluruh SDM</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('RINCIAN_PERORANGAN')}
+                className={`py-1 px-2.5 sm:py-1.5 sm:px-3 rounded-lg text-[10px] sm:text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activeTab === 'RINCIAN_PERORANGAN'
+                    ? 'bg-sky-50 text-sky-800 shadow-2xs border border-sky-200/80 font-black'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-600 shrink-0" />
+                <span className="sm:hidden">Perorangan</span>
+                <span className="hidden sm:inline">Rincian Perorangan</span>
+              </button>
+            </div>
           </div>
 
-          {/* Filter Periode Terpadu di Sebelah Kanan */}
-          <div className="flex items-center flex-wrap gap-1.5 sm:gap-2">
-            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-semibold mr-1">
-              <Filter className="w-3.5 h-3.5 text-sky-600" />
-              <span className="text-slate-700 font-bold hidden sm:inline">Periode:</span>
+          {/* Baris Kontrol: Pencarian / Pemilih Pegawai & Filter Periode */}
+          <div className="grid grid-cols-2 sm:grid-cols-12 gap-1.5 sm:gap-2 pt-0.5">
+            {activeTab === 'REKAP_SEMUA' ? (
+              <div className="col-span-2 sm:col-span-4 lg:col-span-5 relative">
+                <Search className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={rekapSearch}
+                  onChange={(e) => setRekapSearch(e.target.value)}
+                  placeholder="Cari nama, No. ID, unit..."
+                  className="w-full pl-7 sm:pl-9 pr-6 sm:pr-8 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-normal text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs"
+                />
+                {rekapSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setRekapSearch('')}
+                    className="absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                  >
+                    <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="col-span-2 sm:col-span-4 lg:col-span-5">
+                <select
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  className="w-full px-2 sm:px-2.5 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+                >
+                  {individualReports.map((emp) => (
+                    <option key={emp.userId} value={emp.userId}>
+                      {emp.name} ({emp.nip}) - {emp.jabatan}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Tombol Shortcut Bulan Okt */}
+            <div className="col-span-1 sm:col-span-2">
+              <button
+                type="button"
+                onClick={() => handlePeriodChange(10, 2026)}
+                className={`w-full py-1 sm:py-2 px-2 rounded-xl text-[9.5px] sm:text-xs font-bold transition cursor-pointer truncate ${
+                  filterMonth === 10 && filterYear === 2026
+                    ? 'bg-sky-600 text-white shadow-2xs'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs'
+                }`}
+              >
+                Okt 2026
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => handlePeriodChange(10, 2026)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                filterMonth === 10 && filterYear === 2026
-                  ? 'bg-sky-600 text-white shadow-2xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs'
-              }`}
-            >
-              Okt 2026
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handlePeriodChange(11, 2026)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                filterMonth === 11 && filterYear === 2026
-                  ? 'bg-sky-600 text-white shadow-2xs'
-                  : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs'
-              }`}
-            >
-              Nov 2026 (Bulan Ini)
-            </button>
+            {/* Tombol Shortcut Bulan Nov (Bulan Ini) */}
+            <div className="col-span-1 sm:col-span-2">
+              <button
+                type="button"
+                onClick={() => handlePeriodChange(11, 2026)}
+                className={`w-full py-1 sm:py-2 px-2 rounded-xl text-[9.5px] sm:text-xs font-bold transition cursor-pointer truncate ${
+                  filterMonth === 11 && filterYear === 2026
+                    ? 'bg-sky-600 text-white shadow-2xs'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs'
+                }`}
+              >
+                Nov 2026 (Ini)
+              </button>
+            </div>
 
             {/* Dropdown Bulan */}
-            <select
-              value={filterMonth}
-              onChange={(e) => handlePeriodChange(parseInt(e.target.value), filterYear)}
-              className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-2xs"
-            >
-              {monthNames.map((name, idx) => (
-                <option key={idx} value={idx + 1}>
-                  {name}
-                </option>
-              ))}
-            </select>
+            <div className="col-span-1 sm:col-span-2 lg:col-span-2">
+              <select
+                value={filterMonth}
+                onChange={(e) => handlePeriodChange(parseInt(e.target.value), filterYear)}
+                className="w-full px-2 sm:px-2.5 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[9.5px] sm:text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+              >
+                {monthNames.map((name, idx) => (
+                  <option key={idx} value={idx + 1}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* Dropdown Tahun */}
-            <select
-              value={filterYear}
-              onChange={(e) => handlePeriodChange(filterMonth, parseInt(e.target.value))}
-              className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-2xs"
-            >
-              <option value={2025}>2025</option>
-              <option value={2026}>2026</option>
-              <option value={2027}>2027</option>
-            </select>
+            <div className="col-span-1 sm:col-span-1 lg:col-span-1">
+              <select
+                value={filterYear}
+                onChange={(e) => handlePeriodChange(filterMonth, parseInt(e.target.value))}
+                className="w-full px-1.5 sm:px-2 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[9.5px] sm:text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+              >
+                <option value={2025}>2025</option>
+                <option value={2026}>2026</option>
+                <option value={2027}>2027</option>
+              </select>
+            </div>
           </div>
         </div>
 
         {/* 4. TAB 1: REKAPITULASI SELURUH SDM (KOMPREHENSIF) */}
         {activeTab === 'REKAP_SEMUA' && (
-          <div className="p-3.5 sm:p-5 space-y-4">
-            {/* Baris Pencarian Cepat di Layar Web */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 border-b border-slate-100 print-hidden print:hidden">
-              <div className="relative max-w-sm w-full">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Cari nama, NIP, atau unit kerja..."
-                  value={rekapSearch}
-                  onChange={(e) => setRekapSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500 bg-slate-50 text-slate-800"
-                />
-              </div>
-              <p className="text-[11px] text-slate-500">
-                Menampilkan <strong>{filteredReportData.length}</strong> dari {reportData.length} pegawai
-              </p>
-            </div>
+          <div className="p-2.5 sm:p-5 space-y-2.5 sm:space-y-4">
 
           {/* Kop Surat Resmi Institusi STIMI (Tampil Utuh di Desktop & Cetak PDF, Disederhanakan di Ponsel) */}
           <div className="hidden sm:flex items-center justify-center gap-5 pb-4 border-b-2 border-slate-900 print:flex">
@@ -1039,49 +1080,7 @@ export function ReportGenerator({
 
         {/* 5. TAB 2: RINCIAN PERORANGAN (BUKU PRESENSI 1 SDM PER BULAN) */}
         {activeTab === 'RINCIAN_PERORANGAN' && currentIndividual && (
-          <div className="p-3.5 sm:p-5 space-y-4">
-            {/* Toolbar Pemilih Pegawai & Aksi */}
-            <div className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 print-hidden print:hidden">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-                <div className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-sky-600 shrink-0" />
-                  <span className="text-xs font-bold text-slate-800 shrink-0">Pilih Pegawai:</span>
-                </div>
-                <select
-                  value={selectedUserId}
-                  onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer w-full sm:min-w-[260px] shadow-2xs"
-                >
-                  {individualReports.map((emp) => (
-                    <option key={emp.userId} value={emp.userId}>
-                      {emp.name} ({emp.nip}) - {emp.jabatan}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={handleExportExcelIndividual}
-                  className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Ekspor Excel</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handlePrintPDF}
-                  className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span className="sm:hidden">Cetak PDF</span>
-                  <span className="hidden sm:inline">Cetak Lembar Individu</span>
-                </button>
-              </div>
-            </div>
-
+          <div className="p-2.5 sm:p-5 space-y-2.5 sm:space-y-4">
             {/* Kop Surat STIMI (Tampil Utuh di Desktop & Cetak PDF, Disederhanakan di Ponsel) */}
             <div className="hidden sm:flex items-center justify-center gap-5 pb-5 border-b-2 border-slate-900 print:flex">
               <div className="relative w-16 h-16 shrink-0">
