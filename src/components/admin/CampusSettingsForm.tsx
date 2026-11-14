@@ -767,74 +767,82 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
                 </p>
               </div>
 
-              {/* Seksi 1: Visual Timeline & Simulasi Alur Presensi Harian (Dark/High-Contrast Pro Card) */}
-              <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-900 text-white shadow-md border border-slate-800 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              {/* Seksi 1: Visual Timeline & Simulasi Alur Presensi Harian (Soft Sky & Clean Theme) */}
+              <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-sky-50/70 via-white to-sky-50/30 border border-sky-100 shadow-xs space-y-3.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-sky-100/80 pb-3">
                   <div>
-                    <span className="text-[10px] uppercase font-bold tracking-wider text-sky-400 block flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-sky-400" />
-                      Simulasi Alur Presensi Harian (WITA)
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-sky-700 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+                      <span>Simulasi Alur Presensi Harian (WITA)</span>
                     </span>
-                    <h4 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-2 mt-0.5">
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 flex items-center gap-2 mt-0.5">
                       <span>Jam Kerja: {workStartVal} - {workEndVal} WITA</span>
-                      <span className="text-slate-600">|</span>
-                      <span className="text-emerald-400 font-normal font-sans text-xs">
+                      <span className="text-slate-300">|</span>
+                      <span className="text-emerald-700 font-semibold text-xs">
                         Toleransi s/d {graceLimitDisplay}
                       </span>
                     </h4>
                   </div>
-                  <span className="text-[10px] bg-slate-800 text-emerald-300 px-3 py-1 rounded-xl border border-emerald-500/20 self-start sm:self-auto font-mono font-bold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    Live Preview Logika
+                  <span className="text-[10px] bg-white text-sky-700 px-3 py-1 rounded-xl border border-sky-200/90 shadow-2xs self-start sm:self-auto font-mono font-bold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Live Preview Logika</span>
                   </span>
                 </div>
 
-                {/* Grid 4 Kartu Tahapan */}
+                {/* Grid 4 Kartu Tahapan - Bersih, Terang, Elegan & Setema */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
                   {/* Tahap 1: Pagi Dibuka */}
-                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-800/90 border border-slate-700/80 space-y-1">
+                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-sky-200/90 shadow-2xs space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] uppercase tracking-wider font-bold text-sky-400">Pagi Dibuka</span>
-                      <span className="font-mono text-xs sm:text-sm font-black text-sky-300">{earliestVal}</span>
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-sky-700">Pagi Dibuka</span>
+                      <span className="font-mono text-xs sm:text-sm font-black text-sky-900 bg-sky-50 px-1.5 py-0.5 rounded-md border border-sky-100">
+                        {earliestVal}
+                      </span>
                     </div>
-                    <p className="text-[11px] font-bold text-white">Presensi Masuk Aktif</p>
-                    <p className="text-[9px] text-slate-400 leading-snug">
-                      Pegawai dapat mulai absen masuk di titik lokasi
+                    <p className="text-[11px] font-bold text-slate-900 pt-0.5">Presensi Masuk Aktif</p>
+                    <p className="text-[9.5px] text-slate-500 leading-snug">
+                      Pegawai dapat mulai absen masuk di lokasi kampus
                     </p>
                   </div>
 
                   {/* Tahap 2: Tepat Waktu */}
-                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-emerald-950/40 border border-emerald-500/30 space-y-1">
+                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-emerald-200/90 shadow-2xs space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] uppercase tracking-wider font-bold text-emerald-400">Jam Masuk</span>
-                      <span className="font-mono text-xs sm:text-sm font-black text-emerald-300">{workStartVal}</span>
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-emerald-700">Jam Masuk</span>
+                      <span className="font-mono text-xs sm:text-sm font-black text-emerald-900 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">
+                        {workStartVal}
+                      </span>
                     </div>
-                    <p className="text-[11px] font-bold text-emerald-100">Batas Tepat Waktu</p>
-                    <p className="text-[9px] text-emerald-200/70 leading-snug">
-                      Status presensi tercatat &quot;Tepat Waktu&quot;
+                    <p className="text-[11px] font-bold text-slate-900 pt-0.5">Batas Tepat Waktu</p>
+                    <p className="text-[9.5px] text-slate-500 leading-snug">
+                      Absen sebelum jam ini tercatat &quot;Tepat Waktu&quot;
                     </p>
                   </div>
 
                   {/* Tahap 3: Masa Toleransi */}
-                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-950/40 border border-amber-500/30 space-y-1">
+                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-amber-200/90 shadow-2xs space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] uppercase tracking-wider font-bold text-amber-400">Toleransi</span>
-                      <span className="font-mono text-xs sm:text-sm font-black text-amber-300">s/d {graceLimitDisplay}</span>
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-amber-700">Toleransi</span>
+                      <span className="font-mono text-xs sm:text-sm font-black text-amber-900 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-100">
+                        s/d {graceLimitDisplay}
+                      </span>
                     </div>
-                    <p className="text-[11px] font-bold text-amber-100">±{graceVal} Mnt Bebas Lambat</p>
-                    <p className="text-[9px] text-amber-200/70 leading-snug">
-                      Lewat {graceLimitDisplay} tercatat &quot;Lambat&quot;
+                    <p className="text-[11px] font-bold text-slate-900 pt-0.5">±{graceVal} Mnt Bebas Lambat</p>
+                    <p className="text-[9.5px] text-slate-500 leading-snug">
+                      Lewat {graceLimitDisplay} WITA tercatat &quot;Lambat&quot;
                     </p>
                   </div>
 
                   {/* Tahap 4: Pulang Dibuka */}
-                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-indigo-950/40 border border-indigo-500/30 space-y-1">
+                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-indigo-200/90 shadow-2xs space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-400">Presensi Pulang</span>
-                      <span className="font-mono text-xs sm:text-sm font-black text-indigo-300">{workEndVal}</span>
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-700">Presensi Pulang</span>
+                      <span className="font-mono text-xs sm:text-sm font-black text-indigo-900 bg-indigo-50 px-1.5 py-0.5 rounded-md border border-indigo-100">
+                        {workEndVal}
+                      </span>
                     </div>
-                    <p className="text-[11px] font-bold text-indigo-100">Tombol Pulang Aktif</p>
-                    <p className="text-[9px] text-indigo-200/70 leading-snug">
+                    <p className="text-[11px] font-bold text-slate-900 pt-0.5">Tombol Pulang Aktif</p>
+                    <p className="text-[9.5px] text-slate-500 leading-snug">
                       Mulai {workEndVal} WITA dapat absen pulang
                     </p>
                   </div>
