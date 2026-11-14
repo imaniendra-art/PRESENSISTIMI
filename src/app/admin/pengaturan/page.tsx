@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/layout/Navbar';
 import { CampusSettingsForm } from '@/components/admin/CampusSettingsForm';
+import { ensureDefaultWorkSchedules } from '@/actions/adminActions';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,21 +30,37 @@ export default async function AdminPengaturanPage() {
     });
   }
 
-  const locations = await prisma.campusLocation.findMany({
-    include: {
-      _count: {
-        select: { assignedUsers: true, attendances: true },
+  await ensureDefaultWorkSchedules();
+
+  const [locations, workSchedules] = await Promise.all([
+    prisma.campusLocation.findMany({
+      include: {
+        _count: {
+          select: { assignedUsers: true, attendances: true },
+        },
       },
-    },
-    orderBy: { createdAt: 'asc' },
-  });
+      orderBy: { createdAt: 'asc' },
+    }),
+    (prisma as any).workSchedule.findMany({
+      include: {
+        _count: {
+          select: { users: true },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    }),
+  ]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-8 space-y-2.5 sm:space-y-6">
-        <CampusSettingsForm setting={setting} locations={locations} />
+        <CampusSettingsForm
+          setting={setting}
+          locations={locations}
+          workSchedules={workSchedules}
+        />
       </main>
     </div>
   );

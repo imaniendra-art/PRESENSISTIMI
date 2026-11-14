@@ -74,6 +74,10 @@ model User {
   assignedLocationId String?         @db.ObjectId
   assignedLocation   CampusLocation? @relation("UserAssignedLocation", fields: [assignedLocationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   
+  // Master Template Pola Jadwal Kerja
+  workScheduleId     String?         @db.ObjectId
+  workSchedule       WorkSchedule?   @relation("UserWorkSchedule", fields: [workScheduleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   // Pola Jadwal Jam Kerja Khusus (Dosen / Shift Mandiri)
   customWorkStart    String?
   customWorkEnd      String?
@@ -209,4 +213,24 @@ model CampusSetting {
   updatedAt          DateTime @updatedAt
 
   @@map("campus_settings")
+}
+
+model WorkSchedule {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  name               String   // misal: "Reguler Kampus", "Dosen Kelas Siang", "Dosen Fleksibel Bulanan"
+  code               String?  // misal: "REGULER", "DOSEN_SIANG", "DOSEN_FLEKSIBEL"
+  workStart          String   @default("09:00") // "13:00"
+  workEnd            String   @default("16:00") // "17:00"
+  scheduleType       String   @default("STANDARD") // STANDARD | CUSTOM_DAYS | MONTHLY_QUOTA
+  workDays           String?  // e.g. "2,4" untuk Selasa & Kamis
+  monthlyTargetDays  Int?     // e.g. 4 hari/bulan
+  description        String?
+  isDefault          Boolean  @default(false)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  users              User[]   @relation("UserWorkSchedule")
+
+  @@map("work_schedules")
 }

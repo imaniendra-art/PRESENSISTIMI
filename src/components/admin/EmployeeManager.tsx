@@ -40,7 +40,22 @@ import {
 } from 'lucide-react';
 import { User as PrismaUser, CampusLocation } from '@prisma/client';
 
+export interface WorkScheduleOption {
+  id: string;
+  name: string;
+  code?: string | null;
+  workStart: string;
+  workEnd: string;
+  scheduleType: string;
+  workDays?: string | null;
+  monthlyTargetDays?: number | null;
+  description?: string | null;
+  isDefault?: boolean;
+}
+
 export type UserType = PrismaUser & {
+  workScheduleId?: string | null;
+  workSchedule?: WorkScheduleOption | null;
   customWorkStart?: string | null;
   customWorkEnd?: string | null;
   workScheduleType?: string | null;
@@ -49,9 +64,10 @@ export type UserType = PrismaUser & {
 };
 
 interface EmployeeManagerProps {
-  users: (UserType & { atasan?: UserType | null; assignedLocation?: CampusLocation | null })[];
+  users: (UserType & { atasan?: UserType | null; assignedLocation?: CampusLocation | null; workSchedule?: WorkScheduleOption | null })[];
   superiors: UserType[];
   campusLocations: CampusLocation[];
+  workSchedules?: WorkScheduleOption[];
 }
 
 const DAYS_OF_WEEK = [
@@ -63,7 +79,25 @@ const DAYS_OF_WEEK = [
   { value: '6', label: 'Sab' },
 ];
 
+function formatDaysDisplay(daysStr?: string | null) {
+  if (!daysStr) return 'Senin - Jumat';
+  const dayMap: Record<string, string> = {
+    '1': 'Senin',
+    '2': 'Selasa',
+    '3': 'Rabu',
+    '4': 'Kamis',
+    '5': 'Jumat',
+    '6': 'Sabtu',
+    '0': 'Minggu',
+  };
+  return daysStr
+    .split(',')
+    .map((d) => dayMap[d.trim()] || d.trim())
+    .join(', ');
+}
+
 function formatScheduleSummary(user: {
+  workSchedule?: WorkScheduleOption | null;
   customWorkStart?: string | null;
   customWorkEnd?: string | null;
   workScheduleType?: string | null;
@@ -71,6 +105,30 @@ function formatScheduleSummary(user: {
   monthlyTargetDays?: number | null;
 }) {
   const parts: string[] = [];
+
+  if (user.workSchedule) {
+    parts.push(`📋 ${user.workSchedule.name}`);
+    parts.push(`⏰ ${user.workSchedule.workStart}-${user.workSchedule.workEnd}`);
+    if (user.workSchedule.scheduleType === 'CUSTOM_DAYS' && user.workSchedule.workDays) {
+      const dayMap: Record<string, string> = {
+        '1': 'Sen',
+        '2': 'Sel',
+        '3': 'Rab',
+        '4': 'Kam',
+        '5': 'Jum',
+        '6': 'Sab',
+        '0': 'Min',
+      };
+      const days = user.workSchedule.workDays
+        .split(',')
+        .map((d) => dayMap[d.trim()] || d.trim())
+        .filter(Boolean);
+      if (days.length > 0) parts.push(`📅 ${days.join(', ')}`);
+    } else if (user.workSchedule.scheduleType === 'MONTHLY_QUOTA') {
+      parts.push(`🎯 ${user.workSchedule.monthlyTargetDays || 4}x/bln`);
+    }
+    return parts;
+  }
 
   if (user.customWorkStart || user.customWorkEnd) {
     const start = user.customWorkStart || '09:00';
@@ -124,7 +182,7 @@ function formatLocationDisplay(loc?: CampusLocation | null): string {
   return loc.name.replace(/^Target:\s*/i, '').trim();
 }
 
-export function EmployeeManager({ users, superiors, campusLocations }: EmployeeManagerProps) {
+export function EmployeeManager({ users, superiors, campusLocations, workSchedules = [] }: EmployeeManagerProps) {
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -136,7 +194,11 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
   const [selectedUser, setSelectedUser] = useState<(UserType & { assignedLocation?: CampusLocation | null }) | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserType | null>(null);
 
-  // Custom Work Schedule state
+  // Work Schedule Choice states
+  const [addScheduleChoice, setAddScheduleChoice] = useState<string>('DEFAULT');
+  const [editScheduleChoice, setEditScheduleChoice] = useState<string>('DEFAULT');
+
+  // Custom Work Schedule state (for manual overrides)
   const [scheduleType, setScheduleType] = useState<'STANDARD' | 'CUSTOM_DAYS' | 'MONTHLY_QUOTA'>('STANDARD');
   const [selectedDays, setSelectedDays] = useState<string[]>(['1', '2', '3', '4', '5']);
 
@@ -151,6 +213,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
   };
 
   const openAddModal = () => {
+    setAddScheduleChoice('DEFAULT');
     setScheduleType('STANDARD');
     setSelectedDays(['1', '2', '3', '4', '5']);
     setIsAddModalOpen(true);
@@ -158,6 +221,12 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
   };
 
   const openEditModal = (user: UserType & { assignedLocation?: CampusLocation | null }) => {
+    const initialChoice = user.workScheduleId || (
+      (user.customWorkStart || user.customWorkEnd || (user.workScheduleType && user.workScheduleType !== 'STANDARD'))
+        ? 'CUSTOM'
+        : 'DEFAULT'
+    );
+    setEditScheduleChoice(initialChoice);
     const schedType = (user.workScheduleType as any) || 'STANDARD';
     setScheduleType(schedType);
     if (user.workDays) {
@@ -1423,158 +1492,238 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
                 </select>
               </div>
 
-              {/* Pengaturan Pola Jam Kerja & Hari Wajib Khusus */}
+              {/* Pengaturan Pola Jadwal Kerja (Preset Master Pengaturan) */}
               <div className="p-3.5 bg-sky-50/70 border border-sky-100 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] font-bold text-sky-950 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-sky-600" />
-                    Pola Jam Kerja & Hari Wajib (Khusus Dosen)
+                    Pola Jam Kerja & Hari Wajib Presensi
                   </label>
                   <span className="text-[9px] font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full">
-                    Opsional
+                    Preset Pengaturan
                   </span>
                 </div>
 
-                {/* Jam Masuk & Pulang Khusus */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-700 mb-1">
-                      Jam Masuk Khusus
-                    </label>
-                    <input
-                      type="time"
-                      name="customWorkStart"
-                      placeholder="09:00"
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
-                    />
-                    <p className="text-[9px] text-slate-500 mt-0.5">
-                      Kosongkan = ikuti jam kampus (09:00)
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-700 mb-1">
-                      Jam Pulang Khusus
-                    </label>
-                    <input
-                      type="time"
-                      name="customWorkEnd"
-                      placeholder="16:00"
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
-                    />
-                    <p className="text-[9px] text-slate-500 mt-0.5">
-                      Kosongkan = ikuti jam kampus (16:00)
-                    </p>
-                  </div>
-                </div>
-
-                {/* Tipe Jadwal Kehadiran */}
-                <input type="hidden" name="workScheduleType" value={scheduleType} />
-                <input type="hidden" name="workDays" value={selectedDays.join(',')} />
-
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-700 mb-1.5">
-                    Skema Kehadiran Dosen / Pegawai
+                  <label className="block text-[10px] font-bold text-slate-700 mb-1">
+                    Pilih Pola / Shift Kerja *
                   </label>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setScheduleType('STANDARD')}
-                      className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
-                        scheduleType === 'STANDARD'
-                          ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>📅 Reguler</span>
-                      <span className={`text-[8px] font-normal ${scheduleType === 'STANDARD' ? 'text-sky-100' : 'text-slate-400'}`}>
-                        Senin - Jumat
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setScheduleType('CUSTOM_DAYS')}
-                      className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
-                        scheduleType === 'CUSTOM_DAYS'
-                          ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>🗓️ Hari Tertentu</span>
-                      <span className={`text-[8px] font-normal ${scheduleType === 'CUSTOM_DAYS' ? 'text-sky-100' : 'text-slate-400'}`}>
-                        Pilih Hari Hadir
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setScheduleType('MONTHLY_QUOTA')}
-                      className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
-                        scheduleType === 'MONTHLY_QUOTA'
-                          ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>🎯 Target Bulanan</span>
-                      <span className={`text-[8px] font-normal ${scheduleType === 'MONTHLY_QUOTA' ? 'text-sky-100' : 'text-slate-400'}`}>
-                        Kuota X Hari/Bln
-                      </span>
-                    </button>
-                  </div>
+                  <select
+                    name="workScheduleId"
+                    value={addScheduleChoice}
+                    onChange={(e) => setAddScheduleChoice(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+                  >
+                    <option value="DEFAULT">🏢 Standar Kampus (09:00 - 16:00, Senin - Jumat)</option>
+                    {workSchedules.map((ws) => (
+                      <option key={ws.id} value={ws.id}>
+                        📋 {ws.name} ({ws.workStart} - {ws.workEnd} WITA
+                        {ws.scheduleType === 'CUSTOM_DAYS' ? ' • Hari Tertentu' : ws.scheduleType === 'MONTHLY_QUOTA' ? ` • ${ws.monthlyTargetDays || 4}x/bln` : ''})
+                      </option>
+                    ))}
+                    <option value="CUSTOM">⚙️ Kustomisasi Manual (Atur jam & hari khusus pegawai ini)</option>
+                  </select>
                 </div>
 
-                {/* Sub-form Hari Tertentu */}
-                {scheduleType === 'CUSTOM_DAYS' && (
-                  <div className="p-2.5 bg-white rounded-xl border border-sky-200/80 space-y-1.5">
-                    <label className="block text-[10px] font-bold text-slate-700">
-                      Pilih Hari Wajib Hadir / Mengajar di Kampus:
-                    </label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {DAYS_OF_WEEK.map((day) => {
-                        const isSelected = selectedDays.includes(day.value);
+                {/* Preview jika memilih Template Master */}
+                {addScheduleChoice !== 'CUSTOM' && (
+                  <div className="p-3 bg-white rounded-xl border border-sky-200/80 shadow-2xs space-y-1">
+                    {(() => {
+                      if (addScheduleChoice === 'DEFAULT') {
                         return (
-                          <button
-                            key={day.value}
-                            type="button"
-                            onClick={() => toggleDay(day.value)}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                              isSelected
-                                ? 'bg-sky-600 text-white shadow-2xs'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            }`}
-                          >
-                            {day.label}
-                          </button>
+                          <>
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-xs text-slate-900">Standar Kampus STIMI YAPMI</span>
+                              <span className="text-[9.5px] bg-sky-100 text-sky-700 font-mono font-bold px-2 py-0.5 rounded-md">
+                                09:00 - 16:00 WITA
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-600">
+                              📅 Hari Kerja: <strong className="text-slate-800">Senin s/d Jumat</strong> (Libur: Sabtu & Minggu)
+                            </p>
+                            <p className="text-[9px] text-slate-400 italic">
+                              * Pola standar baku seluruh pegawai & dosen reguler.
+                            </p>
+                          </>
                         );
-                      })}
-                    </div>
-                    <p className="text-[9px] text-slate-500">
-                      * Pada hari di luar pilihan ini, pegawai tidak dianggap mangkir dan berstatus &quot;Bebas Tugas&quot; di monitoring.
-                    </p>
+                      }
+                      const ws = workSchedules.find((s) => s.id === addScheduleChoice);
+                      if (!ws) return null;
+                      return (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-xs text-sky-950">{ws.name}</span>
+                            <span className="text-[9.5px] bg-sky-100 text-sky-700 font-mono font-bold px-2 py-0.5 rounded-md">
+                              {ws.workStart} - {ws.workEnd} WITA
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-600">
+                            {ws.scheduleType === 'STANDARD' && '📅 Skema: Senin - Jumat (Reguler)'}
+                            {ws.scheduleType === 'CUSTOM_DAYS' && (
+                              <span>
+                                🗓️ Hari Wajib: <strong className="text-slate-800">{formatDaysDisplay(ws.workDays)}</strong>
+                              </span>
+                            )}
+                            {ws.scheduleType === 'MONTHLY_QUOTA' && (
+                              <span>
+                                🎯 Target Bulanan: <strong className="text-slate-800">{ws.monthlyTargetDays || 4} Hari / Bulan</strong> (Fleksibel)
+                              </span>
+                            )}
+                          </p>
+                          {ws.description && (
+                            <p className="text-[9px] text-slate-500 italic pt-0.5 border-t border-slate-100">
+                              {ws.description}
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
 
-                {/* Sub-form Target Bulanan */}
-                {scheduleType === 'MONTHLY_QUOTA' && (
-                  <div className="p-2.5 bg-white rounded-xl border border-sky-200/80 space-y-1.5">
-                    <label className="block text-[10px] font-bold text-slate-700">
-                      Target Kehadiran Wajib per Bulan (Hari):
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        name="monthlyTargetDays"
-                        min="1"
-                        max="31"
-                        defaultValue={4}
-                        className="w-24 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono"
-                      />
-                      <span className="text-xs text-slate-600 font-medium">Hari / Bulan</span>
+                {/* Form Input Manual Khusus jika admin memilih CUSTOM */}
+                {addScheduleChoice === 'CUSTOM' && (
+                  <div className="space-y-3 pt-2 border-t border-sky-200/60">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-700 mb-1">
+                          Jam Masuk Khusus
+                        </label>
+                        <input
+                          type="time"
+                          name="customWorkStart"
+                          placeholder="09:00"
+                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
+                        />
+                        <p className="text-[9px] text-slate-500 mt-0.5">
+                          Kosongkan = ikuti jam kampus (09:00)
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-700 mb-1">
+                          Jam Pulang Khusus
+                        </label>
+                        <input
+                          type="time"
+                          name="customWorkEnd"
+                          placeholder="16:00"
+                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
+                        />
+                        <p className="text-[9px] text-slate-500 mt-0.5">
+                          Kosongkan = ikuti jam kampus (16:00)
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-[9px] text-slate-500">
-                      * Cocok untuk dosen tanpa jabfung (seperti Pak Irfan) yang hadir secara fleksibel dengan target kumulatif bulanan.
-                    </p>
+
+                    <input type="hidden" name="workScheduleType" value={scheduleType} />
+                    <input type="hidden" name="workDays" value={selectedDays.join(',')} />
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-700 mb-1.5">
+                        Skema Kehadiran Dosen / Pegawai
+                      </label>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setScheduleType('STANDARD')}
+                          className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                            scheduleType === 'STANDARD'
+                              ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>📅 Reguler</span>
+                          <span className={`text-[8px] font-normal ${scheduleType === 'STANDARD' ? 'text-sky-100' : 'text-slate-400'}`}>
+                            Senin - Jumat
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setScheduleType('CUSTOM_DAYS')}
+                          className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                            scheduleType === 'CUSTOM_DAYS'
+                              ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>🗓️ Hari Tertentu</span>
+                          <span className={`text-[8px] font-normal ${scheduleType === 'CUSTOM_DAYS' ? 'text-sky-100' : 'text-slate-400'}`}>
+                            Pilih Hari Hadir
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setScheduleType('MONTHLY_QUOTA')}
+                          className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                            scheduleType === 'MONTHLY_QUOTA'
+                              ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>🎯 Target Bulanan</span>
+                          <span className={`text-[8px] font-normal ${scheduleType === 'MONTHLY_QUOTA' ? 'text-sky-100' : 'text-slate-400'}`}>
+                            Kuota X Hari/Bln
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Sub-form Hari Tertentu */}
+                    {scheduleType === 'CUSTOM_DAYS' && (
+                      <div className="p-2.5 bg-white rounded-xl border border-sky-200/80 space-y-1.5">
+                        <label className="block text-[10px] font-bold text-slate-700">
+                          Pilih Hari Wajib Hadir / Mengajar di Kampus:
+                        </label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {DAYS_OF_WEEK.map((day) => {
+                            const isSelected = selectedDays.includes(day.value);
+                            return (
+                              <button
+                                key={day.value}
+                                type="button"
+                                onClick={() => toggleDay(day.value)}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-sky-600 text-white shadow-2xs'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                }`}
+                              >
+                                {day.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-[9px] text-slate-500">
+                          * Pada hari di luar pilihan ini, pegawai tidak dianggap mangkir dan berstatus &quot;Bebas Tugas&quot; di monitoring.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Sub-form Target Bulanan */}
+                    {scheduleType === 'MONTHLY_QUOTA' && (
+                      <div className="p-2.5 bg-white rounded-xl border border-sky-200/80 space-y-1.5">
+                        <label className="block text-[10px] font-bold text-slate-700">
+                          Target Kehadiran Wajib per Bulan (Hari):
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            name="monthlyTargetDays"
+                            min="1"
+                            max="31"
+                            defaultValue={4}
+                            className="w-24 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono"
+                          />
+                          <span className="text-xs text-slate-600 font-medium">Hari / Bulan</span>
+                        </div>
+                        <p className="text-[9px] text-slate-500">
+                          * Cocok untuk dosen tanpa jabfung (seperti Pak Irfan) yang hadir secara fleksibel dengan target kumulatif bulanan.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1748,160 +1897,240 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
                 </select>
               </div>
 
-              {/* Pengaturan Pola Jam Kerja & Hari Wajib Khusus */}
+              {/* Pengaturan Pola Jadwal Kerja (Preset Master Pengaturan) */}
               <div className="p-3.5 bg-sky-50/70 border border-sky-100 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] font-bold text-sky-950 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-sky-600" />
-                    Pola Jam Kerja & Hari Wajib (Khusus Dosen)
+                    Pola Jam Kerja & Hari Wajib Presensi
                   </label>
                   <span className="text-[9px] font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full">
-                    Opsional
+                    Preset Pengaturan
                   </span>
                 </div>
 
-                {/* Jam Masuk & Pulang Khusus */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-700 mb-1">
-                      Jam Masuk Khusus
-                    </label>
-                    <input
-                      type="time"
-                      name="customWorkStart"
-                      defaultValue={selectedUser.customWorkStart || ''}
-                      placeholder="09:00"
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
-                    />
-                    <p className="text-[9px] text-slate-500 mt-0.5">
-                      Kosongkan = ikuti jam kampus (09:00)
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-700 mb-1">
-                      Jam Pulang Khusus
-                    </label>
-                    <input
-                      type="time"
-                      name="customWorkEnd"
-                      defaultValue={selectedUser.customWorkEnd || ''}
-                      placeholder="16:00"
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
-                    />
-                    <p className="text-[9px] text-slate-500 mt-0.5">
-                      Kosongkan = ikuti jam kampus (16:00)
-                    </p>
-                  </div>
-                </div>
-
-                {/* Tipe Jadwal Kehadiran */}
-                <input type="hidden" name="workScheduleType" value={scheduleType} />
-                <input type="hidden" name="workDays" value={selectedDays.join(',')} />
-
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-700 mb-1.5">
-                    Skema Kehadiran Dosen / Pegawai
+                  <label className="block text-[10px] font-bold text-slate-700 mb-1">
+                    Pilih Pola / Shift Kerja *
                   </label>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setScheduleType('STANDARD')}
-                      className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
-                        scheduleType === 'STANDARD'
-                          ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>📅 Reguler</span>
-                      <span className={`text-[8px] font-normal ${scheduleType === 'STANDARD' ? 'text-sky-100' : 'text-slate-400'}`}>
-                        Senin - Jumat
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setScheduleType('CUSTOM_DAYS')}
-                      className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
-                        scheduleType === 'CUSTOM_DAYS'
-                          ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>🗓️ Hari Tertentu</span>
-                      <span className={`text-[8px] font-normal ${scheduleType === 'CUSTOM_DAYS' ? 'text-sky-100' : 'text-slate-400'}`}>
-                        Pilih Hari Hadir
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setScheduleType('MONTHLY_QUOTA')}
-                      className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
-                        scheduleType === 'MONTHLY_QUOTA'
-                          ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>🎯 Target Bulanan</span>
-                      <span className={`text-[8px] font-normal ${scheduleType === 'MONTHLY_QUOTA' ? 'text-sky-100' : 'text-slate-400'}`}>
-                        Kuota X Hari/Bln
-                      </span>
-                    </button>
-                  </div>
+                  <select
+                    name="workScheduleId"
+                    value={editScheduleChoice}
+                    onChange={(e) => setEditScheduleChoice(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    <option value="DEFAULT">🏢 Standar Kampus (09:00 - 16:00, Senin - Jumat)</option>
+                    {workSchedules.map((ws) => (
+                      <option key={ws.id} value={ws.id}>
+                        📋 {ws.name} ({ws.workStart} - {ws.workEnd} WITA
+                        {ws.scheduleType === 'CUSTOM_DAYS' ? ' • Hari Tertentu' : ws.scheduleType === 'MONTHLY_QUOTA' ? ` • ${ws.monthlyTargetDays || 4}x/bln` : ''})
+                      </option>
+                    ))}
+                    <option value="CUSTOM">⚙️ Kustomisasi Manual (Atur jam & hari khusus pegawai ini)</option>
+                  </select>
                 </div>
 
-                {/* Sub-form Hari Tertentu */}
-                {scheduleType === 'CUSTOM_DAYS' && (
-                  <div className="p-2.5 bg-white rounded-xl border border-sky-200/80 space-y-1.5">
-                    <label className="block text-[10px] font-bold text-slate-700">
-                      Pilih Hari Wajib Hadir / Mengajar di Kampus:
-                    </label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {DAYS_OF_WEEK.map((day) => {
-                        const isSelected = selectedDays.includes(day.value);
+                {/* Preview jika memilih Template Master */}
+                {editScheduleChoice !== 'CUSTOM' && (
+                  <div className="p-3 bg-white rounded-xl border border-sky-200/80 shadow-2xs space-y-1">
+                    {(() => {
+                      if (editScheduleChoice === 'DEFAULT') {
                         return (
-                          <button
-                            key={day.value}
-                            type="button"
-                            onClick={() => toggleDay(day.value)}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                              isSelected
-                                ? 'bg-sky-600 text-white shadow-2xs'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            }`}
-                          >
-                            {day.label}
-                          </button>
+                          <>
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-xs text-slate-900">Standar Kampus STIMI YAPMI</span>
+                              <span className="text-[9.5px] bg-sky-100 text-sky-700 font-mono font-bold px-2 py-0.5 rounded-md">
+                                09:00 - 16:00 WITA
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-600">
+                              📅 Hari Kerja: <strong className="text-slate-800">Senin s/d Jumat</strong> (Libur: Sabtu & Minggu)
+                            </p>
+                            <p className="text-[9px] text-slate-400 italic">
+                              * Pola standar baku seluruh pegawai & dosen reguler.
+                            </p>
+                          </>
                         );
-                      })}
-                    </div>
-                    <p className="text-[9px] text-slate-500">
-                      * Pada hari di luar pilihan ini, pegawai tidak dianggap mangkir dan berstatus &quot;Bebas Tugas&quot; di monitoring.
-                    </p>
+                      }
+                      const ws = workSchedules.find((s) => s.id === editScheduleChoice);
+                      if (!ws) return null;
+                      return (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-xs text-sky-950">{ws.name}</span>
+                            <span className="text-[9.5px] bg-sky-100 text-sky-700 font-mono font-bold px-2 py-0.5 rounded-md">
+                              {ws.workStart} - {ws.workEnd} WITA
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-600">
+                            {ws.scheduleType === 'STANDARD' && '📅 Skema: Senin - Jumat (Reguler)'}
+                            {ws.scheduleType === 'CUSTOM_DAYS' && (
+                              <span>
+                                🗓️ Hari Wajib: <strong className="text-slate-800">{formatDaysDisplay(ws.workDays)}</strong>
+                              </span>
+                            )}
+                            {ws.scheduleType === 'MONTHLY_QUOTA' && (
+                              <span>
+                                🎯 Target Bulanan: <strong className="text-slate-800">{ws.monthlyTargetDays || 4} Hari / Bulan</strong> (Fleksibel)
+                              </span>
+                            )}
+                          </p>
+                          {ws.description && (
+                            <p className="text-[9px] text-slate-500 italic pt-0.5 border-t border-slate-100">
+                              {ws.description}
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
 
-                {/* Sub-form Target Bulanan */}
-                {scheduleType === 'MONTHLY_QUOTA' && (
-                  <div className="p-2.5 bg-white rounded-xl border border-sky-200/80 space-y-1.5">
-                    <label className="block text-[10px] font-bold text-slate-700">
-                      Target Kehadiran Wajib per Bulan (Hari):
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        name="monthlyTargetDays"
-                        min="1"
-                        max="31"
-                        defaultValue={selectedUser.monthlyTargetDays || 4}
-                        className="w-24 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono"
-                      />
-                      <span className="text-xs text-slate-600 font-medium">Hari / Bulan</span>
+                {/* Form Input Manual Khusus jika admin memilih CUSTOM */}
+                {editScheduleChoice === 'CUSTOM' && (
+                  <div className="space-y-3 pt-2 border-t border-sky-200/60">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-700 mb-1">
+                          Jam Masuk Khusus
+                        </label>
+                        <input
+                          type="time"
+                          name="customWorkStart"
+                          defaultValue={selectedUser.customWorkStart || ''}
+                          placeholder="09:00"
+                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
+                        />
+                        <p className="text-[9px] text-slate-500 mt-0.5">
+                          Kosongkan = ikuti jam kampus (09:00)
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-700 mb-1">
+                          Jam Pulang Khusus
+                        </label>
+                        <input
+                          type="time"
+                          name="customWorkEnd"
+                          defaultValue={selectedUser.customWorkEnd || ''}
+                          placeholder="16:00"
+                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
+                        />
+                        <p className="text-[9px] text-slate-500 mt-0.5">
+                          Kosongkan = ikuti jam kampus (16:00)
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-[9px] text-slate-500">
-                      * Cocok untuk dosen tanpa jabfung (seperti Pak Irfan) yang hadir secara fleksibel dengan target kumulatif bulanan.
-                    </p>
+
+                    <input type="hidden" name="workScheduleType" value={scheduleType} />
+                    <input type="hidden" name="workDays" value={selectedDays.join(',')} />
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-700 mb-1.5">
+                        Skema Kehadiran Dosen / Pegawai
+                      </label>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setScheduleType('STANDARD')}
+                          className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                            scheduleType === 'STANDARD'
+                              ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>📅 Reguler</span>
+                          <span className={`text-[8px] font-normal ${scheduleType === 'STANDARD' ? 'text-sky-100' : 'text-slate-400'}`}>
+                            Senin - Jumat
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setScheduleType('CUSTOM_DAYS')}
+                          className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                            scheduleType === 'CUSTOM_DAYS'
+                              ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>🗓️ Hari Tertentu</span>
+                          <span className={`text-[8px] font-normal ${scheduleType === 'CUSTOM_DAYS' ? 'text-sky-100' : 'text-slate-400'}`}>
+                            Pilih Hari Hadir
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setScheduleType('MONTHLY_QUOTA')}
+                          className={`px-2 py-1.5 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                            scheduleType === 'MONTHLY_QUOTA'
+                              ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>🎯 Target Bulanan</span>
+                          <span className={`text-[8px] font-normal ${scheduleType === 'MONTHLY_QUOTA' ? 'text-sky-100' : 'text-slate-400'}`}>
+                            Kuota X Hari/Bln
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Sub-form Hari Tertentu */}
+                    {scheduleType === 'CUSTOM_DAYS' && (
+                      <div className="p-2.5 bg-white rounded-xl border border-sky-200/80 space-y-1.5">
+                        <label className="block text-[10px] font-bold text-slate-700">
+                          Pilih Hari Wajib Hadir / Mengajar di Kampus:
+                        </label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {DAYS_OF_WEEK.map((day) => {
+                            const isSelected = selectedDays.includes(day.value);
+                            return (
+                              <button
+                                key={day.value}
+                                type="button"
+                                onClick={() => toggleDay(day.value)}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-sky-600 text-white shadow-2xs'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                }`}
+                              >
+                                {day.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-[9px] text-slate-500">
+                          * Pada hari di luar pilihan ini, pegawai tidak dianggap mangkir dan berstatus &quot;Bebas Tugas&quot; di monitoring.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Sub-form Target Bulanan */}
+                    {scheduleType === 'MONTHLY_QUOTA' && (
+                      <div className="p-2.5 bg-white rounded-xl border border-sky-200/80 space-y-1.5">
+                        <label className="block text-[10px] font-bold text-slate-700">
+                          Target Kehadiran Wajib per Bulan (Hari):
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            name="monthlyTargetDays"
+                            min="1"
+                            max="31"
+                            defaultValue={selectedUser.monthlyTargetDays || 4}
+                            className="w-24 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono"
+                          />
+                          <span className="text-xs text-slate-600 font-medium">Hari / Bulan</span>
+                        </div>
+                        <p className="text-[9px] text-slate-500">
+                          * Cocok untuk dosen tanpa jabfung (seperti Pak Irfan) yang hadir secara fleksibel dengan target kumulatif bulanan.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

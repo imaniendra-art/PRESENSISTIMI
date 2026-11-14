@@ -7,6 +7,9 @@ import {
   updateCampusLocation,
   toggleCampusLocationStatus,
   deleteCampusLocation,
+  createWorkSchedule,
+  updateWorkSchedule,
+  deleteWorkSchedule,
 } from '@/actions/adminActions';
 import { CampusSetting, CampusLocation } from '@prisma/client';
 import {
@@ -25,11 +28,30 @@ import {
   Users,
   ShieldCheck,
   Calendar,
+  CalendarDays,
+  Target,
   Sparkles,
   Sliders,
   Laptop,
 } from 'lucide-react';
 import { LiveClock } from '@/components/common/LiveClock';
+
+export interface WorkScheduleItem {
+  id: string;
+  name: string;
+  code?: string | null;
+  workStart: string;
+  workEnd: string;
+  scheduleType: string;
+  workDays?: string | null;
+  monthlyTargetDays?: number | null;
+  description?: string | null;
+  isDefault?: boolean;
+  isActive: boolean;
+  _count?: {
+    users: number;
+  };
+}
 
 interface CampusSettingsFormProps {
   setting: CampusSetting & {
@@ -43,15 +65,78 @@ interface CampusSettingsFormProps {
       attendances: number;
     };
   })[];
+  workSchedules?: WorkScheduleItem[];
 }
 
-export function CampusSettingsForm({ setting, locations }: CampusSettingsFormProps) {
-  const [activeTab, setActiveTab] = useState<'LOCATIONS' | 'HOURS'>('LOCATIONS');
+const DAYS_OF_WEEK = [
+  { value: '1', label: 'Sen' },
+  { value: '2', label: 'Sel' },
+  { value: '3', label: 'Rab' },
+  { value: '4', label: 'Kam' },
+  { value: '5', label: 'Jum' },
+  { value: '6', label: 'Sab' },
+];
+
+function formatDaysDisplay(daysStr?: string | null): string {
+  if (!daysStr) return 'Senin - Jumat';
+  const dayMap: Record<string, string> = {
+    '1': 'Senin',
+    '2': 'Selasa',
+    '3': 'Rabu',
+    '4': 'Kamis',
+    '5': 'Jumat',
+    '6': 'Sabtu',
+    '0': 'Minggu',
+  };
+  return daysStr
+    .split(',')
+    .map((d) => dayMap[d.trim()] || d.trim())
+    .join(', ');
+}
+
+export function CampusSettingsForm({ setting, locations, workSchedules = [] }: CampusSettingsFormProps) {
+  const [activeTab, setActiveTab] = useState<'LOCATIONS' | 'HOURS' | 'SCHEDULES'>('LOCATIONS');
 
   // Modals for Location
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] = useState(false);
   const [isEditLocationModalOpen, setIsEditLocationModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<CampusLocation | null>(null);
+
+  // Modals for WorkSchedule
+  const [isAddScheduleModalOpen, setIsAddScheduleModalOpen] = useState(false);
+  const [isEditScheduleModalOpen, setIsEditScheduleModalOpen] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState<WorkScheduleItem | null>(null);
+  const [scheduleTypeState, setScheduleTypeState] = useState<'STANDARD' | 'CUSTOM_DAYS' | 'MONTHLY_QUOTA'>('STANDARD');
+  const [scheduleDaysState, setScheduleDaysState] = useState<string[]>(['1', '2', '3', '4', '5']);
+
+  const toggleScheduleDay = (dayVal: string) => {
+    if (scheduleDaysState.includes(dayVal)) {
+      if (scheduleDaysState.length > 1) {
+        setScheduleDaysState(scheduleDaysState.filter((d) => d !== dayVal));
+      }
+    } else {
+      setScheduleDaysState([...scheduleDaysState, dayVal].sort());
+    }
+  };
+
+  const openAddScheduleModal = () => {
+    setScheduleTypeState('STANDARD');
+    setScheduleDaysState(['1', '2', '3', '4', '5']);
+    setIsAddScheduleModalOpen(true);
+    setAlert(null);
+  };
+
+  const openEditScheduleModal = (ws: WorkScheduleItem) => {
+    setSelectedSchedule(ws);
+    setScheduleTypeState((ws.scheduleType as any) || 'STANDARD');
+    if (ws.workDays) {
+      setScheduleDaysState(ws.workDays.split(',').map((s) => s.trim()));
+    } else {
+      setScheduleDaysState(['1', '2', '3', '4', '5']);
+    }
+    setIsEditScheduleModalOpen(true);
+    setAlert(null);
+  };
 
   // Form states for location modal
   const [modalLat, setModalLat] = useState('');
@@ -198,6 +283,70 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
     }
   };
 
+  // Submit: Tambah Pola Jadwal Baru
+  const handleCreateSchedule = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setAlert(null);
+
+    const formData = new FormData(e.currentTarget);
+    try {
+      const res = await createWorkSchedule(formData);
+      if (res.success) {
+        setAlert({ type: 'success', message: res.message });
+        setIsAddScheduleModalOpen(false);
+        (e.target as HTMLFormElement).reset();
+      } else {
+        setAlert({ type: 'error', message: res.message });
+      }
+    } catch {
+      setAlert({ type: 'error', message: 'Gagal menambahkan pola jadwal kerja' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Submit: Edit Pola Jadwal
+  const handleUpdateSchedule = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setAlert(null);
+
+    const formData = new FormData(e.currentTarget);
+    try {
+      const res = await updateWorkSchedule(formData);
+      if (res.success) {
+        setAlert({ type: 'success', message: res.message });
+        setIsEditScheduleModalOpen(false);
+        setSelectedSchedule(null);
+      } else {
+        setAlert({ type: 'error', message: res.message });
+      }
+    } catch {
+      setAlert({ type: 'error', message: 'Gagal memperbarui pola jadwal kerja' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Submit: Hapus Pola Jadwal
+  const handleDeleteSchedule = async (id: string, name: string) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus pola jadwal "${name}"?`)) {
+      return;
+    }
+    setAlert(null);
+    try {
+      const res = await deleteWorkSchedule(id);
+      if (res.success) {
+        setAlert({ type: 'success', message: res.message });
+      } else {
+        setAlert({ type: 'error', message: res.message });
+      }
+    } catch {
+      setAlert({ type: 'error', message: 'Gagal menghapus pola jadwal' });
+    }
+  };
+
   return (
     <div className="space-y-2.5 sm:space-y-6">
       {/* Alert Notifikasi */}
@@ -231,8 +380,49 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
             </p>
           </div>
 
-          {/* Tombol Tambah Gedung di Kanan Atas (Khusus Mobile - Presisi Selaras Tambah Pegawai) */}
+          {/* Tombol Tambah di Kanan Atas (Khusus Mobile - Presisi Selaras Tambah Pegawai) */}
           <div className="lg:hidden shrink-0">
+            {activeTab === 'SCHEDULES' ? (
+              <button
+                type="button"
+                onClick={openAddScheduleModal}
+                className="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-[9.5px] font-bold transition flex items-center gap-1 shadow-xs cursor-pointer"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Pola Baru</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setModalLat('');
+                  setModalLng('');
+                  setIsAddLocationModalOpen(true);
+                  setAlert(null);
+                }}
+                className="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-[9.5px] font-bold transition flex items-center gap-1 shadow-xs cursor-pointer"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Tambah Gedung</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Sisi Kanan Desktop: Live Clock + Tombol Tambah */}
+        <div className="hidden lg:flex items-center gap-3 shrink-0">
+          <LiveClock />
+
+          {activeTab === 'SCHEDULES' ? (
+            <button
+              type="button"
+              onClick={openAddScheduleModal}
+              className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Tambah Pola Baru</span>
+            </button>
+          ) : (
             <button
               type="button"
               onClick={() => {
@@ -241,31 +431,12 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                 setIsAddLocationModalOpen(true);
                 setAlert(null);
               }}
-              className="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-[9.5px] font-bold transition flex items-center gap-1 shadow-xs cursor-pointer"
+              className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
             >
-              <Plus className="w-3 h-3" />
-              <span>Tambah Gedung</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>Tambah Gedung Baru</span>
             </button>
-          </div>
-        </div>
-
-        {/* Sisi Kanan Desktop: Live Clock + Tombol Tambah Gedung Baru */}
-        <div className="hidden lg:flex items-center gap-3 shrink-0">
-          <LiveClock />
-
-          <button
-            type="button"
-            onClick={() => {
-              setModalLat('');
-              setModalLng('');
-              setIsAddLocationModalOpen(true);
-              setAlert(null);
-            }}
-            className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Tambah Gedung Baru</span>
-          </button>
+          )}
         </div>
 
         {/* Sisi Bawah Mobile: 4 Pill Box Keterangan Simetris (100% Selaras Overview) */}
@@ -292,9 +463,9 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
           </div>
 
           <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs min-w-0">
-            <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-            <span className="text-[9.5px] font-bold text-slate-800 font-mono whitespace-nowrap">
-              {setting.radiusMeters}m GPS
+            <CalendarDays className="w-3 h-3 text-emerald-600 shrink-0" />
+            <span className="text-[9.5px] font-bold text-slate-800 whitespace-nowrap">
+              {workSchedules.length} Pola
             </span>
           </div>
         </div>
@@ -388,31 +559,44 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
       <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden w-full">
         {/* Modern Segmented Tab Switcher */}
         <div className="p-2 sm:p-3 bg-slate-50/70 border-b border-slate-100">
-          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 max-w-xl">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 max-w-2xl">
             <button
               type="button"
               onClick={() => setActiveTab('LOCATIONS')}
-              className={`py-2 px-3 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`py-2 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-bold transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer truncate ${
                 activeTab === 'LOCATIONS'
                   ? 'bg-white text-sky-700 shadow-xs border border-sky-100'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
-              <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-600" />
-              <span>Lokasi Gedung ({locations.length})</span>
+              <Building2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+              <span className="truncate">Lokasi Gedung ({locations.length})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('HOURS')}
-              className={`py-2 px-3 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`py-2 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-bold transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer truncate ${
                 activeTab === 'HOURS'
                   ? 'bg-white text-sky-700 shadow-xs border border-sky-100'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
-              <Sliders className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-600" />
-              <span>Jam Kerja & Kebijakan</span>
+              <Sliders className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+              <span className="truncate">Jam Standar Kampus</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('SCHEDULES')}
+              className={`py-2 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-bold transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer truncate ${
+                activeTab === 'SCHEDULES'
+                  ? 'bg-white text-sky-700 shadow-xs border border-sky-100'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              }`}
+            >
+              <CalendarDays className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+              <span className="truncate">Pola & Shift Kerja ({workSchedules.length})</span>
             </button>
           </div>
         </div>
@@ -783,6 +967,144 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
             </form>
           </div>
         )}
+
+        {/* ================= TAB 3: MASTER POLA & SHIFT KERJA ================= */}
+        {activeTab === 'SCHEDULES' && (
+          <div className="p-3 sm:p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-sky-50/40 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-sky-100/80">
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <span>Master Pola Jam Kerja Civitas (Template Dosen & Staf)</span>
+                  <span className="text-slate-300 font-normal">|</span>
+                  <span className="text-sky-700 font-semibold font-sans text-xs">
+                    {workSchedules.length} pola terdaftar
+                  </span>
+                </h3>
+                <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">
+                  Template pola jam kerja ini otomatis muncul sebagai pilihan dropdown di menu Data Pegawai saat mengatur jadwal dosen atau staf.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={openAddScheduleModal}
+                className="hidden sm:flex px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition items-center gap-1.5 shadow-sm shadow-sky-600/20 cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Tambah Pola Baru</span>
+              </button>
+            </div>
+
+            {/* Grid Kartu Pola Jadwal */}
+            {workSchedules.length === 0 ? (
+              <div className="py-12 px-4 text-center space-y-2 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                <Clock className="w-8 h-8 text-slate-300 mx-auto" />
+                <p className="text-xs font-bold text-slate-600">Belum ada pola kerja kustom</p>
+                <p className="text-[11px] text-slate-400">Klik tombol &apos;Tambah Pola Baru&apos; untuk membuat template jam kerja dosen/staf</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {workSchedules.map((ws) => (
+                  <div
+                    key={ws.id}
+                    className="p-4 rounded-2xl border border-slate-200/90 hover:border-sky-300 bg-white shadow-2xs hover:shadow-sm transition space-y-3 flex flex-col justify-between"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                            {ws.name}
+                          </h4>
+                          {ws.code && (
+                            <span className="text-[9px] font-mono text-slate-400">
+                              Kode: {ws.code}
+                            </span>
+                          )}
+                        </div>
+
+                        {ws.scheduleType === 'STANDARD' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                            Reguler
+                          </span>
+                        ) : ws.scheduleType === 'CUSTOM_DAYS' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-sky-50 text-sky-700 border border-sky-200 shrink-0">
+                            Hari Tertentu
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                            Target Bulanan
+                          </span>
+                        )}
+                      </div>
+
+                      {ws.description && (
+                        <p className="text-[10px] text-slate-500 line-clamp-2">
+                          {ws.description}
+                        </p>
+                      )}
+
+                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-slate-400 font-semibold">Jam Kerja:</span>
+                          <span className="font-mono font-bold text-slate-800 text-[11px]">
+                            {ws.workStart} - {ws.workEnd} WITA
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-slate-400 font-semibold">Skema:</span>
+                          <span className="font-semibold text-slate-700 text-[10.5px]">
+                            {ws.scheduleType === 'CUSTOM_DAYS'
+                              ? formatDaysDisplay(ws.workDays)
+                              : ws.scheduleType === 'MONTHLY_QUOTA'
+                              ? `${ws.monthlyTargetDays || 4} Hari / Bulan`
+                              : 'Senin - Jumat'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                      <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+                        <Users className="w-3 h-3 text-slate-400" />
+                        <span>{ws._count?.users || 0} Dosen/Pegawai</span>
+                      </span>
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => openEditScheduleModal(ws)}
+                          className="p-1.5 rounded-lg text-slate-600 hover:text-sky-700 hover:bg-sky-50 transition cursor-pointer"
+                          title="Edit Pola Jadwal"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSchedule(ws.id, ws.name)}
+                          disabled={(ws._count?.users || 0) > 0}
+                          className={`p-1.5 rounded-lg transition ${
+                            (ws._count?.users || 0) > 0
+                              ? 'text-slate-300 cursor-not-allowed'
+                              : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer'
+                          }`}
+                          title={
+                            (ws._count?.users || 0) > 0
+                              ? 'Tidak dapat dihapus karena digunakan oleh pegawai'
+                              : 'Hapus Pola Jadwal'
+                          }
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ================= MODAL: TAMBAH GEDUNG ================= */}
@@ -1075,6 +1397,450 @@ export function CampusSettingsForm({ setting, locations }: CampusSettingsFormPro
                   className="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition shadow-md shadow-sky-600/20 cursor-pointer"
                 >
                   {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: TAMBAH POLA JADWAL ================= */}
+      {isAddScheduleModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-100 my-8 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-sky-600" />
+                <span>Tambah Pola Jadwal / Shift Baru</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAddScheduleModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateSchedule} className="space-y-3.5">
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="col-span-2">
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Nama Pola Jadwal *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    placeholder="Contoh: Dosen Kelas Siang"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Kode Singkat
+                  </label>
+                  <input
+                    type="text"
+                    name="code"
+                    placeholder="DSN_SIANG"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                </div>
+              </div>
+
+              {/* Jam Masuk & Pulang */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Jam Masuk *
+                  </label>
+                  <input
+                    type="time"
+                    name="workStart"
+                    defaultValue="09:00"
+                    required
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Jam Pulang *
+                  </label>
+                  <input
+                    type="time"
+                    name="workEnd"
+                    defaultValue="16:00"
+                    required
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Pilihan Skema Kehadiran */}
+              <input type="hidden" name="scheduleType" value={scheduleTypeState} />
+              <input type="hidden" name="workDays" value={scheduleDaysState.join(',')} />
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
+                  Skema Kewajiban Kehadiran
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setScheduleTypeState('STANDARD')}
+                    className={`px-2 py-2 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                      scheduleTypeState === 'STANDARD'
+                        ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span>📅 Reguler</span>
+                    <span className={`text-[8.5px] font-normal ${scheduleTypeState === 'STANDARD' ? 'text-sky-100' : 'text-slate-400'}`}>
+                      Senin - Jumat
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setScheduleTypeState('CUSTOM_DAYS')}
+                    className={`px-2 py-2 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                      scheduleTypeState === 'CUSTOM_DAYS'
+                        ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span>🗓️ Hari Tertentu</span>
+                    <span className={`text-[8.5px] font-normal ${scheduleTypeState === 'CUSTOM_DAYS' ? 'text-sky-100' : 'text-slate-400'}`}>
+                      Pilih Hari Hadir
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setScheduleTypeState('MONTHLY_QUOTA')}
+                    className={`px-2 py-2 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                      scheduleTypeState === 'MONTHLY_QUOTA'
+                        ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span>🎯 Target Bulanan</span>
+                    <span className={`text-[8.5px] font-normal ${scheduleTypeState === 'MONTHLY_QUOTA' ? 'text-sky-100' : 'text-slate-400'}`}>
+                      Kuota X Hari/Bln
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Pilihan Hari Tertentu */}
+              {scheduleTypeState === 'CUSTOM_DAYS' && (
+                <div className="p-3 bg-sky-50/70 rounded-xl border border-sky-200/80 space-y-1.5">
+                  <label className="block text-[10px] font-bold text-slate-700">
+                    Pilih Hari Wajib Hadir / Mengajar di Kampus:
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DAYS_OF_WEEK.map((day) => {
+                      const isSelected = scheduleDaysState.includes(day.value);
+                      return (
+                        <button
+                          key={day.value}
+                          type="button"
+                          onClick={() => toggleScheduleDay(day.value)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                            isSelected
+                              ? 'bg-sky-600 text-white shadow-2xs'
+                              : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {day.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[9.5px] text-slate-500">
+                    * Di luar hari yang dipilih, dosen otomatis berstatus &quot;Bebas Tugas&quot; di monitoring.
+                  </p>
+                </div>
+              )}
+
+              {/* Target Bulanan */}
+              {scheduleTypeState === 'MONTHLY_QUOTA' && (
+                <div className="p-3 bg-sky-50/70 rounded-xl border border-sky-200/80 space-y-1.5">
+                  <label className="block text-[10px] font-bold text-slate-700">
+                    Target Kehadiran per Bulan (Hari):
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      name="monthlyTargetDays"
+                      min="1"
+                      max="31"
+                      defaultValue={4}
+                      className="w-24 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 font-mono"
+                    />
+                    <span className="text-xs text-slate-600 font-medium">Hari / Bulan</span>
+                  </div>
+                  <p className="text-[9.5px] text-slate-500">
+                    * Cocok untuk dosen tanpa jabfung (seperti Pak Irfan) yang hadir fleksibel dengan target kumulatif bulanan.
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Keterangan / Catatan Pola (Opsional)
+                </label>
+                <textarea
+                  name="description"
+                  rows={2}
+                  placeholder="Contoh: Digunakan untuk dosen yang hanya mengajar di kelas reguler siang"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAddScheduleModalOpen(false)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition shadow-md shadow-sky-600/20 cursor-pointer"
+                >
+                  {isSubmitting ? 'Menyimpan...' : 'Simpan Pola Jadwal'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: EDIT POLA JADWAL ================= */}
+      {isEditScheduleModalOpen && selectedSchedule && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-100 my-8 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                <Edit2 className="w-4 h-4 text-sky-600" />
+                <span className="truncate">Edit Pola Jadwal: {selectedSchedule.name}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditScheduleModalOpen(false);
+                  setSelectedSchedule(null);
+                }}
+                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateSchedule} className="space-y-3.5">
+              <input type="hidden" name="scheduleId" value={selectedSchedule.id} />
+
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="col-span-2">
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Nama Pola Jadwal *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    defaultValue={selectedSchedule.name}
+                    required
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Kode Singkat
+                  </label>
+                  <input
+                    type="text"
+                    name="code"
+                    defaultValue={selectedSchedule.code || ''}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                </div>
+              </div>
+
+              {/* Jam Masuk & Pulang */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Jam Masuk *
+                  </label>
+                  <input
+                    type="time"
+                    name="workStart"
+                    defaultValue={selectedSchedule.workStart}
+                    required
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Jam Pulang *
+                  </label>
+                  <input
+                    type="time"
+                    name="workEnd"
+                    defaultValue={selectedSchedule.workEnd}
+                    required
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Pilihan Skema Kehadiran */}
+              <input type="hidden" name="scheduleType" value={scheduleTypeState} />
+              <input type="hidden" name="workDays" value={scheduleDaysState.join(',')} />
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
+                  Skema Kewajiban Kehadiran
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setScheduleTypeState('STANDARD')}
+                    className={`px-2 py-2 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                      scheduleTypeState === 'STANDARD'
+                        ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span>📅 Reguler</span>
+                    <span className={`text-[8.5px] font-normal ${scheduleTypeState === 'STANDARD' ? 'text-sky-100' : 'text-slate-400'}`}>
+                      Senin - Jumat
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setScheduleTypeState('CUSTOM_DAYS')}
+                    className={`px-2 py-2 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                      scheduleTypeState === 'CUSTOM_DAYS'
+                        ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span>🗓️ Hari Tertentu</span>
+                    <span className={`text-[8.5px] font-normal ${scheduleTypeState === 'CUSTOM_DAYS' ? 'text-sky-100' : 'text-slate-400'}`}>
+                      Pilih Hari Hadir
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setScheduleTypeState('MONTHLY_QUOTA')}
+                    className={`px-2 py-2 rounded-xl text-center border text-[10px] font-bold transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                      scheduleTypeState === 'MONTHLY_QUOTA'
+                        ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span>🎯 Target Bulanan</span>
+                    <span className={`text-[8.5px] font-normal ${scheduleTypeState === 'MONTHLY_QUOTA' ? 'text-sky-100' : 'text-slate-400'}`}>
+                      Kuota X Hari/Bln
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Pilihan Hari Tertentu */}
+              {scheduleTypeState === 'CUSTOM_DAYS' && (
+                <div className="p-3 bg-sky-50/70 rounded-xl border border-sky-200/80 space-y-1.5">
+                  <label className="block text-[10px] font-bold text-slate-700">
+                    Pilih Hari Wajib Hadir / Mengajar di Kampus:
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DAYS_OF_WEEK.map((day) => {
+                      const isSelected = scheduleDaysState.includes(day.value);
+                      return (
+                        <button
+                          key={day.value}
+                          type="button"
+                          onClick={() => toggleScheduleDay(day.value)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                            isSelected
+                              ? 'bg-sky-600 text-white shadow-2xs'
+                              : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {day.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[9.5px] text-slate-500">
+                    * Di luar hari yang dipilih, dosen otomatis berstatus &quot;Bebas Tugas&quot; di monitoring.
+                  </p>
+                </div>
+              )}
+
+              {/* Target Bulanan */}
+              {scheduleTypeState === 'MONTHLY_QUOTA' && (
+                <div className="p-3 bg-sky-50/70 rounded-xl border border-sky-200/80 space-y-1.5">
+                  <label className="block text-[10px] font-bold text-slate-700">
+                    Target Kehadiran per Bulan (Hari):
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      name="monthlyTargetDays"
+                      min="1"
+                      max="31"
+                      defaultValue={selectedSchedule.monthlyTargetDays || 4}
+                      className="w-24 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 font-mono"
+                    />
+                    <span className="text-xs text-slate-600 font-medium">Hari / Bulan</span>
+                  </div>
+                  <p className="text-[9.5px] text-slate-500">
+                    * Cocok untuk dosen tanpa jabfung (seperti Pak Irfan) yang hadir fleksibel dengan target kumulatif bulanan.
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Keterangan / Catatan Pola (Opsional)
+                </label>
+                <textarea
+                  name="description"
+                  defaultValue={selectedSchedule.description || ''}
+                  rows={2}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditScheduleModalOpen(false);
+                    setSelectedSchedule(null);
+                  }}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition shadow-md shadow-sky-600/20 cursor-pointer"
+                >
+                  {isSubmitting ? 'Memperbarui...' : 'Simpan Perubahan'}
                 </button>
               </div>
             </form>

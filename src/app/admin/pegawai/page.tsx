@@ -13,12 +13,13 @@ export default async function AdminPegawaiPage() {
     redirect('/unauthorized');
   }
 
-  const [users, superiors, campusLocations] = await Promise.all([
+  const [users, superiors, campusLocations, workSchedules] = await Promise.all([
     prisma.user.findMany({
       include: {
         atasan: true,
         assignedLocation: true,
-      },
+        workSchedule: true,
+      } as any,
       orderBy: { createdAt: 'desc' },
     }),
     prisma.user.findMany({
@@ -32,6 +33,10 @@ export default async function AdminPegawaiPage() {
       where: { isActive: true },
       orderBy: { name: 'asc' },
     }),
+    (prisma as any).workSchedule.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'asc' },
+    }),
   ]);
 
   return (
@@ -43,6 +48,7 @@ export default async function AdminPegawaiPage() {
           users={users}
           superiors={superiors}
           campusLocations={campusLocations}
+          workSchedules={workSchedules}
         />
       </main>
     </div>

@@ -192,6 +192,172 @@ export async function deleteCampusLocation(locationId: string) {
 }
 
 // ==========================================
+// MANAJEMEN MASTER POLA & SHIFT KERJA
+// ==========================================
+
+export async function ensureDefaultWorkSchedules() {
+  const count = await (prisma as any).workSchedule.count();
+  if (count === 0) {
+    await (prisma as any).workSchedule.createMany({
+      data: [
+        {
+          name: 'Reguler Kampus (Standar)',
+          code: 'REGULER',
+          workStart: '09:00',
+          workEnd: '16:00',
+          scheduleType: 'STANDARD',
+          workDays: '1,2,3,4,5',
+          description: 'Jam kerja reguler civitas kampus hari Senin s/d Jumat',
+          isDefault: true,
+          isActive: true,
+        },
+        {
+          name: 'Dosen Kelas Siang',
+          code: 'DOSEN_SIANG',
+          workStart: '13:00',
+          workEnd: '17:00',
+          scheduleType: 'CUSTOM_DAYS',
+          workDays: '2,4',
+          description: 'Khusus dosen yang mengajar kelas siang pada hari tertentu (misal Selasa & Kamis)',
+          isDefault: false,
+          isActive: true,
+        },
+        {
+          name: 'Dosen Fleksibel Bulanan (Pak Irfan)',
+          code: 'DOSEN_FLEKSIBEL',
+          workStart: '09:00',
+          workEnd: '16:00',
+          scheduleType: 'MONTHLY_QUOTA',
+          monthlyTargetDays: 4,
+          description: 'Dosen tanpa jabatan fungsional dengan kewajiban kumulatif 4 hari kehadiran per bulan',
+          isDefault: false,
+          isActive: true,
+        },
+      ],
+    });
+  }
+}
+
+export async function createWorkSchedule(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== 'ADMIN') {
+    return { success: false, message: 'Tidak memiliki hak akses' };
+  }
+
+  const name = (formData.get('name') as string)?.trim();
+  const code = (formData.get('code') as string)?.trim() || null;
+  const workStart = (formData.get('workStart') as string)?.trim() || '09:00';
+  const workEnd = (formData.get('workEnd') as string)?.trim() || '16:00';
+  const scheduleType = (formData.get('scheduleType') as string) || 'STANDARD';
+  const workDays = (formData.get('workDays') as string)?.trim() || (scheduleType === 'CUSTOM_DAYS' ? '2,4' : '1,2,3,4,5');
+  const monthlyTargetDays = parseInt(formData.get('monthlyTargetDays') as string, 10) || 4;
+  const description = (formData.get('description') as string)?.trim() || null;
+
+  if (!name) {
+    return { success: false, message: 'Nama pola jadwal kerja wajib diisi' };
+  }
+
+  await (prisma as any).workSchedule.create({
+    data: {
+      name,
+      code,
+      workStart,
+      workEnd,
+      scheduleType,
+      workDays: scheduleType === 'CUSTOM_DAYS' ? workDays : null,
+      monthlyTargetDays: scheduleType === 'MONTHLY_QUOTA' ? monthlyTargetDays : null,
+      description,
+      isActive: true,
+    },
+  });
+
+  revalidatePath('/admin/pengaturan');
+  revalidatePath('/admin/pegawai');
+
+  return { success: true, message: `Pola jadwal "${name}" berhasil ditambahkan!` };
+}
+
+export async function updateWorkSchedule(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== 'ADMIN') {
+    return { success: false, message: 'Tidak memiliki hak akses' };
+  }
+
+  const scheduleId = formData.get('scheduleId') as string;
+  const name = (formData.get('name') as string)?.trim();
+  const code = (formData.get('code') as string)?.trim() || null;
+  const workStart = (formData.get('workStart') as string)?.trim() || '09:00';
+  const workEnd = (formData.get('workEnd') as string)?.trim() || '16:00';
+  const scheduleType = (formData.get('scheduleType') as string) || 'STANDARD';
+  const workDays = (formData.get('workDays') as string)?.trim() || (scheduleType === 'CUSTOM_DAYS' ? '2,4' : '1,2,3,4,5');
+  const monthlyTargetDays = parseInt(formData.get('monthlyTargetDays') as string, 10) || 4;
+  const description = (formData.get('description') as string)?.trim() || null;
+
+  if (!scheduleId || !name) {
+    return { success: false, message: 'ID dan Nama pola jadwal kerja wajib diisi' };
+  }
+
+  await (prisma as any).workSchedule.update({
+    where: { id: scheduleId },
+    data: {
+      name,
+      code,
+      workStart,
+      workEnd,
+      scheduleType,
+      workDays: scheduleType === 'CUSTOM_DAYS' ? workDays : null,
+      monthlyTargetDays: scheduleType === 'MONTHLY_QUOTA' ? monthlyTargetDays : null,
+      description,
+    },
+  });
+
+  // Sinkronkan data ke pegawai yang menggunakan template ini
+  await (prisma as any).user.updateMany({
+    where: { workScheduleId: scheduleId },
+    data: {
+      customWorkStart: workStart,
+      customWorkEnd: workEnd,
+      workScheduleType: scheduleType,
+      workDays: scheduleType === 'CUSTOM_DAYS' ? workDays : null,
+      monthlyTargetDays: scheduleType === 'MONTHLY_QUOTA' ? monthlyTargetDays : null,
+    },
+  });
+
+  revalidatePath('/admin/pengaturan');
+  revalidatePath('/admin/pegawai');
+  revalidatePath('/admin/monitoring');
+
+  return { success: true, message: `Pola jadwal "${name}" berhasil diperbarui!` };
+}
+
+export async function deleteWorkSchedule(scheduleId: string) {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== 'ADMIN') {
+    return { success: false, message: 'Tidak memiliki hak akses' };
+  }
+
+  const assignedCount = await (prisma as any).user.count({
+    where: { workScheduleId: scheduleId },
+  });
+
+  if (assignedCount > 0) {
+    return {
+      success: false,
+      message: `Tidak dapat menghapus pola ini karena sedang digunakan oleh ${assignedCount} pegawai/dosen. Silakan pindahkan jadwal mereka terlebih dahulu.`,
+    };
+  }
+
+  await (prisma as any).workSchedule.delete({
+    where: { id: scheduleId },
+  });
+
+  revalidatePath('/admin/pengaturan');
+  revalidatePath('/admin/pegawai');
+
+  return { success: true, message: 'Pola jadwal berhasil dihapus dari sistem' };
+}
+
+// ==========================================
 // MANAJEMEN PEGAWAI & PENUGASAN LOKASI
 // ==========================================
 
@@ -210,12 +376,36 @@ export async function createEmployee(formData: FormData) {
   const unitKerja = (formData.get('unitKerja') as string)?.trim();
   const atasanId = (formData.get('atasanId') as string) || null;
   const assignedLocationId = (formData.get('assignedLocationId') as string) || null;
-  const customWorkStart = (formData.get('customWorkStart') as string)?.trim() || null;
-  const customWorkEnd = (formData.get('customWorkEnd') as string)?.trim() || null;
-  const workScheduleType = (formData.get('workScheduleType') as string) || 'STANDARD';
-  const workDays = (formData.get('workDays') as string)?.trim() || null;
-  const monthlyTargetDaysStr = formData.get('monthlyTargetDays') as string;
-  const monthlyTargetDays = monthlyTargetDaysStr ? parseInt(monthlyTargetDaysStr, 10) : null;
+  
+  // Sinkronisasi Template Pola Kerja
+  const workScheduleIdRaw = (formData.get('workScheduleId') as string) || null;
+  let finalWorkScheduleId: string | null = null;
+  let finalWorkStart = (formData.get('customWorkStart') as string)?.trim() || null;
+  let finalWorkEnd = (formData.get('customWorkEnd') as string)?.trim() || null;
+  let finalScheduleType = (formData.get('workScheduleType') as string) || 'STANDARD';
+  let finalWorkDays = (formData.get('workDays') as string)?.trim() || null;
+  let finalMonthlyDays = formData.get('monthlyTargetDays') ? parseInt(formData.get('monthlyTargetDays') as string, 10) : null;
+
+  if (workScheduleIdRaw && workScheduleIdRaw !== 'DEFAULT' && workScheduleIdRaw !== 'CUSTOM' && workScheduleIdRaw !== 'none') {
+    const ws = await (prisma as any).workSchedule.findUnique({
+      where: { id: workScheduleIdRaw },
+    });
+    if (ws) {
+      finalWorkScheduleId = ws.id;
+      finalWorkStart = ws.workStart;
+      finalWorkEnd = ws.workEnd;
+      finalScheduleType = ws.scheduleType;
+      finalWorkDays = ws.workDays;
+      finalMonthlyDays = ws.monthlyTargetDays;
+    }
+  } else if (workScheduleIdRaw === 'DEFAULT') {
+    finalWorkScheduleId = null;
+    finalWorkStart = null;
+    finalWorkEnd = null;
+    finalScheduleType = 'STANDARD';
+    finalWorkDays = null;
+    finalMonthlyDays = null;
+  }
 
   if (!nip || !name || !password || !jabatan || !unitKerja) {
     return { success: false, message: 'Semua kolom bertanda bintang (No. ID, Nama, Password, Jabatan, Unit Kerja) wajib diisi' };
@@ -256,11 +446,12 @@ export async function createEmployee(formData: FormData) {
       unitKerja,
       atasanId: atasanId && atasanId !== 'none' ? atasanId : null,
       assignedLocationId: finalLocationId,
-      customWorkStart: customWorkStart || null,
-      customWorkEnd: customWorkEnd || null,
-      workScheduleType: workScheduleType || 'STANDARD',
-      workDays: workScheduleType === 'CUSTOM_DAYS' ? workDays : null,
-      monthlyTargetDays: workScheduleType === 'MONTHLY_QUOTA' ? (monthlyTargetDays || 4) : null,
+      workScheduleId: finalWorkScheduleId,
+      customWorkStart: finalWorkStart || null,
+      customWorkEnd: finalWorkEnd || null,
+      workScheduleType: finalScheduleType || 'STANDARD',
+      workDays: finalScheduleType === 'CUSTOM_DAYS' ? finalWorkDays : null,
+      monthlyTargetDays: finalScheduleType === 'MONTHLY_QUOTA' ? (finalMonthlyDays || 4) : null,
       isActive: true,
     } as any,
   });
@@ -285,12 +476,36 @@ export async function updateEmployee(formData: FormData) {
   const unitKerja = (formData.get('unitKerja') as string)?.trim();
   const atasanId = (formData.get('atasanId') as string) || null;
   const assignedLocationId = (formData.get('assignedLocationId') as string) || null;
-  const customWorkStart = (formData.get('customWorkStart') as string)?.trim() || null;
-  const customWorkEnd = (formData.get('customWorkEnd') as string)?.trim() || null;
-  const workScheduleType = (formData.get('workScheduleType') as string) || 'STANDARD';
-  const workDays = (formData.get('workDays') as string)?.trim() || null;
-  const monthlyTargetDaysStr = formData.get('monthlyTargetDays') as string;
-  const monthlyTargetDays = monthlyTargetDaysStr ? parseInt(monthlyTargetDaysStr, 10) : null;
+  
+  // Sinkronisasi Template Pola Kerja
+  const workScheduleIdRaw = (formData.get('workScheduleId') as string) || null;
+  let finalWorkScheduleId: string | null = null;
+  let finalWorkStart = (formData.get('customWorkStart') as string)?.trim() || null;
+  let finalWorkEnd = (formData.get('customWorkEnd') as string)?.trim() || null;
+  let finalScheduleType = (formData.get('workScheduleType') as string) || 'STANDARD';
+  let finalWorkDays = (formData.get('workDays') as string)?.trim() || null;
+  let finalMonthlyDays = formData.get('monthlyTargetDays') ? parseInt(formData.get('monthlyTargetDays') as string, 10) : null;
+
+  if (workScheduleIdRaw && workScheduleIdRaw !== 'DEFAULT' && workScheduleIdRaw !== 'CUSTOM' && workScheduleIdRaw !== 'none') {
+    const ws = await (prisma as any).workSchedule.findUnique({
+      where: { id: workScheduleIdRaw },
+    });
+    if (ws) {
+      finalWorkScheduleId = ws.id;
+      finalWorkStart = ws.workStart;
+      finalWorkEnd = ws.workEnd;
+      finalScheduleType = ws.scheduleType;
+      finalWorkDays = ws.workDays;
+      finalMonthlyDays = ws.monthlyTargetDays;
+    }
+  } else if (workScheduleIdRaw === 'DEFAULT') {
+    finalWorkScheduleId = null;
+    finalWorkStart = null;
+    finalWorkEnd = null;
+    finalScheduleType = 'STANDARD';
+    finalWorkDays = null;
+    finalMonthlyDays = null;
+  }
 
   if (!userId || !nip || !name || !jabatan || !unitKerja) {
     return { success: false, message: 'Semua kolom wajib diisi' };
@@ -337,11 +552,12 @@ export async function updateEmployee(formData: FormData) {
       unitKerja,
       atasanId: finalAtasanId,
       assignedLocationId: finalLocationId,
-      customWorkStart: customWorkStart || null,
-      customWorkEnd: customWorkEnd || null,
-      workScheduleType: workScheduleType || 'STANDARD',
-      workDays: workScheduleType === 'CUSTOM_DAYS' ? workDays : null,
-      monthlyTargetDays: workScheduleType === 'MONTHLY_QUOTA' ? (monthlyTargetDays || 4) : null,
+      workScheduleId: finalWorkScheduleId,
+      customWorkStart: finalWorkStart || null,
+      customWorkEnd: finalWorkEnd || null,
+      workScheduleType: finalScheduleType || 'STANDARD',
+      workDays: finalScheduleType === 'CUSTOM_DAYS' ? finalWorkDays : null,
+      monthlyTargetDays: finalScheduleType === 'MONTHLY_QUOTA' ? (finalMonthlyDays || 4) : null,
     } as any,
   });
 
