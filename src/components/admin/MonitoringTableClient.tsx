@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import Image from 'next/image';
 import {
   Search,
   Building2,
@@ -10,12 +9,12 @@ import {
   CheckCircle2,
   ClockAlert,
   Briefcase,
-  UserX,
   Camera,
   X,
-  Filter,
   Users,
   Clock,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import { getTimezoneFromCoordinates } from '@/lib/time';
 import { formatDistance, getRegionDescription } from '@/lib/geo';
@@ -203,7 +202,7 @@ export function MonitoringTableClient({
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -244,7 +243,7 @@ export function MonitoringTableClient({
           </div>
         </div>
 
-        {/* Tampilan Desktop: Tabel Lengkap Simetris (hidden md:block) */}
+        {/* Tampilan Desktop: Tabel Lengkap Terstruktur (hidden md:block) */}
         <div className="hidden md:block overflow-x-auto">
           {filteredUsers.length === 0 ? (
             <div className="py-12 px-4 text-center space-y-2">
@@ -270,21 +269,87 @@ export function MonitoringTableClient({
               </button>
             </div>
           ) : (
-            <table className="w-full text-left text-xs">
-              <thead className="bg-sky-50/50 text-slate-600 uppercase tracking-wider text-[10.5px] border-b border-sky-100/80">
-                <tr>
-                  <th className="py-3 px-4 font-bold">Pegawai</th>
-                  <th className="py-3 px-4 font-bold">Unit Kerja</th>
-                  <th className="py-3 px-4 font-bold">Lokasi Presensi</th>
-                  <th className="py-3 px-4 font-bold">Status</th>
-                  <th className="py-3 px-4 font-bold">Masuk</th>
-                  <th className="py-3 px-4 font-bold">Pulang</th>
-                  <th className="py-3 px-4 font-bold">Jarak GPS</th>
-                  <th className="py-3 px-4 font-bold text-center">Foto Bukti</th>
+            <table className="w-full text-left text-xs border-collapse">
+              {/* Header 2 Tingkat: Grup MASUK & Grup PULANG */}
+              <thead>
+                <tr className="bg-sky-50/70 text-slate-700 uppercase tracking-wider text-[10px] border-b border-sky-100">
+                  <th
+                    rowSpan={2}
+                    className="py-3 px-3 font-extrabold text-center w-12 border-r border-sky-100/80"
+                  >
+                    No.
+                  </th>
+                  <th
+                    rowSpan={2}
+                    className="py-3 px-4 font-extrabold border-r border-sky-100/80 min-w-[170px]"
+                  >
+                    Pegawai
+                  </th>
+                  <th
+                    rowSpan={2}
+                    className="py-3 px-3.5 font-extrabold border-r border-sky-100/80 min-w-[130px]"
+                  >
+                    Unit & Jabatan
+                  </th>
+                  <th
+                    rowSpan={2}
+                    className="py-3 px-3 font-extrabold text-center border-r border-sky-100/80 min-w-[100px]"
+                  >
+                    Status
+                  </th>
+
+                  {/* Header Grup PRESENSI MASUK */}
+                  <th
+                    colSpan={3}
+                    className="py-2 px-3 font-black text-center bg-emerald-50 text-emerald-800 border-r border-emerald-200/80 tracking-normal"
+                  >
+                    <span className="flex items-center justify-center gap-1.5">
+                      <LogIn className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Presensi Masuk</span>
+                    </span>
+                  </th>
+
+                  {/* Header Grup PRESENSI PULANG */}
+                  <th
+                    colSpan={3}
+                    className="py-2 px-3 font-black text-center bg-sky-50 text-sky-800 tracking-normal"
+                  >
+                    <span className="flex items-center justify-center gap-1.5">
+                      <LogOut className="w-3.5 h-3.5 text-sky-600" />
+                      <span>Presensi Pulang</span>
+                    </span>
+                  </th>
+                </tr>
+
+                {/* Sub-Header Kolom Masuk & Pulang */}
+                <tr className="bg-slate-50/90 text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                  {/* Kolom Masuk: Waktu, Foto, Lokasi */}
+                  <th className="py-2 px-3 font-bold bg-emerald-50/40 text-emerald-900 border-r border-emerald-100/60 min-w-[90px]">
+                    Jam
+                  </th>
+                  <th className="py-2 px-2 text-center font-bold bg-emerald-50/40 text-emerald-900 border-r border-emerald-100/60 w-14">
+                    Foto
+                  </th>
+                  <th className="py-2 px-3 font-bold bg-emerald-50/40 text-emerald-900 border-r border-sky-100 min-w-[150px]">
+                    Lokasi & Jarak
+                  </th>
+
+                  {/* Kolom Pulang: Waktu, Foto, Lokasi */}
+                  <th className="py-2 px-3 font-bold bg-sky-50/40 text-sky-900 border-r border-sky-100/60 min-w-[90px]">
+                    Jam
+                  </th>
+                  <th className="py-2 px-2 text-center font-bold bg-sky-50/40 text-sky-900 border-r border-sky-100/60 w-14">
+                    Foto
+                  </th>
+                  <th className="py-2 px-3 font-bold bg-sky-50/40 text-sky-900 min-w-[150px]">
+                    Lokasi & Jarak
+                  </th>
                 </tr>
               </thead>
+
+              {/* Isi Data Tabel */}
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredUsers.map((user) => {
+                {filteredUsers.map((user, idx) => {
                   const att = user.attendance;
                   const inTimeInfo = formatTime(att?.clockInTime, att?.clockInLng);
                   const outTimeInfo = formatTime(
@@ -294,8 +359,13 @@ export function MonitoringTableClient({
 
                   return (
                     <tr key={user.id} className="hover:bg-sky-50/30 transition">
-                      {/* Kolom 1: Pegawai */}
-                      <td className="py-3 px-4">
+                      {/* 1. Nomor Urut */}
+                      <td className="py-3 px-3 text-center font-mono font-bold text-slate-500 text-xs border-r border-slate-100">
+                        {idx + 1}
+                      </td>
+
+                      {/* 2. Pegawai */}
+                      <td className="py-3 px-4 border-r border-slate-100">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs uppercase text-slate-600 shrink-0">
                             {user.name.slice(0, 2)}
@@ -311,86 +381,50 @@ export function MonitoringTableClient({
                         </div>
                       </td>
 
-                      {/* Kolom 2: Unit Kerja */}
-                      <td className="py-3 px-4">
-                        <p className="font-medium text-slate-800 truncate max-w-[160px]">
+                      {/* 3. Unit Kerja & Jabatan */}
+                      <td className="py-3 px-3.5 border-r border-slate-100">
+                        <p className="font-medium text-slate-800 truncate max-w-[150px]">
                           {user.unitKerja}
                         </p>
-                        <p className="text-[10px] text-slate-500 truncate max-w-[160px]">
+                        <p className="text-[10px] text-slate-500 truncate max-w-[150px]">
                           {user.jabatan}
                         </p>
                       </td>
 
-                      {/* Kolom 3: Lokasi Presensi & GPS */}
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        {att ? (
-                          <div className="flex flex-col gap-0.5">
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-                              <Building2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                              <span>{att.locationName || 'Kampus STIMI'}</span>
-                            </div>
-                            {att.clockInLat && att.clockInLng && (
-                              <a
-                                href={`https://www.google.com/maps?q=${att.clockInLat},${att.clockInLng}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-[10px] text-sky-600 hover:text-sky-800 hover:underline flex items-center gap-1 font-mono"
-                                title="Buka titik koordinat GPS di Google Maps"
-                              >
-                                <MapPin className="w-2.5 h-2.5 text-rose-500 shrink-0" />
-                                <span>
-                                  {getRegionDescription(att.clockInLat, att.clockInLng) ||
-                                    `${att.clockInLat.toFixed(4)}, ${att.clockInLng.toFixed(4)}`}
-                                </span>
-                                <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
-                              </a>
-                            )}
-                          </div>
-                        ) : user.assignedLocationName ? (
-                          <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                            <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span>Target: {user.assignedLocationName}</span>
-                          </div>
-                        ) : (
-                          <span className="text-[11px] text-slate-400 italic">
-                            Fleksibel (Semua Gedung)
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Kolom 4: Status Kehadiran */}
-                      <td className="py-3 px-4 whitespace-nowrap">
+                      {/* 4. Status Kehadiran */}
+                      <td className="py-3 px-3 whitespace-nowrap text-center border-r border-slate-100">
                         {!att || !att.clockInTime ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-slate-100 text-slate-600">
                             Belum Presensi
                           </span>
                         ) : att.isDinasLuar ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-purple-100 text-purple-800">
                             <Briefcase className="w-3 h-3" /> Dinas Luar
                           </span>
                         ) : att.clockInStatus === 'TEPAT_WAKTU' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-100 text-emerald-800">
                             <CheckCircle2 className="w-3 h-3" /> Tepat Waktu
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-rose-100 text-rose-800">
                             <ClockAlert className="w-3 h-3" /> Terlambat
                           </span>
                         )}
                       </td>
 
-                      {/* Kolom 5: Jam Masuk */}
-                      <td className="py-3 px-4 whitespace-nowrap">
+                      {/* ===== BAGIAN MASUK ===== */}
+                      {/* 5. Jam Masuk */}
+                      <td className="py-3 px-3 whitespace-nowrap border-r border-emerald-100/60 bg-emerald-50/10">
                         {inTimeInfo ? (
                           <div className="flex flex-col">
                             <span className="font-mono font-bold text-slate-900 leading-tight">
                               {inTimeInfo.localTime}{' '}
-                              <span className="text-[9.5px] font-sans font-medium text-slate-500">
+                              <span className="text-[9px] font-sans font-medium text-slate-500">
                                 {inTimeInfo.tzLabel}
                               </span>
                             </span>
                             {inTimeInfo.tzLabel !== 'WITA' && (
-                              <span className="text-[9px] text-slate-400 font-mono">
+                              <span className="text-[8.5px] text-slate-400 font-mono">
                                 ({inTimeInfo.witaTime} WITA)
                               </span>
                             )}
@@ -400,18 +434,110 @@ export function MonitoringTableClient({
                         )}
                       </td>
 
-                      {/* Kolom 6: Jam Pulang */}
-                      <td className="py-3 px-4 whitespace-nowrap">
+                      {/* 6. Foto Masuk */}
+                      <td className="py-3 px-2 text-center border-r border-emerald-100/60 bg-emerald-50/10">
+                        {att?.clockInPhoto ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActivePhotoModal({
+                                type: 'MASUK',
+                                photoUrl: att.clockInPhoto!,
+                                userName: user.name,
+                                userNip: user.nip,
+                                userJabatan: user.jabatan,
+                                timeStr: inTimeInfo
+                                  ? `${inTimeInfo.localTime} ${inTimeInfo.tzLabel}`
+                                  : '-',
+                                status: att.isDinasLuar
+                                  ? 'Dinas Luar'
+                                  : att.clockInStatus === 'TEPAT_WAKTU'
+                                  ? 'Tepat Waktu'
+                                  : 'Terlambat Masuk',
+                                statusType: att.isDinasLuar
+                                  ? 'purple'
+                                  : att.clockInStatus === 'TEPAT_WAKTU'
+                                  ? 'success'
+                                  : 'warning',
+                                location: `${att.locationName || 'Kampus STIMI'}${
+                                  att.clockInLat && att.clockInLng
+                                    ? ` • ${getRegionDescription(
+                                        att.clockInLat,
+                                        att.clockInLng
+                                      )}`
+                                    : ''
+                                }`,
+                              });
+                            }}
+                            className="relative w-8 h-8 rounded-xl overflow-hidden bg-slate-100 border border-emerald-200 shadow-2xs hover:scale-105 transition cursor-pointer mx-auto"
+                            title="Klik untuk zoom Selfie Masuk"
+                          >
+                            <img
+                              src={att.clockInPhoto}
+                              alt={`Masuk ${user.name}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <span className="absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white text-[6.5px] font-black text-center uppercase py-0.2">
+                              Msk
+                            </span>
+                          </button>
+                        ) : (
+                          <span className="text-slate-300 text-xs">-</span>
+                        )}
+                      </td>
+
+                      {/* 7. Lokasi & Jarak Masuk */}
+                      <td className="py-3 px-3 whitespace-nowrap border-r border-sky-100 bg-emerald-50/10">
+                        {att && att.clockInTime ? (
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+                              <Building2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span className="truncate max-w-[130px]">
+                                {att.locationName || 'Kampus STIMI'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px] text-slate-500 font-mono">
+                              {att.clockInDistance !== null && att.clockInDistance !== undefined && (
+                                <span className="font-semibold text-emerald-800">
+                                  {formatDistance(att.clockInDistance)}
+                                </span>
+                              )}
+                              {att.clockInLat && att.clockInLng && (
+                                <a
+                                  href={`https://www.google.com/maps?q=${att.clockInLat},${att.clockInLng}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-sky-600 hover:text-sky-800 hover:underline inline-flex items-center gap-0.5 ml-0.5"
+                                  title="Lihat titik GPS Masuk di Maps"
+                                >
+                                  <MapPin className="w-2.5 h-2.5 text-rose-500 shrink-0" />
+                                  <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ) : user.assignedLocationName ? (
+                          <span className="text-[11px] text-slate-400 italic">
+                            Target: {user.assignedLocationName}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 font-mono">-</span>
+                        )}
+                      </td>
+
+                      {/* ===== BAGIAN PULANG ===== */}
+                      {/* 8. Jam Pulang */}
+                      <td className="py-3 px-3 whitespace-nowrap border-r border-sky-100/60 bg-sky-50/10">
                         {outTimeInfo ? (
                           <div className="flex flex-col">
                             <span className="font-mono font-bold text-slate-800 leading-tight">
                               {outTimeInfo.localTime}{' '}
-                              <span className="text-[9.5px] font-sans font-medium text-slate-500">
+                              <span className="text-[9px] font-sans font-medium text-slate-500">
                                 {outTimeInfo.tzLabel}
                               </span>
                             </span>
                             {outTimeInfo.tzLabel !== 'WITA' && (
-                              <span className="text-[9px] text-slate-400 font-mono">
+                              <span className="text-[8.5px] text-slate-400 font-mono">
                                 ({outTimeInfo.witaTime} WITA)
                               </span>
                             )}
@@ -421,131 +547,101 @@ export function MonitoringTableClient({
                         )}
                       </td>
 
-                      {/* Kolom 7: Jarak GPS */}
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        {att?.clockInDistance !== null && att?.clockInDistance !== undefined ? (
-                          <span className="flex items-center gap-1 font-mono text-slate-700 font-semibold text-xs">
-                            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                            {formatDistance(att.clockInDistance)}
-                          </span>
+                      {/* 9. Foto Pulang */}
+                      <td className="py-3 px-2 text-center border-r border-sky-100/60 bg-sky-50/10">
+                        {att?.clockOutPhoto ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActivePhotoModal({
+                                type: 'PULANG',
+                                photoUrl: att.clockOutPhoto!,
+                                userName: user.name,
+                                userNip: user.nip,
+                                userJabatan: user.jabatan,
+                                timeStr: outTimeInfo
+                                  ? `${outTimeInfo.localTime} ${outTimeInfo.tzLabel}`
+                                  : '-',
+                                status:
+                                  att.clockOutStatus === 'NORMAL'
+                                    ? 'Pulang Normal'
+                                    : att.clockOutStatus === 'PULANG_CEPAT'
+                                    ? 'Pulang Cepat'
+                                    : 'Dinas Luar',
+                                statusType:
+                                  att.clockOutStatus === 'NORMAL'
+                                    ? 'info'
+                                    : att.clockOutStatus === 'PULANG_CEPAT'
+                                    ? 'warning'
+                                    : 'purple',
+                                location: `${att.locationName || 'Kampus STIMI'}${
+                                  att.clockOutLat && att.clockOutLng
+                                    ? ` • ${getRegionDescription(
+                                        att.clockOutLat,
+                                        att.clockOutLng
+                                      )}`
+                                    : ''
+                                }`,
+                              });
+                            }}
+                            className="relative w-8 h-8 rounded-xl overflow-hidden bg-slate-100 border border-sky-200 shadow-2xs hover:scale-105 transition cursor-pointer mx-auto"
+                            title="Klik untuk zoom Selfie Pulang"
+                          >
+                            <img
+                              src={att.clockOutPhoto}
+                              alt={`Pulang ${user.name}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <span className="absolute bottom-0 inset-x-0 bg-sky-600/90 text-white text-[6.5px] font-black text-center uppercase py-0.2">
+                              Plg
+                            </span>
+                          </button>
+                        ) : att?.clockInTime ? (
+                          <div
+                            className="w-8 h-8 rounded-xl bg-slate-50 border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 mx-auto"
+                            title="Belum absen pulang"
+                          >
+                            <Clock className="w-3 h-3 text-slate-300" />
+                            <span className="text-[6.5px] text-slate-400 font-bold">Plg</span>
+                          </div>
                         ) : (
-                          <span className="text-slate-400">-</span>
+                          <span className="text-slate-300 text-xs">-</span>
                         )}
                       </td>
 
-                      {/* Kolom 8: Foto Bukti Selfie (Dual Thumbnails with Lightbox Modal) */}
-                      <td className="py-3 px-4 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center gap-1.5">
-                          {/* Thumbnail Foto Masuk */}
-                          {att?.clockInPhoto ? (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActivePhotoModal({
-                                  type: 'MASUK',
-                                  photoUrl: att.clockInPhoto!,
-                                  userName: user.name,
-                                  userNip: user.nip,
-                                  userJabatan: user.jabatan,
-                                  timeStr: inTimeInfo
-                                    ? `${inTimeInfo.localTime} ${inTimeInfo.tzLabel}`
-                                    : '-',
-                                  status: att.isDinasLuar
-                                    ? 'Dinas Luar'
-                                    : att.clockInStatus === 'TEPAT_WAKTU'
-                                    ? 'Tepat Waktu'
-                                    : 'Terlambat Masuk',
-                                  statusType: att.isDinasLuar
-                                    ? 'purple'
-                                    : att.clockInStatus === 'TEPAT_WAKTU'
-                                    ? 'success'
-                                    : 'warning',
-                                  location: `${att.locationName || 'Kampus STIMI'}${
-                                    att.clockInLat && att.clockInLng
-                                      ? ` • ${getRegionDescription(
-                                          att.clockInLat,
-                                          att.clockInLng
-                                        )}`
-                                      : ''
-                                  }`,
-                                });
-                              }}
-                              className="relative w-8 h-8 rounded-xl overflow-hidden bg-slate-100 border border-emerald-200 shadow-2xs hover:scale-105 transition cursor-pointer group"
-                              title="Klik untuk zoom Selfie Masuk"
-                            >
-                              <img
-                                src={att.clockInPhoto}
-                                alt={`Masuk ${user.name}`}
-                                className="w-full h-full object-cover"
-                              />
-                              <span className="absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white text-[6.5px] font-black text-center uppercase py-0.2">
-                                Msk
+                      {/* 10. Lokasi & Jarak Pulang */}
+                      <td className="py-3 px-3 whitespace-nowrap bg-sky-50/10">
+                        {att?.clockOutTime ? (
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+                              <Building2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                              <span className="truncate max-w-[130px]">
+                                {att.locationName || 'Kampus STIMI'}
                               </span>
-                            </button>
-                          ) : (
-                            <span className="text-slate-300 text-xs">-</span>
-                          )}
-
-                          {/* Thumbnail Foto Pulang */}
-                          {att?.clockOutPhoto ? (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActivePhotoModal({
-                                  type: 'PULANG',
-                                  photoUrl: att.clockOutPhoto!,
-                                  userName: user.name,
-                                  userNip: user.nip,
-                                  userJabatan: user.jabatan,
-                                  timeStr: outTimeInfo
-                                    ? `${outTimeInfo.localTime} ${outTimeInfo.tzLabel}`
-                                    : '-',
-                                  status:
-                                    att.clockOutStatus === 'NORMAL'
-                                      ? 'Pulang Normal'
-                                      : att.clockOutStatus === 'PULANG_CEPAT'
-                                      ? 'Pulang Cepat'
-                                      : 'Dinas Luar',
-                                  statusType:
-                                    att.clockOutStatus === 'NORMAL'
-                                      ? 'info'
-                                      : att.clockOutStatus === 'PULANG_CEPAT'
-                                      ? 'warning'
-                                      : 'purple',
-                                  location: `${att.locationName || 'Kampus STIMI'}${
-                                    att.clockOutLat && att.clockOutLng
-                                      ? ` • ${getRegionDescription(
-                                          att.clockOutLat,
-                                          att.clockOutLng
-                                        )}`
-                                      : ''
-                                  }`,
-                                });
-                              }}
-                              className="relative w-8 h-8 rounded-xl overflow-hidden bg-slate-100 border border-sky-200 shadow-2xs hover:scale-105 transition cursor-pointer group"
-                              title="Klik untuk zoom Selfie Pulang"
-                            >
-                              <img
-                                src={att.clockOutPhoto}
-                                alt={`Pulang ${user.name}`}
-                                className="w-full h-full object-cover"
-                              />
-                              <span className="absolute bottom-0 inset-x-0 bg-sky-600/90 text-white text-[6.5px] font-black text-center uppercase py-0.2">
-                                Plg
-                              </span>
-                            </button>
-                          ) : (
-                            att?.clockInTime && (
-                              <div
-                                className="w-8 h-8 rounded-xl bg-slate-50 border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300"
-                                title="Belum absen pulang"
-                              >
-                                <Clock className="w-3 h-3" />
-                                <span className="text-[6.5px] text-slate-400 font-bold">Plg</span>
-                              </div>
-                            )
-                          )}
-                        </div>
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px] text-slate-500 font-mono">
+                              {att.clockOutDistance !== null && att.clockOutDistance !== undefined && (
+                                <span className="font-semibold text-sky-800">
+                                  {formatDistance(att.clockOutDistance)}
+                                </span>
+                              )}
+                              {att.clockOutLat && att.clockOutLng && (
+                                <a
+                                  href={`https://www.google.com/maps?q=${att.clockOutLat},${att.clockOutLng}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-sky-600 hover:text-sky-800 hover:underline inline-flex items-center gap-0.5 ml-0.5"
+                                  title="Lihat titik GPS Pulang di Maps"
+                                >
+                                  <MapPin className="w-2.5 h-2.5 text-rose-500 shrink-0" />
+                                  <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 italic text-[11px]">Belum</span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -555,14 +651,14 @@ export function MonitoringTableClient({
           )}
         </div>
 
-        {/* Tampilan Mobile: Kartu Ringkas (md:hidden) */}
+        {/* Tampilan Mobile: Kartu Ringkas Responsif (md:hidden) */}
         <div className="block md:hidden divide-y divide-slate-100">
           {filteredUsers.length === 0 ? (
             <div className="py-8 px-4 text-center text-xs text-slate-400">
               Tidak ada data yang sesuai filter
             </div>
           ) : (
-            filteredUsers.map((user) => {
+            filteredUsers.map((user, idx) => {
               const att = user.attendance;
               const inTimeInfo = formatTime(att?.clockInTime, att?.clockInLng);
               const outTimeInfo = formatTime(
@@ -572,179 +668,193 @@ export function MonitoringTableClient({
 
               return (
                 <div key={`mob-${user.id}`} className="p-3.5 space-y-2.5">
+                  {/* Header Baris Mobile: No Urut + Nama & Status */}
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="font-bold text-slate-900 text-xs truncate">{user.name}</p>
-                      <p className="text-[10px] text-slate-500 font-mono">
-                        No. ID: {user.nip} • {user.unitKerja}
-                      </p>
-                      <div className="flex flex-col gap-0.5 mt-1">
-                        <div className="flex items-center gap-1.5 text-[10.5px] text-slate-700 font-medium">
-                          <Building2 className="w-3 h-3 text-sky-600 shrink-0" />
-                          <span className="truncate">
-                            {att?.locationName || user.assignedLocationName || 'Semua Gedung'}
-                          </span>
-                        </div>
-                        {att?.clockInLat && att?.clockInLng && (
-                          <a
-                            href={`https://www.google.com/maps?q=${att.clockInLat},${att.clockInLng}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-[9.5px] text-sky-600 hover:underline flex items-center gap-1 font-mono truncate"
-                          >
-                            <MapPin className="w-2.5 h-2.5 text-rose-500 shrink-0" />
-                            <span className="truncate">
-                              {getRegionDescription(att.clockInLat, att.clockInLng) ||
-                                `${att.clockInLat.toFixed(3)}, ${att.clockInLng.toFixed(3)}`}
-                            </span>
-                            <ExternalLink className="w-2.5 h-2.5 text-slate-400 shrink-0" />
-                          </a>
-                        )}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-6 h-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 text-xs truncate">{user.name}</p>
+                        <p className="text-[10px] text-slate-500 font-mono">
+                          No. ID: {user.nip} • {user.unitKerja}
+                        </p>
                       </div>
                     </div>
 
                     <div className="shrink-0">
                       {!att || !att.clockInTime ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-slate-100 text-slate-600">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-600">
                           Belum Presensi
                         </span>
                       ) : att.isDinasLuar ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-purple-100 text-purple-800">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-100 text-purple-800">
                           <Briefcase className="w-3 h-3" /> Dinas
                         </span>
                       ) : att.clockInStatus === 'TEPAT_WAKTU' ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-100 text-emerald-800">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800">
                           <CheckCircle2 className="w-3 h-3" /> Tepat
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-rose-100 text-rose-800">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-100 text-rose-800">
                           <ClockAlert className="w-3 h-3" /> Lambat
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Jam & Jarak */}
-                  <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100 text-[11px]">
-                    <div>
-                      <span className="text-[9px] text-slate-400 block font-semibold uppercase">
-                        Masuk
-                      </span>
-                      {inTimeInfo ? (
-                        <span className="font-bold text-slate-800 font-mono block">
-                          {inTimeInfo.localTime}{' '}
-                          <span className="text-[8.5px] text-slate-500">{inTimeInfo.tzLabel}</span>
+                  {/* 2 Kolom Mobile: Presensi Masuk & Presensi Pulang */}
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    {/* Blok Masuk */}
+                    <div className="bg-emerald-50/40 p-2 rounded-xl border border-emerald-100/70 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-bold uppercase text-emerald-800 flex items-center gap-1">
+                          <LogIn className="w-3 h-3" /> Masuk
                         </span>
-                      ) : (
-                        <span className="font-bold text-slate-400 font-mono">-</span>
-                      )}
+                        {inTimeInfo && (
+                          <span className="font-mono font-bold text-slate-900 text-xs">
+                            {inTimeInfo.localTime}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-0.5">
+                        {att?.clockInPhoto ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActivePhotoModal({
+                                type: 'MASUK',
+                                photoUrl: att.clockInPhoto!,
+                                userName: user.name,
+                                userNip: user.nip,
+                                userJabatan: user.jabatan,
+                                timeStr: inTimeInfo
+                                  ? `${inTimeInfo.localTime} ${inTimeInfo.tzLabel}`
+                                  : '-',
+                                status: att.isDinasLuar
+                                  ? 'Dinas Luar'
+                                  : att.clockInStatus === 'TEPAT_WAKTU'
+                                  ? 'Tepat Waktu'
+                                  : 'Terlambat Masuk',
+                                statusType: att.isDinasLuar
+                                  ? 'purple'
+                                  : att.clockInStatus === 'TEPAT_WAKTU'
+                                  ? 'success'
+                                  : 'warning',
+                                location: `${att.locationName || 'Kampus STIMI'}${
+                                  att.clockInLat && att.clockInLng
+                                    ? ` • ${getRegionDescription(
+                                        att.clockInLat,
+                                        att.clockInLng
+                                      )}`
+                                    : ''
+                                }`,
+                              });
+                            }}
+                            className="relative w-7 h-7 rounded-lg overflow-hidden bg-white border border-emerald-300 shadow-2xs shrink-0 cursor-pointer"
+                          >
+                            <img
+                              src={att.clockInPhoto}
+                              alt={`Masuk ${user.name}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 font-mono text-[10px]">-</span>
+                        )}
+
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-semibold text-slate-800 truncate">
+                            {att?.locationName || 'Kampus STIMI'}
+                          </p>
+                          {att?.clockInDistance !== null && att?.clockInDistance !== undefined && (
+                            <p className="text-[9px] text-emerald-800 font-mono font-bold">
+                              {formatDistance(att.clockInDistance)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <span className="text-[9px] text-slate-400 block font-semibold uppercase">
-                        Pulang
-                      </span>
-                      {outTimeInfo ? (
-                        <span className="font-bold text-slate-800 font-mono block">
-                          {outTimeInfo.localTime}{' '}
-                          <span className="text-[8.5px] text-slate-500">{outTimeInfo.tzLabel}</span>
+                    {/* Blok Pulang */}
+                    <div className="bg-sky-50/40 p-2 rounded-xl border border-sky-100/70 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-bold uppercase text-sky-800 flex items-center gap-1">
+                          <LogOut className="w-3 h-3" /> Pulang
                         </span>
-                      ) : (
-                        <span className="font-bold text-slate-400 font-mono">-</span>
-                      )}
-                    </div>
+                        {outTimeInfo ? (
+                          <span className="font-mono font-bold text-slate-900 text-xs">
+                            {outTimeInfo.localTime}
+                          </span>
+                        ) : (
+                          <span className="text-[9.5px] italic text-slate-400">Belum</span>
+                        )}
+                      </div>
 
-                    <div>
-                      <span className="text-[9px] text-slate-400 block font-semibold uppercase">
-                        Jarak GPS
-                      </span>
-                      <span className="font-mono font-semibold text-slate-700 block">
-                        {att?.clockInDistance !== null && att?.clockInDistance !== undefined
-                          ? formatDistance(att.clockInDistance)
-                          : '-'}
-                      </span>
+                      <div className="flex items-center gap-2 pt-0.5">
+                        {att?.clockOutPhoto ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActivePhotoModal({
+                                type: 'PULANG',
+                                photoUrl: att.clockOutPhoto!,
+                                userName: user.name,
+                                userNip: user.nip,
+                                userJabatan: user.jabatan,
+                                timeStr: outTimeInfo
+                                  ? `${outTimeInfo.localTime} ${outTimeInfo.tzLabel}`
+                                  : '-',
+                                status:
+                                  att.clockOutStatus === 'NORMAL'
+                                    ? 'Pulang Normal'
+                                    : att.clockOutStatus === 'PULANG_CEPAT'
+                                    ? 'Pulang Cepat'
+                                    : 'Dinas Luar',
+                                statusType:
+                                  att.clockOutStatus === 'NORMAL'
+                                    ? 'info'
+                                    : att.clockOutStatus === 'PULANG_CEPAT'
+                                    ? 'warning'
+                                    : 'purple',
+                                location: `${att.locationName || 'Kampus STIMI'}${
+                                  att.clockOutLat && att.clockOutLng
+                                    ? ` • ${getRegionDescription(
+                                        att.clockOutLat,
+                                        att.clockOutLng
+                                      )}`
+                                    : ''
+                                }`,
+                              });
+                            }}
+                            className="relative w-7 h-7 rounded-lg overflow-hidden bg-white border border-sky-300 shadow-2xs shrink-0 cursor-pointer"
+                          >
+                            <img
+                              src={att.clockOutPhoto}
+                              alt={`Pulang ${user.name}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 font-mono text-[10px]">-</span>
+                        )}
+
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-semibold text-slate-800 truncate">
+                            {att?.clockOutTime
+                              ? att.locationName || 'Kampus STIMI'
+                              : 'Belum Pulang'}
+                          </p>
+                          {att?.clockOutDistance !== null && att?.clockOutDistance !== undefined && (
+                            <p className="text-[9px] text-sky-800 font-mono font-bold">
+                              {formatDistance(att.clockOutDistance)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  {/* Foto Bukti Selfie di Mobile */}
-                  {(att?.clockInPhoto || att?.clockOutPhoto) && (
-                    <div className="flex items-center justify-end gap-2 pt-0.5">
-                      {att?.clockInPhoto && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActivePhotoModal({
-                              type: 'MASUK',
-                              photoUrl: att.clockInPhoto!,
-                              userName: user.name,
-                              userNip: user.nip,
-                              userJabatan: user.jabatan,
-                              timeStr: inTimeInfo
-                                ? `${inTimeInfo.localTime} ${inTimeInfo.tzLabel}`
-                                : '-',
-                              status: att.isDinasLuar
-                                ? 'Dinas Luar'
-                                : att.clockInStatus === 'TEPAT_WAKTU'
-                                ? 'Tepat Waktu'
-                                : 'Terlambat Masuk',
-                              statusType: att.isDinasLuar
-                                ? 'purple'
-                                : att.clockInStatus === 'TEPAT_WAKTU'
-                                ? 'success'
-                                : 'warning',
-                              location: `${att.locationName || 'Kampus STIMI'}${
-                                att.clockInLat && att.clockInLng
-                                  ? ` • ${getRegionDescription(att.clockInLat, att.clockInLng)}`
-                                  : ''
-                              }`,
-                            });
-                          }}
-                          className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg inline-flex items-center gap-1 text-[10px] font-bold transition border border-emerald-200"
-                        >
-                          <Camera className="w-3 h-3" />
-                          <span>Selfie Masuk</span>
-                        </button>
-                      )}
-                      {att?.clockOutPhoto && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActivePhotoModal({
-                              type: 'PULANG',
-                              photoUrl: att.clockOutPhoto!,
-                              userName: user.name,
-                              userNip: user.nip,
-                              userJabatan: user.jabatan,
-                              timeStr: outTimeInfo
-                                ? `${outTimeInfo.localTime} ${outTimeInfo.tzLabel}`
-                                : '-',
-                              status:
-                                att.clockOutStatus === 'NORMAL'
-                                  ? 'Pulang Normal'
-                                  : att.clockOutStatus === 'PULANG_CEPAT'
-                                  ? 'Pulang Cepat'
-                                  : 'Dinas Luar',
-                              statusType:
-                                att.clockOutStatus === 'NORMAL'
-                                  ? 'info'
-                                  : att.clockOutStatus === 'PULANG_CEPAT'
-                                  ? 'warning'
-                                  : 'purple',
-                              location: `${att.locationName || 'Kampus STIMI'}${
-                                att.clockOutLat && att.clockOutLng
-                                  ? ` • ${getRegionDescription(att.clockOutLat, att.clockOutLng)}`
-                                  : ''
-                              }`,
-                            });
-                          }}
-                          className="px-2 py-1 bg-sky-50 hover:bg-sky-100 text-sky-800 rounded-lg inline-flex items-center gap-1 text-[10px] font-bold transition border border-sky-200"
-                        >
-                          <Camera className="w-3 h-3" />
-                          <span>Selfie Pulang</span>
-                        </button>
-                      )}
-                    </div>
-                  )}
                 </div>
               );
             })

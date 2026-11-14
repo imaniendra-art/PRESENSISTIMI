@@ -107,6 +107,21 @@ export default async function AdminMonitoringPage({
       );
     }
 
+    let calculatedOutDist = att?.clockOutDistance;
+    if (
+      (calculatedOutDist === null || calculatedOutDist === undefined || calculatedOutDist === 0) &&
+      att?.clockOutLat &&
+      att?.clockOutLng &&
+      campusSetting
+    ) {
+      calculatedOutDist = calculateHaversineDistance(
+        att.clockOutLat,
+        att.clockOutLng,
+        campusSetting.latitude,
+        campusSetting.longitude
+      );
+    }
+
     return {
       id: u.id,
       name: u.name,
@@ -129,7 +144,7 @@ export default async function AdminMonitoringPage({
             clockOutLng: att.clockOutLng,
             clockOutPhoto: att.clockOutPhoto,
             clockOutStatus: att.clockOutStatus,
-            clockOutDistance: att.clockOutDistance,
+            clockOutDistance: calculatedOutDist,
             isDinasLuar: att.isDinasLuar,
           }
         : null,
