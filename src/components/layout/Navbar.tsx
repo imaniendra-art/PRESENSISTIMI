@@ -13,7 +13,6 @@ import {
   LogOut,
   Clock,
   ShieldAlert,
-  User,
 } from 'lucide-react';
 
 export function Navbar() {

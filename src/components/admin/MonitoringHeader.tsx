@@ -129,6 +129,7 @@ export function MonitoringHeader({
               type="date"
               value={currentDateStr}
               onChange={(e) => handleDateChange(e.target.value)}
+              title={formattedDateDisplay}
               className="bg-transparent text-xs font-bold font-mono text-slate-800 focus:outline-none cursor-pointer"
             />
             {isToday ? (

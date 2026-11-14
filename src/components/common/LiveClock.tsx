@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import { Clock } from 'lucide-react';
 
 interface LiveClockProps {
@@ -8,15 +8,20 @@ interface LiveClockProps {
   timezone?: string;
 }
 
+const emptySubscribe = () => () => {};
+
 export function LiveClock({
   className = '',
   timezone = 'Asia/Makassar',
 }: LiveClockProps) {
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const [time, setTime] = useState<string>('');
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const update = () => {
       try {
         const str = new Date().toLocaleTimeString('id-ID', {
@@ -51,7 +56,7 @@ export function LiveClock({
         <Clock className="w-3 h-3" />
       </div>
       <span className="text-[11px] sm:text-xs font-bold font-mono text-slate-800 tabular-nums leading-none whitespace-nowrap">
-        {mounted && time ? time : '--:--:--'}
+        {isMounted && time ? time : '--:--:--'}
       </span>
     </div>
   );

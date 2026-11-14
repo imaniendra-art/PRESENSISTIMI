@@ -3,7 +3,6 @@ import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/layout/Navbar';
-import { getStartOfDay } from '@/lib/time';
 import { calculateHaversineDistance } from '@/lib/geo';
 import { MonitoringHeader } from '@/components/admin/MonitoringHeader';
 import {
@@ -181,11 +180,11 @@ export default async function AdminMonitoringPage({
       jabatan: u.jabatan || 'Staf',
       unitKerja: u.unitKerja || 'Unit Lainnya',
       assignedLocationName: u.assignedLocation?.name || null,
-      customWorkStart: (u as any).customWorkStart || null,
-      customWorkEnd: (u as any).customWorkEnd || null,
-      workScheduleType: (u as any).workScheduleType || null,
-      workDays: (u as any).workDays || null,
-      monthlyTargetDays: (u as any).monthlyTargetDays || null,
+      customWorkStart: u.customWorkStart || null,
+      customWorkEnd: u.customWorkEnd || null,
+      workScheduleType: u.workScheduleType || null,
+      workDays: u.workDays || null,
+      monthlyTargetDays: u.monthlyTargetDays || null,
       activeLeave: userLeave
         ? {
             id: userLeave.id,

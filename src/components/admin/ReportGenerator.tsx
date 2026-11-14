@@ -7,7 +7,6 @@ import * as XLSX from 'xlsx';
 import {
   FileSpreadsheet,
   Printer,
-  Filter,
   Users,
   CheckCircle2,
   Clock,
@@ -19,9 +18,7 @@ import {
   Calendar,
   Briefcase,
   MapPin,
-  Timer,
   AlertTriangle,
-  Award,
   X,
   ClockAlert,
 } from 'lucide-react';

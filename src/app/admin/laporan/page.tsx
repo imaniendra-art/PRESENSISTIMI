@@ -342,7 +342,7 @@ export default async function AdminLaporanPage({ searchParams }: AdminLaporanPag
       let clockOutStatusLabel: string | null = null;
       let durationMinutes = 0;
       let durationDisplay = '-';
-      let locationDisplay =
+      const locationDisplay =
         att?.locationName ||
         att?.location?.name ||
         u.assignedLocation?.name ||

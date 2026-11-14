@@ -29,7 +29,7 @@ export async function updateCampusSettings(formData: FormData) {
 
   const existing = await prisma.campusSetting.findFirst();
 
-  const payload: any = {
+  const payload = {
     campusName,
     address,
     workStart,
@@ -391,7 +391,7 @@ export async function createEmployee(formData: FormData) {
   let finalMonthlyDays = formData.get('monthlyTargetDays') ? parseInt(formData.get('monthlyTargetDays') as string, 10) : null;
 
   if (workScheduleIdRaw && workScheduleIdRaw !== 'DEFAULT' && workScheduleIdRaw !== 'CUSTOM' && workScheduleIdRaw !== 'none') {
-    const ws = await (prisma as any).workSchedule.findUnique({
+    const ws = await prisma.workSchedule.findUnique({
       where: { id: workScheduleIdRaw },
     });
     if (ws) {
@@ -457,7 +457,7 @@ export async function createEmployee(formData: FormData) {
       workDays: finalScheduleType === 'CUSTOM_DAYS' ? finalWorkDays : null,
       monthlyTargetDays: finalScheduleType === 'MONTHLY_QUOTA' ? (finalMonthlyDays || 4) : null,
       isActive: true,
-    } as any,
+    },
   });
 
   revalidatePath('/admin/pegawai');
@@ -491,7 +491,7 @@ export async function updateEmployee(formData: FormData) {
   let finalMonthlyDays = formData.get('monthlyTargetDays') ? parseInt(formData.get('monthlyTargetDays') as string, 10) : null;
 
   if (workScheduleIdRaw && workScheduleIdRaw !== 'DEFAULT' && workScheduleIdRaw !== 'CUSTOM' && workScheduleIdRaw !== 'none') {
-    const ws = await (prisma as any).workSchedule.findUnique({
+    const ws = await prisma.workSchedule.findUnique({
       where: { id: workScheduleIdRaw },
     });
     if (ws) {
@@ -562,7 +562,7 @@ export async function updateEmployee(formData: FormData) {
       workScheduleType: finalScheduleType || 'STANDARD',
       workDays: finalScheduleType === 'CUSTOM_DAYS' ? finalWorkDays : null,
       monthlyTargetDays: finalScheduleType === 'MONTHLY_QUOTA' ? (finalMonthlyDays || 4) : null,
-    } as any,
+    },
   });
 
   revalidatePath('/admin/pegawai');

@@ -160,6 +160,10 @@ export async function submitClockIn(data: {
     include: { assignedLocation: true },
   });
 
+  if (!user) {
+    return { success: false, message: 'Data akun pegawai tidak ditemukan' };
+  }
+
   // Ambil pengaturan jam kerja kampus
   const campusSetting = await prisma.campusSetting.findFirst();
   if (!campusSetting) {
@@ -167,7 +171,7 @@ export async function submitClockIn(data: {
   }
 
   // Validasi Jendela Waktu Buka Presensi Pagi (Earliest Clock In)
-  const earliest = (campusSetting as any).earliestClockIn;
+  const earliest = campusSetting.earliestClockIn;
   if (earliest && typeof earliest === 'string' && earliest.includes(':')) {
     const [eH, eM] = earliest.split(':').map(Number);
     const nowWitaHour = (now.getUTCHours() + 8) % 24;
@@ -291,7 +295,7 @@ export async function submitClockIn(data: {
   }
 
   // Evaluasi status keterlambatan (gunakan jam masuk khusus jika disetel untuk dosen tersebut)
-  const effectiveWorkStart = (user as any).customWorkStart || campusSetting.workStart;
+  const effectiveWorkStart = user.customWorkStart || campusSetting.workStart;
   const status = evaluateClockInStatus(
     now,
     effectiveWorkStart,
@@ -420,6 +424,10 @@ export async function submitClockOut(data: {
     include: { assignedLocation: true },
   });
 
+  if (!user) {
+    return { success: false, message: 'Data akun pegawai tidak ditemukan' };
+  }
+
   const activeLocations = await prisma.campusLocation.findMany({
     where: { isActive: true },
   });
@@ -487,9 +495,9 @@ export async function submitClockOut(data: {
   // Evaluasi status kepulangan (gunakan jam pulang khusus dosen jika disetel)
   const userRecord = await prisma.user.findUnique({
     where: { id: userId },
-    select: { customWorkEnd: true } as any,
+    select: { customWorkEnd: true },
   });
-  const effectiveWorkEnd = (userRecord as any)?.customWorkEnd || campusSetting.workEnd;
+  const effectiveWorkEnd = userRecord?.customWorkEnd || campusSetting.workEnd;
   const status = evaluateClockOutStatus(now, effectiveWorkEnd, existing.isDinasLuar, data.longitude);
 
   await prisma.attendance.update({
@@ -698,7 +706,7 @@ export async function submitQuickPresence(data: {
   let resolvedLocationName: string = campusSetting.campusName;
   let recordedDistance = 0;
 
-  const isFriday = (campusSetting as any).wfaFriday !== false && now.getDay() === 5;
+  const isFriday = campusSetting.wfaFriday !== false && now.getDay() === 5;
   const isDinasLuar = Boolean(data.isDinasLuar);
 
   if (isDinasLuar) {
@@ -823,7 +831,7 @@ export async function submitQuickPresence(data: {
   // KONDISI 1: Belum Presensi Masuk -> Lakukan Clock In
   if (!existing || !existing.clockInTime) {
     // Validasi Jendela Buka Presensi Pagi (Earliest Clock In)
-    const earliest = (campusSetting as any).earliestClockIn;
+    const earliest = campusSetting.earliestClockIn;
     if (earliest && typeof earliest === 'string' && earliest.includes(':')) {
       const [eH, eM] = earliest.split(':').map(Number);
       const nowWitaHour = (now.getUTCHours() + 8) % 24;
@@ -847,7 +855,7 @@ export async function submitQuickPresence(data: {
       return { success: false, message: 'Gagal memproses dan mengompres foto selfie' };
     }
 
-    const effectiveWorkStart = (user as any).customWorkStart || campusSetting.workStart;
+    const effectiveWorkStart = user.customWorkStart || campusSetting.workStart;
     const clockInStatus = isDinasLuar
       ? 'DINAS_LUAR'
       : evaluateClockInStatus(
@@ -932,7 +940,7 @@ export async function submitQuickPresence(data: {
     }
 
     const isDinasLuarOut = isDinasLuar || existing.isDinasLuar;
-    const effectiveWorkEnd = (user as any).customWorkEnd || campusSetting.workEnd;
+    const effectiveWorkEnd = user.customWorkEnd || campusSetting.workEnd;
     const clockOutStatus = isDinasLuarOut
       ? 'DINAS_LUAR'
       : evaluateClockOutStatus(now, effectiveWorkEnd, false, data.longitude);

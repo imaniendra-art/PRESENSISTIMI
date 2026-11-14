@@ -1,18 +1,16 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import {
   Search,
-  Building2,
   MapPin,
-  ExternalLink,
   CheckCircle2,
   ClockAlert,
   Briefcase,
   Camera,
   X,
   Users,
-  Clock,
   LogIn,
   LogOut,
   CalendarOff,
@@ -169,18 +167,18 @@ export function MonitoringTableClient({
   const [activePhotoModal, setActivePhotoModal] = useState<ActivePhotoModalData | null>(null);
 
   // Helper untuk menentukan apakah dosen bebas tugas hari ini
-  const isUserOffToday = (u: MonitoringUserRow) => {
+  const isUserOffToday = useCallback((u: MonitoringUserRow) => {
     return (
       targetDayOfWeek !== undefined &&
       u.workScheduleType === 'CUSTOM_DAYS' &&
       Boolean(u.workDays) &&
       !u.workDays!.split(',').map((s) => s.trim()).includes(String(targetDayOfWeek))
     );
-  };
+  }, [targetDayOfWeek]);
 
-  const isUserMonthlyQuota = (u: MonitoringUserRow) => {
+  const isUserMonthlyQuota = useCallback((u: MonitoringUserRow) => {
     return u.workScheduleType === 'MONTHLY_QUOTA';
-  };
+  }, []);
 
   // Ambil daftar unik Unit Kerja untuk dropdown filter
   const unitList = useMemo(() => {
@@ -266,7 +264,7 @@ export function MonitoringTableClient({
         !u.activeDutyTrip &&
         (isUserOffToday(u) || isUserMonthlyQuota(u))
     ).length;
-  }, [users, targetDayOfWeek]);
+  }, [users, isUserOffToday, isUserMonthlyQuota]);
 
   const countBelumMurni = useMemo(() => {
     return users.filter(
@@ -277,7 +275,7 @@ export function MonitoringTableClient({
         !isUserOffToday(u) &&
         !isUserMonthlyQuota(u)
     ).length;
-  }, [users, targetDayOfWeek]);
+  }, [users, isUserOffToday, isUserMonthlyQuota]);
 
   // Filter client-side instan
   const filteredUsers = useMemo(() => {
@@ -330,7 +328,7 @@ export function MonitoringTableClient({
 
       return true;
     });
-  }, [users, searchQuery, unitFilter, statusFilter, targetDayOfWeek]);
+  }, [users, searchQuery, unitFilter, statusFilter, isUserOffToday, isUserMonthlyQuota]);
 
   return (
     <>
@@ -716,10 +714,12 @@ export function MonitoringTableClient({
                             className="relative w-7 h-7 rounded-lg overflow-hidden bg-slate-100 border border-emerald-200 shadow-2xs hover:scale-105 transition cursor-pointer mx-auto"
                             title="Klik untuk zoom Selfie Masuk"
                           >
-                            <img
+                            <Image
                               src={att.clockInPhoto}
                               alt={`Masuk ${user.name}`}
-                              className="w-full h-full object-cover"
+                              fill
+                              unoptimized
+                              className="object-cover"
                             />
                             <span className="absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white text-[6px] font-black text-center uppercase py-0.2">
                               Msk
@@ -859,10 +859,12 @@ export function MonitoringTableClient({
                             className="relative w-7 h-7 rounded-lg overflow-hidden bg-slate-100 border border-sky-200 shadow-2xs hover:scale-105 transition cursor-pointer mx-auto"
                             title="Klik untuk zoom Selfie Pulang"
                           >
-                            <img
+                            <Image
                               src={att.clockOutPhoto}
                               alt={`Pulang ${user.name}`}
-                              className="w-full h-full object-cover"
+                              fill
+                              unoptimized
+                              className="object-cover"
                             />
                             <span className="absolute bottom-0 inset-x-0 bg-sky-600/90 text-white text-[6px] font-black text-center uppercase py-0.2">
                               Plg
@@ -1114,10 +1116,12 @@ export function MonitoringTableClient({
                             className="relative w-8 h-8 rounded-lg overflow-hidden bg-white border border-emerald-300 shadow-2xs shrink-0 cursor-pointer hover:scale-105 transition"
                             title="Klik untuk zoom Foto Masuk"
                           >
-                            <img
+                            <Image
                               src={att.clockInPhoto}
                               alt={`Masuk ${user.name}`}
-                              className="w-full h-full object-cover"
+                              fill
+                              unoptimized
+                              className="object-cover"
                             />
                             <span className="absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white text-[6px] font-black text-center uppercase py-0.2">
                               Msk
@@ -1271,10 +1275,12 @@ export function MonitoringTableClient({
                             className="relative w-8 h-8 rounded-lg overflow-hidden bg-white border border-sky-300 shadow-2xs shrink-0 cursor-pointer hover:scale-105 transition"
                             title="Klik untuk zoom Foto Pulang"
                           >
-                            <img
+                            <Image
                               src={att.clockOutPhoto}
                               alt={`Pulang ${user.name}`}
-                              className="w-full h-full object-cover"
+                              fill
+                              unoptimized
+                              className="object-cover"
                             />
                             <span className="absolute bottom-0 inset-x-0 bg-sky-600/90 text-white text-[6px] font-black text-center uppercase py-0.2">
                               Plg
@@ -1375,10 +1381,12 @@ export function MonitoringTableClient({
 
             {/* Area Tampilan Foto */}
             <div className="relative w-full aspect-square bg-slate-950 flex items-center justify-center overflow-hidden">
-              <img
+              <Image
                 src={activePhotoModal.photoUrl}
                 alt={`Selfie ${activePhotoModal.type} - ${activePhotoModal.userName}`}
-                className="w-full h-full object-contain"
+                fill
+                unoptimized
+                className="object-contain"
               />
             </div>
 

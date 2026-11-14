@@ -97,7 +97,7 @@ export default async function AdminDashboardPage() {
     }),
   ]);
 
-  const isWfaToday = Boolean((campusSetting as any)?.wfaFriday !== false && isFriday);
+  const isWfaToday = Boolean(campusSetting?.wfaFriday !== false && isFriday);
 
   // Metrik Utama Hari Ini
   const hadirMasuk = attendancesToday.filter((a) => a.clockInTime).length;

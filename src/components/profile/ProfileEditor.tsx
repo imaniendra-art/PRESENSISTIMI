@@ -19,8 +19,6 @@ import {
   Loader2,
   Building2,
   ShieldCheck,
-  Briefcase,
-  MapPin,
   Calendar,
 } from 'lucide-react';
 

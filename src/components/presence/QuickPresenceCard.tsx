@@ -66,7 +66,21 @@ export function QuickPresenceCard({
   campusLocations = [],
 }: QuickPresenceCardProps) {
   // Saved IDs di Perangkat (localStorage)
-  const [savedEmployees, setSavedEmployees] = useState<SavedEmployee[]>([]);
+  const [savedEmployees, setSavedEmployees] = useState<SavedEmployee[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
+    } catch {
+      // Abaikan error storage
+    }
+    return [];
+  });
   // GPS State
   const [coords, setCoords] = useState<{
     lat: number;
@@ -124,22 +138,7 @@ export function QuickPresenceCard({
     };
   }, []);
 
-  // Muat No. ID yang tersimpan di perangkat (localStorage)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) {
-            setSavedEmployees(parsed);
-          }
-        }
-      } catch {
-        // Abaikan error storage
-      }
-    }
-  }, []);
+
 
   // Simpan No. ID ke memori perangkat
   const saveEmployeeToLocal = useCallback((nip: string, name: string) => {

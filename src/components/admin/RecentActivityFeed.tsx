@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Users,
   ArrowUpRight,
@@ -11,10 +12,6 @@ import {
   Camera,
   X,
   MapPin,
-  CheckCircle2,
-  AlertTriangle,
-  Briefcase,
-  Maximize2,
 } from 'lucide-react';
 import { getTimezoneFromCoordinates } from '@/lib/time';
 import { getRegionDescription } from '@/lib/geo';
@@ -223,10 +220,12 @@ export function RecentActivityFeed({ initialActivities }: RecentActivityFeedProp
                           className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden bg-slate-100 border border-emerald-200/90 shadow-2xs hover:scale-105 transition group cursor-pointer"
                           title="Klik untuk perbesar Selfie Masuk"
                         >
-                          <img
+                          <Image
                             src={att.clockInPhoto}
                             alt={`Selfie Masuk ${att.user.name}`}
-                            className="w-full h-full object-cover"
+                            fill
+                            unoptimized
+                            className="object-cover"
                           />
                           <span className="absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white text-[7px] font-black text-center uppercase tracking-tighter leading-none py-0.5">
                             Msk
@@ -282,10 +281,12 @@ export function RecentActivityFeed({ initialActivities }: RecentActivityFeedProp
                           className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden bg-slate-100 border border-sky-200/90 shadow-2xs hover:scale-105 transition group cursor-pointer"
                           title="Klik untuk perbesar Selfie Pulang"
                         >
-                          <img
+                          <Image
                             src={att.clockOutPhoto}
                             alt={`Selfie Pulang ${att.user.name}`}
-                            className="w-full h-full object-cover"
+                            fill
+                            unoptimized
+                            className="object-cover"
                           />
                           <span className="absolute bottom-0 inset-x-0 bg-sky-600/90 text-white text-[7px] font-black text-center uppercase tracking-tighter leading-none py-0.5">
                             Plg
@@ -435,10 +436,12 @@ export function RecentActivityFeed({ initialActivities }: RecentActivityFeedProp
 
             {/* Area Tampilan Foto */}
             <div className="relative w-full aspect-square bg-slate-950 flex items-center justify-center overflow-hidden">
-              <img
+              <Image
                 src={activePhotoModal.photoUrl}
                 alt={`Selfie ${activePhotoModal.type} - ${activePhotoModal.userName}`}
-                className="w-full h-full object-contain"
+                fill
+                unoptimized
+                className="object-contain"
               />
             </div>
 

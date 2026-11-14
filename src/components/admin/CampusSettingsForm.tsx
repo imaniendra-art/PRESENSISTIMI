@@ -27,9 +27,7 @@ import {
   X,
   Users,
   ShieldCheck,
-  Calendar,
   CalendarDays,
-  Target,
   Sparkles,
   Sliders,
   Laptop,
@@ -128,7 +126,10 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
 
   const openEditScheduleModal = (ws: WorkScheduleItem) => {
     setSelectedSchedule(ws);
-    setScheduleTypeState((ws.scheduleType as any) || 'STANDARD');
+    const validScheduleTypes = ['STANDARD', 'CUSTOM_DAYS', 'MONTHLY_QUOTA'] as const;
+    const isScheduleType = (v: unknown): v is 'STANDARD' | 'CUSTOM_DAYS' | 'MONTHLY_QUOTA' =>
+      typeof v === 'string' && (validScheduleTypes as readonly string[]).includes(v);
+    setScheduleTypeState(isScheduleType(ws.scheduleType) ? ws.scheduleType : 'STANDARD');
     if (ws.workDays) {
       setScheduleDaysState(ws.workDays.split(',').map((s) => s.trim()));
     } else {

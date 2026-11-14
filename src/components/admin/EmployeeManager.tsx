@@ -26,7 +26,6 @@ import {
   Search,
   X,
   Users,
-  Building2,
   MapPin,
   ArrowUpDown,
   ArrowUp,
@@ -35,8 +34,6 @@ import {
   GraduationCap,
   ShieldCheck,
   Clock,
-  CalendarDays,
-  Target,
 } from 'lucide-react';
 import { User as PrismaUser, CampusLocation } from '@prisma/client';
 
@@ -227,7 +224,12 @@ export function EmployeeManager({ users, superiors, campusLocations, workSchedul
         : 'DEFAULT'
     );
     setEditScheduleChoice(initialChoice);
-    const schedType = (user.workScheduleType as any) || 'STANDARD';
+    const validScheduleTypes = ['STANDARD', 'CUSTOM_DAYS', 'MONTHLY_QUOTA'] as const;
+    const schedType =
+      typeof user.workScheduleType === 'string' &&
+      (validScheduleTypes as readonly string[]).includes(user.workScheduleType)
+        ? (user.workScheduleType as 'STANDARD' | 'CUSTOM_DAYS' | 'MONTHLY_QUOTA')
+        : 'STANDARD';
     setScheduleType(schedType);
     if (user.workDays) {
       setSelectedDays(user.workDays.split(',').map((s) => s.trim()));
@@ -345,7 +347,7 @@ export function EmployeeManager({ users, superiors, campusLocations, workSchedul
       if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [users, searchQuery, filterRole, filterLocation, sortField, sortDirection]);
+  }, [users, searchQuery, filterRole, filterLocation, filterStatus, sortField, sortDirection]);
 
   // Handler: Ekspor Data Pegawai ke Excel (.xlsx)
   const handleExportEmployees = () => {

@@ -19,7 +19,7 @@ export default async function AdminPegawaiPage() {
         atasan: true,
         assignedLocation: true,
         workSchedule: true,
-      } as any,
+      },
       orderBy: { createdAt: 'desc' },
     }),
     prisma.user.findMany({
