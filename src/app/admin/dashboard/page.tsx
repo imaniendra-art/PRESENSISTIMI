@@ -166,11 +166,16 @@ export default async function AdminDashboardPage() {
   // 5 Presensi Masuk Terkini
   const recentClockIns = attendancesToday.filter((a) => a.clockInTime).slice(0, 5);
 
-  const formattedToday = today.toLocaleDateString('id-ID', {
-    weekday: 'long',
+  const formattedShortDate = today.toLocaleDateString('id-ID', {
+    weekday: 'short',
     day: 'numeric',
-    month: 'long',
+    month: 'short',
     year: 'numeric',
+  });
+
+  const formattedMobileDate = today.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
   });
 
   return (
@@ -179,129 +184,202 @@ export default async function AdminDashboardPage() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Soft Sky Hero Card - Simetris & Terstruktur */}
-        <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-3xl p-5 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-          {/* Sisi Kiri: Identitas & Tanggal */}
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/90 border border-sky-200/80 text-sky-700 shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
-              <span>Monitoring Presensi Real-Time</span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Overview Kehadiran STIMI
+        <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-3xl p-4 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Sisi Kiri: Menumpuk 2 Baris Bersih */}
+          <div>
+            <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+              Overview Kehadiran
             </h1>
-            <p className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-              <Calendar className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-              <span>{formattedToday}</span>
+            <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-0.5">
+              STIMI YAPMI Makassar
             </p>
           </div>
 
-          {/* Sisi Kanan: 3 Pill Box Simetris */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full lg:w-auto shrink-0">
-            {/* Box 1: Jam Operasional */}
-            <div className="flex items-center gap-3 px-3.5 py-2.5 bg-white/90 border border-sky-100 rounded-2xl shadow-2xs">
-              <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100/60">
+          {/* Sisi Kanan Versi Desktop: 4 Pill Box Simetris Sejajar */}
+          <div className="hidden lg:flex items-center gap-2.5 shrink-0">
+            {/* Box 1: Hari & Tanggal */}
+            <div className="flex items-center gap-2.5 px-3 py-2 bg-white/90 border border-sky-100 rounded-2xl shadow-2xs">
+              <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100/60">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                  Hari & Tanggal
+                </span>
+                <span className="text-xs font-bold text-slate-800 block whitespace-nowrap">
+                  {formattedShortDate}
+                </span>
+              </div>
+            </div>
+
+            {/* Box 2: Jam Kerja */}
+            <div className="flex items-center gap-2.5 px-3 py-2 bg-white/90 border border-sky-100 rounded-2xl shadow-2xs">
+              <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100/60">
                 <Clock className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider truncate">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
                   Jam Kerja
                 </span>
-                <span className="text-xs font-bold text-slate-800 font-mono block truncate">
+                <span className="text-xs font-bold text-slate-800 font-mono block whitespace-nowrap">
                   {campusSetting?.workStart} - {campusSetting?.workEnd} WITA
                 </span>
               </div>
             </div>
 
-            {/* Box 2: Radius Geofence */}
+            {/* Box 3: Radius Geofence */}
             <Link
               href="/admin/pengaturan"
-              className="flex items-center gap-3 px-3.5 py-2.5 bg-white/90 hover:bg-white border border-sky-100 hover:border-sky-300 rounded-2xl shadow-2xs transition group cursor-pointer"
+              className="flex items-center gap-2.5 px-3 py-2 bg-white/90 hover:bg-white border border-sky-100 hover:border-sky-300 rounded-2xl shadow-2xs transition group cursor-pointer"
               title="Klik untuk konfigurasi radius geofence"
             >
-              <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white flex items-center justify-center shrink-0 border border-sky-100/60 transition shadow-2xs">
+              <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white flex items-center justify-center shrink-0 border border-sky-100/60 transition shadow-2xs">
                 <MapPin className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider truncate">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
                   Radius Geofence
                 </span>
-                <span className="text-xs font-bold text-slate-800 font-mono group-hover:text-sky-700 transition block truncate">
+                <span className="text-xs font-bold text-slate-800 font-mono group-hover:text-sky-700 transition block whitespace-nowrap">
                   {campusSetting?.radiusMeters} Meter
                 </span>
               </div>
             </Link>
 
-            {/* Box 3: Pola Kehadiran Hari Ini */}
-            <div className="flex items-center gap-3 px-3.5 py-2.5 bg-white/90 border border-sky-100 rounded-2xl shadow-2xs">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100/60">
+            {/* Box 4: Pola Hari Ini */}
+            <div className="flex items-center gap-2.5 px-3 py-2 bg-white/90 border border-sky-100 rounded-2xl shadow-2xs">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100/60">
                 <Building2 className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider truncate">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
                   Pola Hari Ini
                 </span>
-                <span className="text-xs font-bold text-slate-800 block truncate">
+                <span className="text-xs font-bold text-slate-800 block whitespace-nowrap">
                   {isFriday ? 'WFA Fleksibel' : 'WFO Kampus'}
                 </span>
               </div>
             </div>
           </div>
+
+          {/* Sisi Bawah Versi Mobile: 4 Icon Keterangan 1-Baris Saja (Hemat Ruang & Elegan) */}
+          <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-sky-100/80 lg:hidden w-full">
+            <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs">
+              <Calendar className="w-3 h-3 text-sky-600 shrink-0" />
+              <span className="text-[10px] font-bold text-slate-800 truncate">
+                {formattedMobileDate}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs">
+              <Clock className="w-3 h-3 text-sky-600 shrink-0" />
+              <span className="text-[10px] font-bold text-slate-800 font-mono truncate">
+                {campusSetting?.workStart}-{campusSetting?.workEnd}
+              </span>
+            </div>
+
+            <Link
+              href="/admin/pengaturan"
+              className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs hover:border-sky-300 transition"
+              title="Radius Kampus"
+            >
+              <MapPin className="w-3 h-3 text-sky-600 shrink-0" />
+              <span className="text-[10px] font-bold text-slate-800 font-mono truncate">
+                {campusSetting?.radiusMeters}m
+              </span>
+            </Link>
+
+            <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs">
+              <Building2 className="w-3 h-3 text-emerald-600 shrink-0" />
+              <span className="text-[10px] font-bold text-slate-800 truncate">
+                {isFriday ? 'WFA' : 'WFO'}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Metrik Utama (Responsif: 2 kolom di HP, 4 kolom di layar lebar) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-indigo-200 transition">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Pegawai</span>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shrink-0">
-                <Users className="w-4 h-4" />
+        {/* Metrik Utama (Responsif: 1 baris 4 kolom di HP & Desktop) */}
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-4 w-full">
+          <div className="bg-white p-2 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:border-indigo-200 transition">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <span className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+                <span className="sm:hidden">Total</span>
+                <span className="hidden sm:inline">Total Pegawai</span>
+              </span>
+              <div className="w-5 h-5 sm:w-9 sm:h-9 rounded-md sm:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shrink-0">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4" />
               </div>
             </div>
-            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums">{totalPegawai}</p>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1 truncate">{totalAtasan} Pejabat Penilai</p>
-          </div>
-
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-emerald-200 transition">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Hadir Hari Ini</span>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
-                <CheckCircle2 className="w-4 h-4" />
-              </div>
-            </div>
-            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums">
-              {hadirMasuk}{' '}
-              <span className="text-xs font-semibold text-emerald-600 font-sans">({persentaseHadir}%)</span>
+            <p className="text-sm sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+              {totalPegawai}
             </p>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1 truncate">{tepatWaktu} Tepat Waktu</p>
+            <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
+              {totalAtasan} <span className="hidden sm:inline">Pejabat Penilai</span><span className="sm:hidden">Atasan</span>
+            </p>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-amber-200 transition">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Terlambat Masuk</span>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shrink-0">
-                <ClockAlert className="w-4 h-4" />
+          <div className="bg-white p-2 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:border-emerald-200 transition">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <span className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+                <span className="sm:hidden">Hadir</span>
+                <span className="hidden sm:inline">Hadir Hari Ini</span>
+              </span>
+              <div className="w-5 h-5 sm:w-9 sm:h-9 rounded-md sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
+                <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4" />
               </div>
             </div>
-            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums">{terlambat}</p>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1 truncate">{dinasLuar} Tugas Dinas Luar</p>
+            <p className="text-sm sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight flex items-baseline gap-1">
+              <span>{hadirMasuk}</span>
+              <span className="text-[9px] sm:text-xs font-semibold text-emerald-600 font-sans tracking-tight">
+                ({persentaseHadir}%)
+              </span>
+            </p>
+            <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
+              {tepatWaktu} <span className="hidden sm:inline">Tepat Waktu</span><span className="sm:hidden">Tepat</span>
+            </p>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-rose-200 transition">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Belum Presensi</span>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100 shrink-0">
-                <Users className="w-4 h-4" />
+          <div className="bg-white p-2 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:border-amber-200 transition">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <span className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+                <span className="sm:hidden">Lambat</span>
+                <span className="hidden sm:inline">Terlambat Masuk</span>
+              </span>
+              <div className="w-5 h-5 sm:w-9 sm:h-9 rounded-md sm:rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shrink-0">
+                <ClockAlert className="w-3 h-3 sm:w-4 sm:h-4" />
               </div>
             </div>
-            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums">{belumHadir}</p>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1 truncate">{pendingLeaves} Izin Menunggu</p>
+            <p className="text-sm sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+              {terlambat}
+            </p>
+            <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
+              {dinasLuar} <span className="hidden sm:inline">Tugas Dinas Luar</span><span className="sm:hidden">Dinas</span>
+            </p>
+          </div>
+
+          <div className="bg-white p-2 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs hover:border-rose-200 transition">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <span className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
+                <span className="sm:hidden">Belum</span>
+                <span className="hidden sm:inline">Belum Presensi</span>
+              </span>
+              <div className="w-5 h-5 sm:w-9 sm:h-9 rounded-md sm:rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100 shrink-0">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+              </div>
+            </div>
+            <p className="text-sm sm:text-2xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+              {belumHadir}
+            </p>
+            <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
+              {pendingLeaves} <span className="hidden sm:inline">Izin Menunggu</span><span className="sm:hidden">Izin</span>
+            </p>
           </div>
         </div>
 
-        {/* Bagian Visualisasi Analitik & Aktivitas Terkini */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Kolom Kiri: Tren Mingguan & Distribusi Unit Kerja */}
-          <div className="lg:col-span-7 space-y-6">
+        {/* Bagian Visualisasi Analitik & Aktivitas Terkini (Mobile: Aktivitas di atas; Desktop: 2 Kolom Sejajar) */}
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6">
+          {/* Kolom Kiri di Desktop (7 Cols), tapi Urutan Kedua di Mobile */}
+          <div className="order-2 lg:order-1 lg:col-span-7 lg:col-start-1 space-y-6">
             {/* Tren Kehadiran Mingguan (Senin - Jumat) */}
             <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs">
               <div className="flex items-center justify-between mb-6">
@@ -419,8 +497,8 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Kolom Kanan: Aktivitas Presensi Masuk Terkini (Live Feed) */}
-          <div className="lg:col-span-5 space-y-6">
+          {/* Kolom Kanan di Desktop (5 Cols), tapi Urutan Pertama di Mobile (Langsung di Bawah 4 Card) */}
+          <div className="order-1 lg:order-2 lg:col-span-5 lg:col-start-8 space-y-6">
             <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs h-full flex flex-col">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
