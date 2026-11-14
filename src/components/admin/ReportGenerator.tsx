@@ -623,13 +623,13 @@ export function ReportGenerator({
           <div className="grid grid-cols-2 sm:grid-cols-12 gap-1.5 sm:gap-2 pt-0.5">
             {activeTab === 'REKAP_SEMUA' ? (
               <div className="col-span-2 sm:col-span-4 lg:col-span-5 relative">
-                <Search className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={rekapSearch}
                   onChange={(e) => setRekapSearch(e.target.value)}
                   placeholder="Cari nama, No. ID, unit..."
-                  className="w-full pl-7 sm:pl-9 pr-6 sm:pr-8 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-normal text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs"
+                  className="w-full pl-7 sm:pl-9 pr-6 sm:pr-8 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[9px] sm:text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs"
                 />
                 {rekapSearch && (
                   <button
@@ -646,7 +646,7 @@ export function ReportGenerator({
                 <select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="w-full px-2 sm:px-2.5 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+                  className="w-full px-2 sm:px-2.5 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[9px] sm:text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
                 >
                   {individualReports.map((emp) => (
                     <option key={emp.userId} value={emp.userId}>
@@ -662,9 +662,9 @@ export function ReportGenerator({
               <button
                 type="button"
                 onClick={() => handlePeriodChange(10, 2026)}
-                className={`w-full py-1 sm:py-2 px-2 rounded-xl text-[9.5px] sm:text-xs font-bold transition cursor-pointer truncate ${
+                className={`w-full py-1 sm:py-2 px-2 rounded-xl text-[9px] sm:text-xs font-semibold transition cursor-pointer truncate ${
                   filterMonth === 10 && filterYear === 2026
-                    ? 'bg-sky-600 text-white shadow-2xs'
+                    ? 'bg-sky-600 text-white shadow-2xs font-bold'
                     : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs'
                 }`}
               >
@@ -677,9 +677,9 @@ export function ReportGenerator({
               <button
                 type="button"
                 onClick={() => handlePeriodChange(11, 2026)}
-                className={`w-full py-1 sm:py-2 px-2 rounded-xl text-[9.5px] sm:text-xs font-bold transition cursor-pointer truncate ${
+                className={`w-full py-1 sm:py-2 px-2 rounded-xl text-[9px] sm:text-xs font-semibold transition cursor-pointer truncate ${
                   filterMonth === 11 && filterYear === 2026
-                    ? 'bg-sky-600 text-white shadow-2xs'
+                    ? 'bg-sky-600 text-white shadow-2xs font-bold'
                     : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs'
                 }`}
               >
@@ -692,7 +692,7 @@ export function ReportGenerator({
               <select
                 value={filterMonth}
                 onChange={(e) => handlePeriodChange(parseInt(e.target.value), filterYear)}
-                className="w-full px-2 sm:px-2.5 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[9.5px] sm:text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+                className="w-full px-2 sm:px-2.5 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[9px] sm:text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
               >
                 {monthNames.map((name, idx) => (
                   <option key={idx} value={idx + 1}>
@@ -707,7 +707,7 @@ export function ReportGenerator({
               <select
                 value={filterYear}
                 onChange={(e) => handlePeriodChange(filterMonth, parseInt(e.target.value))}
-                className="w-full px-1.5 sm:px-2 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[9.5px] sm:text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+                className="w-full px-1.5 sm:px-2 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[9px] sm:text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
               >
                 <option value={2025}>2025</option>
                 <option value={2026}>2026</option>
@@ -749,12 +749,6 @@ export function ReportGenerator({
                 </p>
               </div>
             </div>
-          </div>
-
-          {/* Baris Ringkas Layar Ponsel (sm:hidden) */}
-          <div className="sm:hidden flex items-center justify-between pb-2 border-b border-slate-100 text-[11px] font-semibold text-slate-600 print:hidden">
-            <span className="text-slate-800 font-bold">Rekap Presensi SDM</span>
-            <span className="text-slate-500 font-mono">{monthNames[filterMonth - 1]} {filterYear}</span>
           </div>
 
           {/* Tampilan Desktop: Tabel Rekapitulasi 17 Kolom Mandiri (Zero Horizontal Scroll di Desktop) */}
@@ -1104,12 +1098,6 @@ export function ReportGenerator({
                   </p>
                 </div>
               </div>
-            </div>
-
-            {/* Baris Info Ringkas Layar Ponsel Tab 2 */}
-            <div className="sm:hidden flex items-center justify-between pb-2 border-b border-slate-100 text-[11px] font-semibold text-slate-600 print:hidden">
-              <span className="text-slate-800 font-bold">Buku Presensi Pegawai</span>
-              <span className="text-slate-500 font-mono">{monthNames[filterMonth - 1]} {filterYear}</span>
             </div>
 
             {/* Kartu Profil Pegawai Terpilih */}
