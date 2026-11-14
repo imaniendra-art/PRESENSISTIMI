@@ -408,53 +408,64 @@ export default async function AdminDashboardPage() {
                 </span>
               </div>
 
-              {/* Bar Chart Visual SVG */}
-              <div className="grid grid-cols-5 gap-3 pt-4 pb-2 items-end h-44 border-b border-slate-100">
-                {weeklyStats.map((stat, idx) => {
-                  const maxBarHeight = 120; // px
-                  const barHeight = Math.max(8, Math.round((stat.pct / 100) * maxBarHeight));
+              {/* Area Bar Chart & Sumbu Label yang Terstruktur (Bebas Tumpang Tindih) */}
+              <div className="pt-2 pb-3 border-b border-slate-100">
+                {/* Kolom Batang Visual */}
+                <div className="grid grid-cols-5 gap-2 sm:gap-3 items-end h-32 sm:h-36">
+                  {weeklyStats.map((stat, idx) => {
+                    const maxBarHeight = 100; // px
+                    const barHeight = Math.max(8, Math.round((stat.pct / 100) * maxBarHeight));
 
-                  return (
-                    <div key={idx} className="flex flex-col items-center gap-2 h-full justify-end">
-                      <span className="text-[11px] font-bold font-mono text-slate-700 tabular-nums">
-                        {stat.isFuture ? '-' : `${stat.count}`}
-                      </span>
-
-                      <div className="w-full max-w-[42px] bg-slate-100 rounded-t-xl h-[120px] flex items-end justify-center p-1">
-                        <div
-                          style={{ height: stat.isFuture ? '4px' : `${barHeight}px` }}
-                          className={`w-full rounded-t-lg transition-all duration-500 ${
-                            stat.isFuture
-                              ? 'bg-slate-200'
-                              : stat.isToday
-                              ? 'bg-gradient-to-t from-sky-600 to-sky-400 shadow-sm'
-                              : 'bg-sky-600/75'
-                          }`}
-                        />
-                      </div>
-
-                      <div className="text-center mt-1">
-                        <span
-                          className={`text-xs font-bold block ${
-                            stat.isToday ? 'text-sky-700 underline font-extrabold' : 'text-slate-700'
-                          }`}
-                        >
-                          {stat.dayName}
+                    return (
+                      <div key={idx} className="flex flex-col items-center gap-1.5 h-full justify-end">
+                        <span className="text-[11px] font-bold font-mono text-slate-700 tabular-nums">
+                          {stat.isFuture ? '-' : `${stat.count}`}
                         </span>
-                        <span className="text-[10px] text-slate-400 block">{stat.dateStr}</span>
+
+                        <div className="w-full max-w-[38px] bg-slate-100 rounded-t-xl h-[100px] flex items-end justify-center p-1">
+                          <div
+                            style={{ height: stat.isFuture ? '4px' : `${barHeight}px` }}
+                            className={`w-full rounded-t-lg transition-all duration-500 ${
+                              stat.isFuture
+                                ? 'bg-slate-200'
+                                : stat.isToday
+                                ? 'bg-gradient-to-t from-sky-600 to-sky-400 shadow-sm'
+                                : 'bg-sky-600/75'
+                            }`}
+                          />
+                        </div>
                       </div>
+                    );
+                  })}
+                </div>
+
+                {/* Sumbu X: Nama Hari & Tanggal (Berada di luar area batang, tidak akan pernah overlap) */}
+                <div className="grid grid-cols-5 gap-2 sm:gap-3 mt-2.5 text-center">
+                  {weeklyStats.map((stat, idx) => (
+                    <div key={idx} className="min-w-0">
+                      <span
+                        className={`text-[11px] sm:text-xs font-bold block leading-tight ${
+                          stat.isToday ? 'text-sky-700 underline font-extrabold' : 'text-slate-700'
+                        }`}
+                      >
+                        {stat.dayName}
+                      </span>
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 block mt-0.5 whitespace-nowrap leading-tight">
+                        {stat.dateStr}
+                      </span>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
 
-              <div className="mt-3 sm:mt-4 flex items-center justify-between gap-1 text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+              {/* Legenda Bawah: Terpisah Bersih di Bawah Garis */}
+              <div className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-500">
                 <span className="flex items-center gap-1.5 font-medium">
                   <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-t from-sky-600 to-sky-400 inline-block shrink-0" />
                   Hari Ini ({persentaseHadir}%)
                 </span>
-                <span className="text-slate-400 font-mono text-[10px] sm:text-[11px]">
-                  {totalPegawai} Pegawai Aktif
+                <span className="text-slate-400 font-mono text-[10px] sm:text-[11px] shrink-0">
+                  Basis: {totalPegawai} Pegawai
                 </span>
               </div>
             </div>
