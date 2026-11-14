@@ -520,19 +520,19 @@ export default async function AdminDashboardPage() {
           {/* Kolom Kanan di Desktop (5 Cols), tapi Urutan Pertama di Mobile (Langsung di Bawah 4 Card) */}
           <div className="order-1 lg:order-2 lg:col-span-5 lg:col-start-8 space-y-2.5 sm:space-y-6">
             <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-xs h-full flex flex-col">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <div className="flex items-center justify-between mb-3 pb-2.5 sm:mb-4 sm:pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <span className="relative flex h-2.5 w-2.5">
+                  <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-sky-500" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
                   </span>
-                  <h2 className="text-sm font-bold text-slate-900">
+                  <h2 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
                     Aktivitas Presensi Terkini
                   </h2>
                 </div>
                 <Link
                   href="/admin/monitoring"
-                  className="text-xs text-sky-700 hover:text-sky-800 font-bold flex items-center gap-1 group"
+                  className="text-[11px] sm:text-xs text-sky-700 hover:text-sky-800 font-bold flex items-center gap-0.5 group"
                 >
                   <span>Selengkapnya</span>
                   <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition" />
@@ -540,10 +540,14 @@ export default async function AdminDashboardPage() {
               </div>
 
               {recentClockIns.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400 space-y-2">
-                  <Users className="w-10 h-10 text-slate-300 stroke-[1.5]" />
-                  <p className="text-xs font-semibold text-slate-600">Belum ada presensi masuk hari ini</p>
-                  <p className="text-[11px] text-slate-400 max-w-xs">
+                <div className="flex-1 flex flex-col items-center justify-center py-5 sm:py-8 px-4 text-center space-y-1.5">
+                  <div className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mb-1">
+                    <Users className="w-5 h-5 stroke-[1.75]" />
+                  </div>
+                  <p className="text-xs sm:text-sm font-bold text-slate-700">
+                    Belum ada presensi masuk hari ini
+                  </p>
+                  <p className="text-[11px] text-slate-500 max-w-xs leading-relaxed">
                     Catatan kehadiran pegawai yang masuk akan muncul secara live di feed ini.
                   </p>
                 </div>
@@ -558,10 +562,10 @@ export default async function AdminDashboardPage() {
                       : '-';
 
                     return (
-                      <div key={att.id} className="pt-3 first:pt-0 flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 min-w-0">
+                      <div key={att.id} className="pt-2.5 first:pt-0 flex items-center justify-between gap-2.5 sm:gap-3">
+                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                           {/* Foto Selfie Avatar */}
-                          <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                          <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                             {att.clockInPhoto ? (
                               <Image
                                 src={att.clockInPhoto}
@@ -581,15 +585,15 @@ export default async function AdminDashboardPage() {
                             <p className="text-xs font-bold text-slate-900 truncate">
                               {att.user.name}
                             </p>
-                            <p className="text-[11px] text-slate-500 truncate">
+                            <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
                               {att.user.jabatan} • No. ID: {att.user.nip}
                             </p>
-                            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                              <span className="text-[10px] text-emerald-800 font-medium">
+                            <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                              <span className="text-[9.5px] sm:text-[10px] text-emerald-800 font-semibold truncate max-w-[130px] sm:max-w-none">
                                 {att.locationName || 'Kampus STIMI'}
                               </span>
                               {att.clockInLat && att.clockInLng && (
-                                <span className="text-[10px] text-slate-500 font-mono">
+                                <span className="text-[9.5px] sm:text-[10px] text-slate-400 font-mono truncate max-w-[120px] sm:max-w-none">
                                   • {getRegionDescription(att.clockInLat, att.clockInLng)}
                                 </span>
                               )}
@@ -616,9 +620,9 @@ export default async function AdminDashboardPage() {
 
                             if (tzLabel === 'WITA') {
                               return (
-                                <span className="font-mono tabular-nums text-xs font-bold text-slate-900 block">
+                                <span className="font-mono tabular-nums text-xs font-bold text-slate-900 block leading-tight">
                                   {witaTime}{' '}
-                                  <span className="text-[10px] font-sans font-normal text-slate-500">
+                                  <span className="text-[10px] font-sans font-medium text-slate-500">
                                     WITA
                                   </span>
                                 </span>
@@ -626,21 +630,21 @@ export default async function AdminDashboardPage() {
                             }
 
                             return (
-                              <div>
-                                <span className="font-mono tabular-nums text-xs font-bold text-slate-900 flex items-center justify-end gap-1">
+                              <div className="flex flex-col items-end">
+                                <span className="font-mono tabular-nums text-xs font-bold text-slate-900 flex items-center justify-end gap-1 leading-tight">
                                   {localTime}{' '}
                                   <span className="text-[9px] px-1 py-0.2 rounded bg-amber-100 text-amber-800 font-sans font-bold uppercase">
                                     {tzLabel}
                                   </span>
                                 </span>
-                                <span className="text-[10px] text-slate-400 font-mono block">
+                                <span className="text-[9.5px] text-slate-400 font-mono block mt-0.5">
                                   ({witaTime} WITA)
                                 </span>
                               </div>
                             );
                           })()}
                           <span
-                            className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-bold mt-1 ${
+                            className={`inline-block text-[9.5px] sm:text-[10px] px-2 py-0.5 rounded-full font-bold mt-1 ${
                               att.isDinasLuar
                                 ? 'bg-purple-100 text-purple-800'
                                 : att.clockInStatus === 'TEPAT_WAKTU'
