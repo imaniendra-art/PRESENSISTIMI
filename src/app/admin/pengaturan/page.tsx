@@ -41,7 +41,7 @@ export default async function AdminPengaturanPage() {
       },
       orderBy: { createdAt: 'asc' },
     }),
-    (prisma as any).workSchedule.findMany({
+    prisma.workSchedule.findMany({
       include: {
         _count: {
           select: { users: true },

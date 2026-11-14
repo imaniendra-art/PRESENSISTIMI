@@ -196,45 +196,49 @@ export async function deleteCampusLocation(locationId: string) {
 // ==========================================
 
 export async function ensureDefaultWorkSchedules() {
-  const count = await (prisma as any).workSchedule.count();
-  if (count === 0) {
-    await (prisma as any).workSchedule.createMany({
-      data: [
-        {
-          name: 'Reguler Kampus (Standar)',
-          code: 'REGULER',
-          workStart: '09:00',
-          workEnd: '16:00',
-          scheduleType: 'STANDARD',
-          workDays: '1,2,3,4,5',
-          description: 'Jam kerja reguler civitas kampus hari Senin s/d Jumat',
-          isDefault: true,
-          isActive: true,
-        },
-        {
-          name: 'Dosen Kelas Siang',
-          code: 'DOSEN_SIANG',
-          workStart: '13:00',
-          workEnd: '17:00',
-          scheduleType: 'CUSTOM_DAYS',
-          workDays: '2,4',
-          description: 'Khusus dosen yang mengajar kelas siang pada hari tertentu (misal Selasa & Kamis)',
-          isDefault: false,
-          isActive: true,
-        },
-        {
-          name: 'Dosen Fleksibel Bulanan (Pak Irfan)',
-          code: 'DOSEN_FLEKSIBEL',
-          workStart: '09:00',
-          workEnd: '16:00',
-          scheduleType: 'MONTHLY_QUOTA',
-          monthlyTargetDays: 4,
-          description: 'Dosen tanpa jabatan fungsional dengan kewajiban kumulatif 4 hari kehadiran per bulan',
-          isDefault: false,
-          isActive: true,
-        },
-      ],
-    });
+  try {
+    const count = await prisma.workSchedule.count();
+    if (count === 0) {
+      await prisma.workSchedule.createMany({
+        data: [
+          {
+            name: 'Reguler Kampus (Standar)',
+            code: 'REGULER',
+            workStart: '09:00',
+            workEnd: '16:00',
+            scheduleType: 'STANDARD',
+            workDays: '1,2,3,4,5',
+            description: 'Jam kerja reguler civitas kampus hari Senin s/d Jumat',
+            isDefault: true,
+            isActive: true,
+          },
+          {
+            name: 'Dosen Kelas Siang',
+            code: 'DOSEN_SIANG',
+            workStart: '13:00',
+            workEnd: '17:00',
+            scheduleType: 'CUSTOM_DAYS',
+            workDays: '2,4',
+            description: 'Khusus dosen yang mengajar kelas siang pada hari tertentu (misal Selasa & Kamis)',
+            isDefault: false,
+            isActive: true,
+          },
+          {
+            name: 'Dosen Fleksibel Bulanan (Pak Irfan)',
+            code: 'DOSEN_FLEKSIBEL',
+            workStart: '09:00',
+            workEnd: '16:00',
+            scheduleType: 'MONTHLY_QUOTA',
+            monthlyTargetDays: 4,
+            description: 'Dosen tanpa jabatan fungsional dengan kewajiban kumulatif 4 hari kehadiran per bulan',
+            isDefault: false,
+            isActive: true,
+          },
+        ],
+      });
+    }
+  } catch (err) {
+    console.error('ensureDefaultWorkSchedules error:', err);
   }
 }
 
@@ -257,7 +261,7 @@ export async function createWorkSchedule(formData: FormData) {
     return { success: false, message: 'Nama pola jadwal kerja wajib diisi' };
   }
 
-  await (prisma as any).workSchedule.create({
+  await prisma.workSchedule.create({
     data: {
       name,
       code,
@@ -297,7 +301,7 @@ export async function updateWorkSchedule(formData: FormData) {
     return { success: false, message: 'ID dan Nama pola jadwal kerja wajib diisi' };
   }
 
-  await (prisma as any).workSchedule.update({
+  await prisma.workSchedule.update({
     where: { id: scheduleId },
     data: {
       name,
@@ -312,7 +316,7 @@ export async function updateWorkSchedule(formData: FormData) {
   });
 
   // Sinkronkan data ke pegawai yang menggunakan template ini
-  await (prisma as any).user.updateMany({
+  await prisma.user.updateMany({
     where: { workScheduleId: scheduleId },
     data: {
       customWorkStart: workStart,
@@ -336,7 +340,7 @@ export async function deleteWorkSchedule(scheduleId: string) {
     return { success: false, message: 'Tidak memiliki hak akses' };
   }
 
-  const assignedCount = await (prisma as any).user.count({
+  const assignedCount = await prisma.user.count({
     where: { workScheduleId: scheduleId },
   });
 
@@ -347,7 +351,7 @@ export async function deleteWorkSchedule(scheduleId: string) {
     };
   }
 
-  await (prisma as any).workSchedule.delete({
+  await prisma.workSchedule.delete({
     where: { id: scheduleId },
   });
 

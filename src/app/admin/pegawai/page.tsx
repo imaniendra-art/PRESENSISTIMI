@@ -33,7 +33,7 @@ export default async function AdminPegawaiPage() {
       where: { isActive: true },
       orderBy: { name: 'asc' },
     }),
-    (prisma as any).workSchedule.findMany({
+    prisma.workSchedule.findMany({
       where: { isActive: true },
       orderBy: { createdAt: 'asc' },
     }),
