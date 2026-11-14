@@ -293,10 +293,10 @@ export function MonitoringTableClient({
             </h3>
           </div>
 
-          {/* Controls Bar: Search Input, Unit Dropdown, Status Dropdown */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 pt-1">
-            {/* Search Input */}
-            <div className="sm:col-span-6 lg:col-span-5 relative">
+          {/* Controls Bar: Search Input, Unit Dropdown, Status Dropdown (2-Kolom Rapi di Mobile) */}
+          <div className="grid grid-cols-2 sm:grid-cols-12 gap-2 pt-1">
+            {/* Search Input: Lebar Penuh di Mobile (col-span-2) */}
+            <div className="col-span-2 sm:col-span-6 lg:col-span-5 relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -316,14 +316,14 @@ export function MonitoringTableClient({
               )}
             </div>
 
-            {/* Filter Unit Kerja */}
-            <div className="sm:col-span-3 lg:col-span-4">
+            {/* Filter Unit Kerja: Kolom Kiri di Mobile (col-span-1) */}
+            <div className="col-span-1 sm:col-span-3 lg:col-span-4">
               <select
                 value={unitFilter}
                 onChange={(e) => setUnitFilter(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+                className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
               >
-                <option value="ALL">Semua Unit Kerja ({totalEmployees})</option>
+                <option value="ALL">Semua Unit ({totalEmployees})</option>
                 {unitList.map((unit) => (
                   <option key={unit} value={unit}>
                     {unit}
@@ -332,20 +332,20 @@ export function MonitoringTableClient({
               </select>
             </div>
 
-            {/* Filter Status Kehadiran */}
-            <div className="sm:col-span-3 lg:col-span-3">
+            {/* Filter Status Kehadiran: Kolom Kanan di Mobile (col-span-1) */}
+            <div className="col-span-1 sm:col-span-3 lg:col-span-3">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+                className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
               >
                 <option value="ALL">Semua Status ({totalEmployees})</option>
                 <option value="HADIR">Hadir ({totalHadir})</option>
-                <option value="TEPAT">Tepat Waktu ({countTepat})</option>
-                <option value="LAMBAT">Terlambat ({countLambat})</option>
-                <option value="DINAS">Dinas Luar ({countDinas})</option>
-                <option value="CUTI_IZIN">Cuti / Izin / Sakit ({countCutiIzin})</option>
-                <option value="BELUM">Belum Presensi ({countBelumMurni})</option>
+                <option value="TEPAT">Tepat ({countTepat})</option>
+                <option value="LAMBAT">Lambat ({countLambat})</option>
+                <option value="DINAS">Dinas ({countDinas})</option>
+                <option value="CUTI_IZIN">Cuti/Izin ({countCutiIzin})</option>
+                <option value="BELUM">Belum ({countBelumMurni})</option>
               </select>
             </div>
           </div>
@@ -825,15 +825,17 @@ export function MonitoringTableClient({
 
               return (
                 <div key={`mob-${user.id}`} className="p-3.5 space-y-2.5">
-                  {/* Header Baris Mobile: No Urut + Nama & Status */}
+                  {/* Header Baris Mobile: No Urut + Nama, NIP, Unit + Status */}
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-6 h-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-6 h-6 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 font-mono font-bold text-xs flex items-center justify-center shrink-0">
                         {idx + 1}
                       </span>
                       <div className="min-w-0">
-                        <p className="font-bold text-slate-900 text-xs truncate">{user.name}</p>
-                        <p className="text-[10px] text-slate-500 font-mono">
+                        <p className="font-bold text-slate-900 text-xs sm:text-sm truncate leading-snug">
+                          {user.name}
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-mono truncate">
                           No. ID: {user.nip} • {user.unitKerja}
                         </p>
                       </div>
@@ -893,13 +895,39 @@ export function MonitoringTableClient({
                   {/* 2 Kolom Mobile: Presensi Masuk & Presensi Pulang */}
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     {/* Blok Masuk */}
-                    <div className="bg-emerald-50/40 p-2 rounded-xl border border-emerald-100/70 space-y-1">
+                    <div
+                      className={`p-2 sm:p-2.5 rounded-xl border space-y-1.5 transition ${
+                        att?.clockInTime
+                          ? 'bg-emerald-50/50 border-emerald-200/80 shadow-2xs'
+                          : user.activeLeave
+                          ? 'bg-amber-50/50 border-amber-200/80'
+                          : user.activeDutyTrip
+                          ? 'bg-purple-50/50 border-purple-200/80'
+                          : 'bg-slate-50/70 border-slate-200/70'
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-bold uppercase text-emerald-800 flex items-center gap-1">
+                        <span
+                          className={`text-[9px] font-bold uppercase flex items-center gap-1 ${
+                            att?.clockInTime
+                              ? 'text-emerald-800'
+                              : user.activeLeave
+                              ? 'text-amber-800'
+                              : user.activeDutyTrip
+                              ? 'text-purple-800'
+                              : 'text-slate-500'
+                          }`}
+                        >
                           <LogIn className="w-3 h-3" /> Masuk
                         </span>
                         {inTimeInfo ? (
-                          <span className="font-mono font-bold text-slate-900 text-xs">
+                          <span
+                            className={`font-mono font-bold text-xs ${
+                              att?.clockInStatus === 'TERLAMBAT'
+                                ? 'text-rose-700'
+                                : 'text-slate-900'
+                            }`}
+                          >
                             {inTimeInfo.localTime}
                           </span>
                         ) : user.activeLeave ? (
@@ -949,20 +977,26 @@ export function MonitoringTableClient({
                                 }`,
                               });
                             }}
-                            className="relative w-7 h-7 rounded-lg overflow-hidden bg-white border border-emerald-300 shadow-2xs shrink-0 cursor-pointer"
+                            className="relative w-8 h-8 rounded-lg overflow-hidden bg-white border border-emerald-300 shadow-2xs shrink-0 cursor-pointer hover:scale-105 transition"
+                            title="Klik untuk zoom Foto Masuk"
                           >
                             <img
                               src={att.clockInPhoto}
                               alt={`Masuk ${user.name}`}
                               className="w-full h-full object-cover"
                             />
+                            <span className="absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white text-[6px] font-black text-center uppercase py-0.2">
+                              Msk
+                            </span>
                           </button>
                         ) : (
-                          <span className="text-slate-400 italic text-[10px]">Belum</span>
+                          <div className="w-8 h-8 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center shrink-0">
+                            <Camera className="w-3.5 h-3.5 text-slate-300" />
+                          </div>
                         )}
 
-                        <div className="min-w-0">
-                          <p className="text-[10px] font-semibold text-slate-800 truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-semibold text-slate-800 truncate leading-tight">
                             {att?.clockInTime
                               ? formatLocationShort(att.locationName)
                               : user.activeLeave
@@ -974,18 +1008,51 @@ export function MonitoringTableClient({
                               : 'Belum'}
                           </p>
                           {att?.clockInDistance !== null && att?.clockInDistance !== undefined && (
-                            <p className="text-[9px] text-emerald-800 font-mono font-bold">
-                              {formatDistance(att.clockInDistance)}
-                            </p>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-[9px] text-emerald-800 font-mono font-bold">
+                                {formatDistance(att.clockInDistance)}
+                              </span>
+                              {att.clockInLat && att.clockInLng && (
+                                <a
+                                  href={`https://www.google.com/maps?q=${att.clockInLat},${att.clockInLng}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-sky-600 hover:text-sky-800 inline-flex items-center"
+                                  title="Buka Maps"
+                                >
+                                  <MapPin className="w-2.5 h-2.5 text-rose-500" />
+                                </a>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
                     </div>
 
                     {/* Blok Pulang */}
-                    <div className="bg-sky-50/40 p-2 rounded-xl border border-sky-100/70 space-y-1">
+                    <div
+                      className={`p-2 sm:p-2.5 rounded-xl border space-y-1.5 transition ${
+                        att?.clockOutTime
+                          ? 'bg-sky-50/50 border-sky-200/80 shadow-2xs'
+                          : user.activeLeave
+                          ? 'bg-amber-50/50 border-amber-200/80'
+                          : user.activeDutyTrip
+                          ? 'bg-purple-50/50 border-purple-200/80'
+                          : 'bg-slate-50/70 border-slate-200/70'
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-bold uppercase text-sky-800 flex items-center gap-1">
+                        <span
+                          className={`text-[9px] font-bold uppercase flex items-center gap-1 ${
+                            att?.clockOutTime
+                              ? 'text-sky-800'
+                              : user.activeLeave
+                              ? 'text-amber-800'
+                              : user.activeDutyTrip
+                              ? 'text-purple-800'
+                              : 'text-slate-500'
+                          }`}
+                        >
                           <LogOut className="w-3 h-3" /> Pulang
                         </span>
                         {outTimeInfo ? (
@@ -1041,20 +1108,26 @@ export function MonitoringTableClient({
                                 }`,
                               });
                             }}
-                            className="relative w-7 h-7 rounded-lg overflow-hidden bg-white border border-sky-300 shadow-2xs shrink-0 cursor-pointer"
+                            className="relative w-8 h-8 rounded-lg overflow-hidden bg-white border border-sky-300 shadow-2xs shrink-0 cursor-pointer hover:scale-105 transition"
+                            title="Klik untuk zoom Foto Pulang"
                           >
                             <img
                               src={att.clockOutPhoto}
                               alt={`Pulang ${user.name}`}
                               className="w-full h-full object-cover"
                             />
+                            <span className="absolute bottom-0 inset-x-0 bg-sky-600/90 text-white text-[6px] font-black text-center uppercase py-0.2">
+                              Plg
+                            </span>
                           </button>
                         ) : (
-                          <span className="text-slate-400 italic text-[10px]">Belum</span>
+                          <div className="w-8 h-8 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center shrink-0">
+                            <Camera className="w-3.5 h-3.5 text-slate-300" />
+                          </div>
                         )}
 
-                        <div className="min-w-0">
-                          <p className="text-[10px] font-semibold text-slate-800 truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-semibold text-slate-800 truncate leading-tight">
                             {att?.clockOutTime
                               ? formatLocationShort(att.locationName)
                               : user.activeLeave
@@ -1064,9 +1137,22 @@ export function MonitoringTableClient({
                               : 'Belum'}
                           </p>
                           {att?.clockOutDistance !== null && att?.clockOutDistance !== undefined && (
-                            <p className="text-[9px] text-sky-800 font-mono font-bold">
-                              {formatDistance(att.clockOutDistance)}
-                            </p>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-[9px] text-sky-800 font-mono font-bold">
+                                {formatDistance(att.clockOutDistance)}
+                              </span>
+                              {att.clockOutLat && att.clockOutLng && (
+                                <a
+                                  href={`https://www.google.com/maps?q=${att.clockOutLat},${att.clockOutLng}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-sky-600 hover:text-sky-800 inline-flex items-center"
+                                  title="Buka Maps"
+                                >
+                                  <MapPin className="w-2.5 h-2.5 text-rose-500" />
+                                </a>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>

@@ -177,7 +177,7 @@ export function MonitoringHeader({
             type="date"
             value={currentDateStr}
             onChange={(e) => handleDateChange(e.target.value)}
-            className="bg-transparent text-[11px] font-bold font-mono text-slate-800 focus:outline-none cursor-pointer max-w-[110px]"
+            className="bg-transparent text-[11px] font-bold font-mono text-slate-800 focus:outline-none cursor-pointer flex-1 min-w-0 text-center"
           />
 
           <button
