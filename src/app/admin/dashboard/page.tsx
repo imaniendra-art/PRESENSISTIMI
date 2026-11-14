@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/layout/Navbar';
+import { LiveClock } from '@/components/common/LiveClock';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getStartOfDay, getTimezoneFromCoordinates } from '@/lib/time';
@@ -185,14 +186,22 @@ export default async function AdminDashboardPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Soft Sky Hero Card - Simetris & Terstruktur */}
         <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-3xl p-4 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          {/* Sisi Kiri: Menumpuk 2 Baris Bersih */}
-          <div>
-            <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
-              Overview Kehadiran
-            </h1>
-            <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-0.5">
-              STIMI YAPMI Makassar
-            </p>
+          {/* Header Row: Judul di Kiri & Jam Live di Sampingnya (Khusus Mobile Mengisi Space Kosong) */}
+          <div className="flex items-center justify-between gap-3 w-full lg:w-auto">
+            {/* Sisi Kiri: Menumpuk 2 Baris Bersih & Simetris */}
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                Overview Kehadiran
+              </h1>
+              <p className="text-base sm:text-xl font-extrabold text-slate-800 tracking-tight mt-0.5 leading-snug">
+                STIMI YAPMI Makassar
+              </p>
+            </div>
+
+            {/* Jam Live Real-Time di Samping Tulisan (Tampil di Mobile) */}
+            <div className="lg:hidden shrink-0">
+              <LiveClock />
+            </div>
           </div>
 
           {/* Sisi Kanan Versi Desktop: 4 Pill Box Simetris Sejajar */}
@@ -263,35 +272,35 @@ export default async function AdminDashboardPage() {
           </div>
 
           {/* Sisi Bawah Versi Mobile: 4 Icon Keterangan 1-Baris Saja (Hemat Ruang & Elegan) */}
-          <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-sky-100/80 lg:hidden w-full">
-            <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs">
+          <div className="grid grid-cols-4 gap-1 sm:gap-1.5 pt-2 border-t border-sky-100/80 lg:hidden w-full">
+            <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs min-w-0">
               <Calendar className="w-3 h-3 text-sky-600 shrink-0" />
-              <span className="text-[10px] font-bold text-slate-800 truncate">
+              <span className="text-[9.5px] font-bold text-slate-800 whitespace-nowrap">
                 {formattedMobileDate}
               </span>
             </div>
 
-            <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs">
-              <Clock className="w-3 h-3 text-sky-600 shrink-0" />
-              <span className="text-[10px] font-bold text-slate-800 font-mono truncate">
+            <div className="flex items-center justify-center gap-0.5 py-1 px-0.5 bg-white/90 border border-sky-100 rounded-xl shadow-2xs min-w-0">
+              <Clock className="w-2.5 h-2.5 text-sky-600 shrink-0" />
+              <span className="text-[8.5px] sm:text-[9.5px] font-bold text-slate-800 font-mono tracking-tighter whitespace-nowrap">
                 {campusSetting?.workStart}-{campusSetting?.workEnd}
               </span>
             </div>
 
             <Link
               href="/admin/pengaturan"
-              className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs hover:border-sky-300 transition"
+              className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs hover:border-sky-300 transition min-w-0"
               title="Radius Kampus"
             >
               <MapPin className="w-3 h-3 text-sky-600 shrink-0" />
-              <span className="text-[10px] font-bold text-slate-800 font-mono truncate">
+              <span className="text-[9.5px] font-bold text-slate-800 font-mono whitespace-nowrap">
                 {campusSetting?.radiusMeters}m
               </span>
             </Link>
 
-            <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs">
+            <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs min-w-0">
               <Building2 className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span className="text-[10px] font-bold text-slate-800 truncate">
+              <span className="text-[9.5px] font-bold text-slate-800 whitespace-nowrap">
                 {isFriday ? 'WFA' : 'WFO'}
               </span>
             </div>
