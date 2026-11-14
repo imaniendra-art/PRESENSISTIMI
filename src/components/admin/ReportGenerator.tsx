@@ -25,6 +25,7 @@ import {
   Award,
 } from 'lucide-react';
 import { CampusSetting } from '@prisma/client';
+import { LiveClock } from '@/components/common/LiveClock';
 
 export interface ReportSummaryRow {
   userId: string;
@@ -377,78 +378,117 @@ export function ReportGenerator({
         }
       `}</style>
 
-      {/* 1. HERO HEADER: Harmonisasi Soft Sky & Slate (Setema Overview & Pengaturan) */}
-      <div className="relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-sky-50/70 via-white to-sky-50/30 border border-sky-100 shadow-xs print-hidden print:hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200 shadow-2xs">
-              <FileSpreadsheet className="w-6 h-6 text-sky-700" />
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-sky-700">
-                  Modul Laporan Presensi STIMI
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-white text-sky-800 text-[10px] font-bold font-mono border border-sky-200/90 shadow-2xs">
-                  {monthNames[filterMonth - 1]} {filterYear}
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold font-mono">
-                  {reportData.length} Pegawai Terdaftar
-                </span>
-              </div>
-              <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
-                Rekapitulasi Kehadiran & Ekspor Laporan
-              </h1>
-              <p className="text-xs text-slate-500 mt-0.5 max-w-2xl leading-relaxed">
-                Pantau rekapitulasi kehadiran institusi bulanan atau telusuri buku presensi perorangan
-                SDM (jam masuk, pulang, durasi kerja, dan status harian) untuk evaluasi serta pengarsipan resmi.
-              </p>
-            </div>
+      {/* 1. SOFT SKY HERO CARD - Simetris & Selaras dengan Overview, Monitoring, Data Pegawai & Pengaturan */}
+      <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-2xl sm:rounded-3xl p-3 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-4 print-hidden print:hidden">
+        {/* Header Row: Judul di Kiri & Jam Live di Sampingnya (Khusus Mobile Mengisi Space Kosong) */}
+        <div className="flex items-center justify-between gap-2 w-full lg:w-auto">
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-2xl font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap">
+              Laporan & Rekapitulasi Presensi
+            </h1>
+            <p className="text-xs sm:text-lg font-extrabold text-slate-700 tracking-tight mt-0.5 leading-tight whitespace-nowrap">
+              STIMI YAPMI Makassar
+            </p>
           </div>
 
-          <div className="flex items-center flex-wrap gap-2.5 self-start lg:self-center">
-            {activeTab === 'REKAP_SEMUA' ? (
-              <>
-                <button
-                  type="button"
-                  onClick={handleExportExcelAll}
-                  className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
-                >
-                  <FileSpreadsheet className="w-4 h-4" />
-                  <span>Ekspor Excel (.xlsx)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handlePrintPDF}
-                  className="px-3.5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>Cetak PDF Landscape</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={handleExportExcelIndividual}
-                  className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
-                >
-                  <FileSpreadsheet className="w-4 h-4" />
-                  <span>Ekspor Excel Pegawai Ini</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handlePrintPDF}
-                  className="px-3.5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>Cetak Lembar Individu</span>
-                </button>
-              </>
-            )}
+          {/* Jam Live Real-Time Khusus Mobile */}
+          <div className="lg:hidden shrink-0">
+            <LiveClock />
           </div>
+        </div>
+
+        {/* Sisi Kanan Desktop: Tombol Aksi + Live Clock */}
+        <div className="hidden lg:flex items-center gap-2.5 shrink-0">
+          {activeTab === 'REKAP_SEMUA' ? (
+            <>
+              <button
+                type="button"
+                onClick={handleExportExcelAll}
+                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>Ekspor Excel (.xlsx)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePrintPDF}
+                className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Cetak PDF Landscape</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleExportExcelIndividual}
+                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>Ekspor Excel Pegawai</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePrintPDF}
+                className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Cetak Lembar Individu</span>
+              </button>
+            </>
+          )}
+
+          <div className="h-6 w-px bg-slate-200 ml-1 mr-1" />
+
+          <LiveClock />
+        </div>
+
+        {/* Sisi Bawah Mobile: Tombol Aksi 1-Baris Penuh Simetris */}
+        <div className="grid grid-cols-2 gap-1.5 pt-1.5 sm:pt-2 border-t border-sky-100/80 lg:hidden w-full">
+          {activeTab === 'REKAP_SEMUA' ? (
+            <>
+              <button
+                type="button"
+                onClick={handleExportExcelAll}
+                className="px-2.5 py-1.5 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+              >
+                <FileSpreadsheet className="w-3 h-3" />
+                <span>Ekspor Excel</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePrintPDF}
+                className="px-2.5 py-1.5 bg-sky-600 active:bg-sky-700 text-white rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+              >
+                <Printer className="w-3 h-3" />
+                <span>Cetak PDF</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleExportExcelIndividual}
+                className="px-2.5 py-1.5 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+              >
+                <FileSpreadsheet className="w-3 h-3" />
+                <span>Ekspor Excel</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePrintPDF}
+                className="px-2.5 py-1.5 bg-sky-600 active:bg-sky-700 text-white rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+              >
+                <Printer className="w-3 h-3" />
+                <span>Cetak Lembar</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
