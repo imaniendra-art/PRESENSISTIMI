@@ -163,27 +163,14 @@ export function MonitoringTableClient({
       <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
         {/* Toolbar Pencarian & Filter Cepat (Web & Mobile) */}
         <div className="p-3 sm:p-5 border-b border-slate-100 bg-slate-50/50 space-y-3">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div>
-              <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <span>Daftar Presensi Pegawai</span>
-                <span className="text-slate-400 font-normal">|</span>
-                <span className="text-sky-700 font-semibold normal-case font-sans">
-                  {formattedDateDisplay}
-                </span>
-              </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Menampilkan <strong>{filteredUsers.length}</strong> dari{' '}
-                <strong>{totalEmployees}</strong> civitas STIMI ({totalHadir} hadir)
-              </p>
-            </div>
-
-            {/* Counter Badge Ringkas */}
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="px-2.5 py-1 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 shadow-2xs">
-                {Math.round((totalHadir / (totalEmployees || 1)) * 100)}% Partisipasi
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <span>Daftar Presensi Pegawai</span>
+              <span className="text-slate-300 font-normal">|</span>
+              <span className="text-sky-700 font-semibold normal-case font-sans">
+                {formattedDateDisplay}
               </span>
-            </div>
+            </h3>
           </div>
 
           {/* Controls Bar: Search Input, Unit Dropdown, Status Dropdown */}
