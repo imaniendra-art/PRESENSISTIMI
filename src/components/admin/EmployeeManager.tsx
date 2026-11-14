@@ -478,29 +478,45 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
       )}
 
       {/* Soft Sky Hero Card - Simetris & Selaras dengan Overview & Monitoring */}
-      <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-2xl sm:rounded-3xl p-3 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
-        {/* Sisi Kiri: Judul 2-Baris Bersih & Elegan */}
-        <div className="min-w-0">
-          <h1 className="text-sm sm:text-2xl font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap">
-            Data Pegawai
-          </h1>
-          <p className="text-xs sm:text-lg font-extrabold text-slate-700 tracking-tight mt-0.5 leading-tight whitespace-nowrap">
-            STIMI YAPMI Makassar
-          </p>
+      <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-2xl sm:rounded-3xl p-3 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-4">
+        {/* Baris Atas: Judul di Kiri & Tombol Tambah Pegawai di Kanan Atas pada Mobile */}
+        <div className="flex items-center justify-between gap-2 w-full lg:w-auto">
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-2xl font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap">
+              Data Pegawai
+            </h1>
+            <p className="text-xs sm:text-lg font-extrabold text-slate-700 tracking-tight mt-0.5 leading-tight whitespace-nowrap">
+              STIMI YAPMI Makassar
+            </p>
+          </div>
+
+          {/* Tombol Tambah Pegawai di Kanan Atas (Khusus Mobile) */}
+          <div className="lg:hidden shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setIsAddModalOpen(true);
+                setAlert(null);
+              }}
+              className="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-[10.5px] font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Tambah Pegawai</span>
+            </button>
+          </div>
         </div>
 
-        {/* Sisi Kanan: 3 Tombol Aksi Utama (Desktop & Mobile) */}
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        {/* Sisi Kanan Desktop: 3 Tombol Aksi Sejajar */}
+        <div className="hidden lg:flex items-center gap-2 shrink-0">
           {/* Tombol Ekspor Excel */}
           <button
             type="button"
             onClick={handleExportEmployees}
             title="Unduh seluruh data pegawai ke format Excel (.xlsx)"
-            className="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white/95 hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+            className="px-3 py-2 bg-white/95 hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-600" />
-            <span className="hidden sm:inline">Ekspor Excel</span>
-            <span className="sm:hidden">Ekspor</span>
+            <span>Ekspor Excel</span>
           </button>
 
           {/* Tombol Import Excel / CSV */}
@@ -512,11 +528,10 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
               setImportFileName('');
               setImportErrors([]);
             }}
-            className="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+            className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="hidden sm:inline">Import Excel / CSV</span>
-            <span className="sm:hidden">Import</span>
+            <span>Import Excel / CSV</span>
           </button>
 
           {/* Tombol Tambah Manual */}
@@ -526,10 +541,39 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
               setIsAddModalOpen(true);
               setAlert(null);
             }}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
+            className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
           >
             <UserPlus className="w-3.5 h-3.5" />
             <span>Tambah Pegawai</span>
+          </button>
+        </div>
+
+        {/* Sisi Bawah Mobile: Tombol Ekspor & Import di Kiri Bawah (Selaras Overview & Monitoring) */}
+        <div className="flex items-center justify-start gap-1.5 pt-1.5 sm:pt-2 border-t border-sky-100/80 lg:hidden w-full">
+          {/* Tombol Ekspor Excel */}
+          <button
+            type="button"
+            onClick={handleExportEmployees}
+            title="Unduh seluruh data pegawai ke format Excel (.xlsx)"
+            className="py-1 px-2.5 bg-white/90 hover:bg-slate-50 text-slate-700 border border-sky-100 rounded-xl text-[9.5px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+          >
+            <Download className="w-3 h-3 text-slate-600" />
+            <span>Ekspor Data</span>
+          </button>
+
+          {/* Tombol Import Excel / CSV */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsImportModalOpen(true);
+              setImportRows([]);
+              setImportFileName('');
+              setImportErrors([]);
+            }}
+            className="py-1 px-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl text-[9.5px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+          >
+            <FileSpreadsheet className="w-3 h-3 text-emerald-600" />
+            <span>Import Excel / CSV</span>
           </button>
         </div>
       </div>
