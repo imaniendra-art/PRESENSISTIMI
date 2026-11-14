@@ -152,6 +152,50 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
     setting.wfaFriday !== undefined ? setting.wfaFriday : true
   );
 
+  // Controlled states for Jam Standar & Simulasi Alur Presensi
+  const [workStartVal, setWorkStartVal] = useState(setting.workStart || '09:00');
+  const [workEndVal, setWorkEndVal] = useState(setting.workEnd || '16:00');
+  const [earliestVal, setEarliestVal] = useState(setting.earliestClockIn || '06:30');
+  const [graceVal, setGraceVal] = useState<number>(setting.gracePeriodMinutes ?? 15);
+  const [radiusVal, setRadiusVal] = useState<number>(setting.radiusMeters ?? 100);
+
+  // State Hari Kerja Interaktif (Bisa Dicentang / Dipilih)
+  const [activeDays, setActiveDays] = useState<string[]>(
+    setting.workDays ? setting.workDays.split(',').map((d) => d.trim()) : ['1', '2', '3', '4', '5']
+  );
+
+  const toggleActiveDay = (val: string) => {
+    if (activeDays.includes(val)) {
+      if (activeDays.length > 1) {
+        setActiveDays(activeDays.filter((d) => d !== val));
+      }
+    } else {
+      setActiveDays([...activeDays, val].sort());
+    }
+  };
+
+  const setPresetDays = (preset: 'MON_FRI' | 'MON_SAT') => {
+    if (preset === 'MON_FRI') {
+      setActiveDays(['1', '2', '3', '4', '5']);
+    } else {
+      setActiveDays(['1', '2', '3', '4', '5', '6']);
+    }
+  };
+
+  const getGraceTimeLimit = (startTime: string, graceMinutes: number) => {
+    try {
+      const [h, m] = startTime.split(':').map((x) => parseInt(x, 10));
+      const totalM = h * 60 + m + (graceMinutes || 0);
+      const endH = Math.floor(totalM / 60) % 24;
+      const endM = totalM % 60;
+      return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+    } catch {
+      return '09:15';
+    }
+  };
+
+  const graceLimitDisplay = getGraceTimeLimit(workStartVal, graceVal);
+
   const activeLocationsCount = locations.filter((loc) => loc.isActive).length;
 
   // Ambil titik GPS perangkat langsung
@@ -369,7 +413,7 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
 
       {/* Soft Sky Hero Card - Simetris & Selaras dengan Overview, Monitoring & Data Pegawai */}
       <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-2xl sm:rounded-3xl p-3 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-4">
-        {/* Baris Atas: Judul di Kiri & Tombol Tambah Gedung di Kanan Atas pada Mobile */}
+        {/* Header Row: Judul di Kiri & Jam Live di Sampingnya (Khusus Mobile Mengisi Space Kosong) */}
         <div className="flex items-center justify-between gap-2 w-full lg:w-auto">
           <div className="min-w-0">
             <h1 className="text-sm sm:text-2xl font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap">
@@ -380,63 +424,15 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
             </p>
           </div>
 
-          {/* Tombol Tambah di Kanan Atas (Khusus Mobile - Presisi Selaras Tambah Pegawai) */}
+          {/* Jam Live Real-Time di Samping Tulisan (Tampil di Mobile) */}
           <div className="lg:hidden shrink-0">
-            {activeTab === 'SCHEDULES' ? (
-              <button
-                type="button"
-                onClick={openAddScheduleModal}
-                className="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-[9.5px] font-bold transition flex items-center gap-1 shadow-xs cursor-pointer"
-              >
-                <Plus className="w-3 h-3" />
-                <span>Pola Baru</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setModalLat('');
-                  setModalLng('');
-                  setIsAddLocationModalOpen(true);
-                  setAlert(null);
-                }}
-                className="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-[9.5px] font-bold transition flex items-center gap-1 shadow-xs cursor-pointer"
-              >
-                <Plus className="w-3 h-3" />
-                <span>Tambah Gedung</span>
-              </button>
-            )}
+            <LiveClock />
           </div>
         </div>
 
-        {/* Sisi Kanan Desktop: Live Clock + Tombol Tambah */}
+        {/* Sisi Kanan Desktop: Live Clock */}
         <div className="hidden lg:flex items-center gap-3 shrink-0">
           <LiveClock />
-
-          {activeTab === 'SCHEDULES' ? (
-            <button
-              type="button"
-              onClick={openAddScheduleModal}
-              className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Tambah Pola Baru</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setModalLat('');
-                setModalLng('');
-                setIsAddLocationModalOpen(true);
-                setAlert(null);
-              }}
-              className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Tambah Gedung Baru</span>
-            </button>
-          )}
         </div>
 
         {/* Sisi Bawah Mobile: 4 Pill Box Keterangan Simetris (100% Selaras Overview) */}
@@ -570,7 +566,7 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
               }`}
             >
               <Building2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-              <span className="truncate">Lokasi Gedung ({locations.length})</span>
+              <span className="truncate">Lokasi Gedung</span>
             </button>
 
             <button
@@ -596,7 +592,7 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
               }`}
             >
               <CalendarDays className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-              <span className="truncate">Pola & Shift Kerja ({workSchedules.length})</span>
+              <span className="truncate">Pola & Shift Kerja</span>
             </button>
           </div>
         </div>
@@ -626,7 +622,7 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
                   setIsAddLocationModalOpen(true);
                   setAlert(null);
                 }}
-                className="hidden sm:flex px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition items-center gap-1.5 shadow-sm shadow-sky-600/20 cursor-pointer shrink-0"
+                className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm shadow-sky-600/20 cursor-pointer shrink-0 self-start sm:self-auto"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Gedung Baru</span>
@@ -756,80 +752,136 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
           </div>
         )}
 
-        {/* ================= TAB 2: JAM KERJA & KEBIJAKAN WFO/WFA ================= */}
+        {/* ================= TAB 2: JAM STANDAR KAMPUS & KEBIJAKAN ================= */}
         {activeTab === 'HOURS' && (
-          <div className="p-3 sm:p-6 max-w-3xl space-y-5">
-            <form onSubmit={handleUpdateHours} className="space-y-5">
-              {/* Seksi 1: Profil & Alamat Kampus */}
-              <div className="bg-slate-50/60 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-sky-600" />
-                  <span>Identitas Perguruan Tinggi</span>
-                </h4>
+          <div className="p-3 sm:p-6 max-w-4xl space-y-6">
+            <form onSubmit={handleUpdateHours} className="space-y-6">
+              {/* Seksi 0: Header Keterangan Tab */}
+              <div className="bg-sky-50/40 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-sky-100/80">
+                <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <Sliders className="w-4 h-4 text-sky-600" />
+                  <span>Konfigurasi Waktu Operasional Presensi & Kebijakan Kampus</span>
+                </h3>
+                <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">
+                  Pengaturan ini berlaku sebagai standar baku institusi STIMI YAPMI Makassar bagi seluruh pegawai reguler dan acuan sistem geofencing.
+                </p>
+              </div>
 
-                <div className="space-y-3 pt-1">
+              {/* Seksi 1: Visual Timeline & Simulasi Alur Presensi Harian (Dark/High-Contrast Pro Card) */}
+              <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-900 text-white shadow-md border border-slate-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Nama Institusi Kampus
-                    </label>
-                    <input
-                      type="text"
-                      name="campusName"
-                      defaultValue={setting.campusName}
-                      required
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
-                    />
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-sky-400 block flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-sky-400" />
+                      Simulasi Alur Presensi Harian (WITA)
+                    </span>
+                    <h4 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-2 mt-0.5">
+                      <span>Jam Kerja: {workStartVal} - {workEndVal} WITA</span>
+                      <span className="text-slate-600">|</span>
+                      <span className="text-emerald-400 font-normal font-sans text-xs">
+                        Toleransi s/d {graceLimitDisplay}
+                      </span>
+                    </h4>
+                  </div>
+                  <span className="text-[10px] bg-slate-800 text-emerald-300 px-3 py-1 rounded-xl border border-emerald-500/20 self-start sm:self-auto font-mono font-bold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    Live Preview Logika
+                  </span>
+                </div>
+
+                {/* Grid 4 Kartu Tahapan */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+                  {/* Tahap 1: Pagi Dibuka */}
+                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-800/90 border border-slate-700/80 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-sky-400">Pagi Dibuka</span>
+                      <span className="font-mono text-xs sm:text-sm font-black text-sky-300">{earliestVal}</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-white">Presensi Masuk Aktif</p>
+                    <p className="text-[9px] text-slate-400 leading-snug">
+                      Pegawai dapat mulai absen masuk di titik lokasi
+                    </p>
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Alamat Utama Kampus
-                    </label>
-                    <textarea
-                      name="address"
-                      defaultValue={setting.address}
-                      required
-                      rows={2}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
-                    />
+                  {/* Tahap 2: Tepat Waktu */}
+                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-emerald-950/40 border border-emerald-500/30 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-emerald-400">Jam Masuk</span>
+                      <span className="font-mono text-xs sm:text-sm font-black text-emerald-300">{workStartVal}</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-emerald-100">Batas Tepat Waktu</p>
+                    <p className="text-[9px] text-emerald-200/70 leading-snug">
+                      Status presensi tercatat &quot;Tepat Waktu&quot;
+                    </p>
+                  </div>
+
+                  {/* Tahap 3: Masa Toleransi */}
+                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-950/40 border border-amber-500/30 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-amber-400">Toleransi</span>
+                      <span className="font-mono text-xs sm:text-sm font-black text-amber-300">s/d {graceLimitDisplay}</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-amber-100">±{graceVal} Mnt Bebas Lambat</p>
+                    <p className="text-[9px] text-amber-200/70 leading-snug">
+                      Lewat {graceLimitDisplay} tercatat &quot;Lambat&quot;
+                    </p>
+                  </div>
+
+                  {/* Tahap 4: Pulang Dibuka */}
+                  <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-indigo-950/40 border border-indigo-500/30 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-400">Presensi Pulang</span>
+                      <span className="font-mono text-xs sm:text-sm font-black text-indigo-300">{workEndVal}</span>
+                    </div>
+                    <p className="text-[11px] font-bold text-indigo-100">Tombol Pulang Aktif</p>
+                    <p className="text-[9px] text-indigo-200/70 leading-snug">
+                      Mulai {workEndVal} WITA dapat absen pulang
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Seksi 2: Jam Operasional Presensi */}
-              <div className="bg-slate-50/60 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-emerald-600" />
-                  <span>Ketentuan Jam Kerja & Toleransi (WITA)</span>
-                </h4>
+              {/* Seksi 2: Pengaturan Jam Kerja Utama */}
+              <div className="bg-white p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-emerald-600" />
+                    <span>Ketentuan Jam Masuk & Pulang Baku (WITA)</span>
+                  </h4>
+                  <span className="text-[10px] bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-semibold">
+                    Zona Waktu WITA (Makassar)
+                  </span>
+                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Jendela Buka Pagi (Awal Absen)
+                      Jendela Buka Pagi (Awal Absen) *
                     </label>
                     <input
                       type="time"
                       name="earliestClockIn"
-                      defaultValue={setting.earliestClockIn || '06:30'}
+                      value={earliestVal}
+                      onChange={(e) => setEarliestVal(e.target.value)}
                       required
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
                     />
                     <p className="text-[9.5px] text-slate-500 mt-1">
-                      Presensi masuk baru dibuka mulai jam ini
+                      Presensi masuk dibuka mulai jam ini
                     </p>
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Jam Masuk Standar
+                      Jam Masuk Standar *
                     </label>
                     <input
                       type="time"
                       name="workStart"
-                      defaultValue={setting.workStart}
+                      value={workStartVal}
+                      onChange={(e) => setWorkStartVal(e.target.value)}
                       required
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
                     />
                     <p className="text-[9.5px] text-slate-500 mt-1">
                       Batas waktu masuk normal
@@ -838,73 +890,147 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
 
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Jam Pulang Standar
+                      Jam Pulang Standar *
                     </label>
                     <input
                       type="time"
                       name="workEnd"
-                      defaultValue={setting.workEnd}
+                      value={workEndVal}
+                      onChange={(e) => setWorkEndVal(e.target.value)}
                       required
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
                     />
                     <p className="text-[9.5px] text-slate-500 mt-1">
-                      Presensi pulang dibuka
+                      Presensi pulang resmi dibuka
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Toleransi Keterlambatan (Menit)
+                {/* Kolom Toleransi & Radius dengan Quick Select Pills */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                  {/* Toleransi */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-bold text-slate-700">
+                      Toleransi Keterlambatan (Menit) *
                     </label>
-                    <input
-                      type="number"
-                      name="gracePeriodMinutes"
-                      defaultValue={setting.gracePeriodMinutes}
-                      min={0}
-                      max={60}
-                      required
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
-                    />
-                    <p className="text-[9.5px] text-slate-500 mt-1">
-                      Contoh: 15 menit berarti sampai pukul 08:15 tetap dihitung Tepat Waktu.
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        name="gracePeriodMinutes"
+                        value={graceVal}
+                        onChange={(e) => setGraceVal(parseInt(e.target.value, 10) || 0)}
+                        min={0}
+                        max={60}
+                        required
+                        className="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-bold font-mono focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
+                      />
+                      <span className="text-xs text-slate-600 font-medium">Menit</span>
+
+                      {/* Quick Select Buttons */}
+                      <div className="flex items-center gap-1 ml-auto">
+                        {[0, 10, 15, 30].map((mins) => (
+                          <button
+                            key={mins}
+                            type="button"
+                            onClick={() => setGraceVal(mins)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer ${
+                              graceVal === mins
+                                ? 'bg-sky-600 text-white shadow-2xs'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            {mins}m
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-[9.5px] text-slate-500">
+                      Hingga pukul <strong className="text-slate-800 font-mono">{graceLimitDisplay}</strong> pegawai tetap dihitung Tepat Waktu.
                     </p>
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Radius Geofence Standar (Meter)
+                  {/* Radius Geofence Standar */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-bold text-slate-700">
+                      Radius Geofence Standar (Meter) *
                     </label>
-                    <input
-                      type="number"
-                      name="radiusMeters"
-                      defaultValue={setting.radiusMeters}
-                      min={10}
-                      max={1000}
-                      required
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
-                    />
-                    <p className="text-[9.5px] text-slate-500 mt-1">
-                      Jarak toleransi GPS default jika gedung belum disetel khusus.
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        name="radiusMeters"
+                        value={radiusVal}
+                        onChange={(e) => setRadiusVal(parseFloat(e.target.value) || 100)}
+                        min={10}
+                        max={1000}
+                        required
+                        className="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-bold font-mono focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
+                      />
+                      <span className="text-xs text-slate-600 font-medium">Meter</span>
+
+                      {/* Quick Select Buttons */}
+                      <div className="flex items-center gap-1 ml-auto">
+                        {[35, 50, 100, 150].map((r) => (
+                          <button
+                            key={r}
+                            type="button"
+                            onClick={() => setRadiusVal(r)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer ${
+                              radiusVal === r
+                                ? 'bg-sky-600 text-white shadow-2xs'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            {r}m
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-[9.5px] text-slate-500">
+                      Radius GPS default jika lokasi gedung belum memiliki setelan khusus.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Seksi 3: Kebijakan Hari Kerja & Pola WFO/WFA Mingguan */}
-              <div className="bg-slate-50/60 p-3.5 sm:p-5 rounded-2xl border border-slate-200/80 space-y-3">
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Laptop className="w-4 h-4 text-purple-600" />
-                  <span>Kebijakan Hari Kerja & Pola WFO / WFA</span>
-                </h4>
+              {/* Seksi 3: Jadwal Hari Kerja & Kebijakan WFO/WFA Mingguan */}
+              <div className="bg-white p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <Laptop className="w-4 h-4 text-purple-600" />
+                    <span>Jadwal Hari Kerja Aktif & Kebijakan WFO / WFA</span>
+                  </h4>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setPresetDays('MON_FRI')}
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
+                        activeDays.length === 5 && !activeDays.includes('6')
+                          ? 'bg-purple-100 text-purple-700 font-bold'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      5 Hari (Sen-Jum)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPresetDays('MON_SAT')}
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
+                        activeDays.includes('6')
+                          ? 'bg-purple-100 text-purple-700 font-bold'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      6 Hari (+Sabtu)
+                    </button>
+                  </div>
+                </div>
 
                 <div className="space-y-3 pt-1">
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
-                      Hari Kerja Aktif Institusi
+                      Pilih Hari Kerja Aktif Institusi (Klik untuk mengaktifkan/menonaktifkan):
                     </label>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                       {[
                         { label: 'Senin', val: '1' },
                         { label: 'Selasa', val: '2' },
@@ -912,30 +1038,51 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
                         { label: 'Kamis', val: '4' },
                         { label: 'Jumat', val: '5' },
                         { label: 'Sabtu', val: '6' },
-                      ].map((day) => (
-                        <span
-                          key={day.val}
-                          className="px-3 py-1 bg-white border border-slate-200 text-slate-800 rounded-xl text-[10.5px] font-bold shadow-2xs"
-                        >
-                          {day.label}
-                        </span>
-                      ))}
+                      ].map((day) => {
+                        const isSelected = activeDays.includes(day.val);
+                        return (
+                          <button
+                            key={day.val}
+                            type="button"
+                            onClick={() => toggleActiveDay(day.val)}
+                            className={`p-2.5 rounded-xl border text-center transition flex flex-col items-center gap-0.5 cursor-pointer ${
+                              isSelected
+                                ? 'bg-sky-50 text-sky-800 border-sky-300 font-bold shadow-2xs'
+                                : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 font-medium'
+                            }`}
+                          >
+                            <span className="text-xs">{day.label}</span>
+                            <span className={`text-[9px] ${isSelected ? 'text-sky-600 font-semibold' : 'text-slate-400'}`}>
+                              {isSelected ? '✓ Masuk' : 'Libur'}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
-                    <input type="hidden" name="workDays" value={setting.workDays || '1,2,3,4,5'} />
-                    <p className="text-[9.5px] text-slate-500 mt-1">
-                      Standar hari kerja akademik STIMI YAPMI: Senin s/d Jumat (Sabtu opsional/khusus).
+                    <input type="hidden" name="workDays" value={activeDays.join(',')} />
+                    <p className="text-[10px] text-slate-500 mt-1.5">
+                      * Terpilih: <strong className="text-slate-800">{activeDays.length} Hari Kerja Aktif</strong> per minggu. Di hari libur, sistem monitoring tidak menganggap pegawai mangkir.
                     </p>
                   </div>
 
                   {/* Toggle Kebijakan Jumat WFA Fleksibel */}
-                  <div className="p-3 bg-white border border-purple-100 rounded-xl sm:rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
+                  <div className="p-3.5 bg-gradient-to-r from-purple-50/80 to-white border border-purple-100 rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
                     <div className="space-y-0.5">
                       <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-purple-600" />
                         <span>Kebijakan Hari Jumat: WFA Fleksibel</span>
+                        {wfaFridayState ? (
+                          <span className="text-[9px] font-bold bg-purple-100 text-purple-700 px-2 py-0.2 rounded-full">
+                            Aktif
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.2 rounded-full">
+                            Nonaktif
+                          </span>
+                        )}
                       </span>
-                      <p className="text-[10px] text-slate-500 max-w-md leading-relaxed">
-                        Jika diaktifkan, di hari Jumat pegawai dapat presensi masuk/pulang tanpa dibatasi radius geofence kampus (status WFA).
+                      <p className="text-[10px] text-slate-500 max-w-lg leading-relaxed">
+                        Jika diaktifkan, pada hari Jumat pegawai diperbolehkan presensi masuk dan pulang dari luar kampus (Work From Anywhere) tanpa terkena batasan radius geofence.
                       </p>
                     </div>
 
@@ -953,15 +1100,60 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
                 </div>
               </div>
 
+              {/* Seksi 4: Profil & Alamat Kampus */}
+              <div className="bg-white p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs space-y-3">
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-sky-600" />
+                  <span>Identitas Perguruan Tinggi</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Nama Institusi Kampus *
+                    </label>
+                    <input
+                      type="text"
+                      name="campusName"
+                      defaultValue={setting.campusName}
+                      required
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Alamat Utama Kampus *
+                    </label>
+                    <input
+                      type="text"
+                      name="address"
+                      defaultValue={setting.address}
+                      required
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Action Save Button */}
               <div className="pt-2 flex justify-end">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-sky-600/20 cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
+                  className="px-6 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-sky-600/20 cursor-pointer disabled:opacity-60 flex items-center gap-2"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Menyimpan...' : 'Simpan Pengaturan Kampus'}</span>
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Menyimpan Pengaturan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Simpan Pengaturan Kampus</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>
@@ -988,7 +1180,7 @@ export function CampusSettingsForm({ setting, locations, workSchedules = [] }: C
               <button
                 type="button"
                 onClick={openAddScheduleModal}
-                className="hidden sm:flex px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition items-center gap-1.5 shadow-sm shadow-sky-600/20 cursor-pointer shrink-0"
+                className="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm shadow-sky-600/20 cursor-pointer shrink-0 self-start sm:self-auto"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Pola Baru</span>
