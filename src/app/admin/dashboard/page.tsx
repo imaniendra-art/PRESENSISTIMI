@@ -11,10 +11,7 @@ import {
   Users,
   CheckCircle2,
   ClockAlert,
-  Settings,
-  FileSpreadsheet,
   ArrowRight,
-  ShieldCheck,
   Activity,
   Building2,
   TrendingUp,
@@ -165,35 +162,42 @@ export default async function AdminDashboardPage() {
   // 5 Presensi Masuk Terkini
   const recentClockIns = attendancesToday.filter((a) => a.clockInTime).slice(0, 5);
 
+  const formattedToday = today.toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner Admin - Fresh Sky Blue Theme Selaras */}
-        <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-sky-600 rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-sky-600/15 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-sky-400/30 relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 border border-white/30 rounded-full text-white text-xs font-semibold mb-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-sky-100" />
-              <span>Portal Administrator SDM STIMI</span>
+        {/* Compact Page Header - Clean, Focused & Space-Saving */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Overview Kehadiran
+              </h1>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200/80">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                Live
+              </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-              Pusat Kendali Kepegawaian & Presensi
-            </h1>
-            <p className="text-sky-100 text-xs mt-1">
-              {campusSetting?.campusName} • Radius Geofence Aktif: {campusSetting?.radiusMeters} Meter • Jam Kerja: {campusSetting?.workStart} - {campusSetting?.workEnd} WITA
+            <p className="text-xs text-slate-500 mt-1">
+              {formattedToday} • Jam Operasional: {campusSetting?.workStart} - {campusSetting?.workEnd} WITA • Radius Geofence: {campusSetting?.radiusMeters}m
             </p>
           </div>
 
           <Link
             href="/admin/monitoring"
-            className="relative z-10 bg-white text-sky-700 hover:bg-sky-50 active:bg-sky-100 px-5 py-3.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-950/10 transition shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 active:bg-sky-200 border border-sky-200/80 transition shadow-2xs self-start sm:self-auto cursor-pointer"
           >
-            <Activity className="w-4 h-4 text-sky-600" />
-            <span>Pantau Kehadiran Real-Time Hari Ini</span>
-            <ArrowRight className="w-4 h-4 text-sky-600" />
+            <Activity className="w-3.5 h-3.5 text-sky-600" />
+            <span>Monitor Hari Ini</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
@@ -256,7 +260,7 @@ export default async function AdminDashboardPage() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-emerald-600" />
+                    <TrendingUp className="w-4 h-4 text-sky-600" />
                     <h2 className="text-sm font-bold text-slate-900">
                       Tren Kehadiran Mingguan (Senin - Jumat)
                     </h2>
@@ -265,7 +269,7 @@ export default async function AdminDashboardPage() {
                     Tingkat kedisiplinan dan absensi civitas akademika minggu berjalan
                   </p>
                 </div>
-                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold font-mono">
+                <span className="px-3 py-1 bg-sky-50 text-sky-700 border border-sky-200/80 rounded-full text-xs font-bold font-mono">
                   Target: 100%
                 </span>
               </div>
@@ -289,8 +293,8 @@ export default async function AdminDashboardPage() {
                             stat.isFuture
                               ? 'bg-slate-200'
                               : stat.isToday
-                              ? 'bg-gradient-to-t from-emerald-600 to-teal-400 shadow-sm'
-                              : 'bg-emerald-600/80'
+                              ? 'bg-gradient-to-t from-sky-600 to-sky-400 shadow-sm'
+                              : 'bg-sky-600/75'
                           }`}
                         />
                       </div>
@@ -298,7 +302,7 @@ export default async function AdminDashboardPage() {
                       <div className="text-center mt-1">
                         <span
                           className={`text-xs font-bold block ${
-                            stat.isToday ? 'text-emerald-700 underline font-extrabold' : 'text-slate-700'
+                            stat.isToday ? 'text-sky-700 underline font-extrabold' : 'text-slate-700'
                           }`}
                         >
                           {stat.dayName}
@@ -312,7 +316,7 @@ export default async function AdminDashboardPage() {
 
               <div className="mt-4 flex items-center justify-between text-xs text-slate-500 pt-2">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-md bg-gradient-to-t from-emerald-600 to-teal-400 inline-block" />
+                  <span className="w-3 h-3 rounded-md bg-gradient-to-t from-sky-600 to-sky-400 inline-block" />
                   Hari Ini ({persentaseHadir}% Presensi)
                 </span>
                 <span className="text-slate-400 font-mono text-[11px]">
@@ -325,7 +329,7 @@ export default async function AdminDashboardPage() {
             <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-emerald-600" />
+                  <Building2 className="w-4 h-4 text-sky-600" />
                   <h2 className="text-sm font-bold text-slate-900">
                     Distribusi Kehadiran Unit Kerja Hari Ini
                   </h2>
@@ -335,7 +339,7 @@ export default async function AdminDashboardPage() {
                 </span>
               </div>
 
-              <div className="space-y-3.5">
+              <div className="space-y-3.5 max-h-[340px] overflow-y-auto pr-1">
                 {unitStats.map((unit, idx) => (
                   <div key={idx} className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
@@ -344,7 +348,7 @@ export default async function AdminDashboardPage() {
                       </span>
                       <span className="text-slate-600 font-mono tabular-nums font-medium">
                         <strong>{unit.hadir}</strong> / {unit.total}{' '}
-                        <span className="text-emerald-700 font-bold ml-1">
+                        <span className="text-sky-700 font-bold ml-1">
                           ({unit.percent}%)
                         </span>
                       </span>
@@ -355,9 +359,9 @@ export default async function AdminDashboardPage() {
                         style={{ width: `${unit.percent}%` }}
                         className={`h-full rounded-full transition-all duration-300 ${
                           unit.percent === 100
-                            ? 'bg-emerald-500'
+                            ? 'bg-sky-600'
                             : unit.percent > 50
-                            ? 'bg-teal-500'
+                            ? 'bg-sky-500'
                             : 'bg-amber-500'
                         }`}
                       />
@@ -374,8 +378,8 @@ export default async function AdminDashboardPage() {
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-sky-500" />
                   </span>
                   <h2 className="text-sm font-bold text-slate-900">
                     Aktivitas Presensi Terkini
@@ -383,7 +387,7 @@ export default async function AdminDashboardPage() {
                 </div>
                 <Link
                   href="/admin/monitoring"
-                  className="text-xs text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 group"
+                  className="text-xs text-sky-700 hover:text-sky-800 font-bold flex items-center gap-1 group"
                 >
                   <span>Selengkapnya</span>
                   <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition" />
@@ -509,54 +513,6 @@ export default async function AdminDashboardPage() {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Menu Akses Cepat Admin */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          <Link
-            href="/admin/pegawai"
-            className="p-5 bg-white rounded-3xl border border-slate-200/90 hover:border-sky-300 transition shadow-xs group cursor-pointer"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 group-hover:bg-sky-600 text-sky-600 group-hover:text-white flex items-center justify-center mb-3 transition shadow-xs">
-              <Users className="w-6 h-6" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition">
-              Kelola Data Pegawai
-            </h3>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-              Tambah dosen/staf baru, reset sandi, penataan hierarki atasan langsung, dan status akun.
-            </p>
-          </Link>
-
-          <Link
-            href="/admin/pengaturan"
-            className="p-5 bg-white rounded-3xl border border-slate-200/90 hover:border-sky-300 transition shadow-xs group cursor-pointer"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 group-hover:bg-sky-600 text-sky-600 group-hover:text-white flex items-center justify-center mb-3 transition shadow-xs">
-              <Settings className="w-6 h-6" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition">
-              Pengaturan Kampus & Geofence
-            </h3>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-              Konfigurasi titik latitude/longitude kampus, radius toleransi meter, dan jam kerja standar.
-            </p>
-          </Link>
-
-          <Link
-            href="/admin/laporan"
-            className="p-5 bg-white rounded-3xl border border-slate-200/90 hover:border-sky-300 transition shadow-xs group cursor-pointer"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 group-hover:bg-sky-600 text-sky-600 group-hover:text-white flex items-center justify-center mb-3 transition shadow-xs">
-              <FileSpreadsheet className="w-6 h-6" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition">
-              Rekapitulasi & Ekspor Laporan
-            </h3>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-              Unduh laporan kehadiran bulanan format Excel (.xlsx) dan pratinjau cetak resmi PDF.
-            </p>
-          </Link>
         </div>
       </main>
     </div>
