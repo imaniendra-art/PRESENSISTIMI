@@ -483,14 +483,14 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
         <div className="flex items-center justify-between gap-2 w-full lg:w-auto">
           <div className="min-w-0">
             <h1 className="text-sm sm:text-2xl font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap">
-              Data Pegawai
+              Data Pegawai & Dosen
             </h1>
             <p className="text-xs sm:text-lg font-extrabold text-slate-700 tracking-tight mt-0.5 leading-tight whitespace-nowrap">
               STIMI YAPMI Makassar
             </p>
           </div>
 
-          {/* Tombol Tambah Pegawai di Kanan Atas (Khusus Mobile) */}
+          {/* Tombol Tambah Pegawai di Kanan Atas (Khusus Mobile - Ukuran & Padding Presisi Selaras LiveClock) */}
           <div className="lg:hidden shrink-0">
             <button
               type="button"
@@ -498,9 +498,9 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
                 setIsAddModalOpen(true);
                 setAlert(null);
               }}
-              className="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-[10.5px] font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
+              className="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-[9.5px] font-bold transition flex items-center gap-1 shadow-xs cursor-pointer"
             >
-              <UserPlus className="w-3.5 h-3.5" />
+              <UserPlus className="w-3 h-3" />
               <span>Tambah Pegawai</span>
             </button>
           </div>
@@ -548,14 +548,14 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
           </button>
         </div>
 
-        {/* Sisi Bawah Mobile: Tombol Ekspor & Import di Kiri Bawah (Selaras Overview & Monitoring) */}
-        <div className="flex items-center justify-start gap-1.5 pt-1.5 sm:pt-2 border-t border-sky-100/80 lg:hidden w-full">
+        {/* Sisi Bawah Mobile: Tombol Ekspor & Import 1-Baris Penuh Simetris Selaras Monitoring */}
+        <div className="grid grid-cols-2 gap-1.5 pt-1.5 sm:pt-2 border-t border-sky-100/80 lg:hidden w-full">
           {/* Tombol Ekspor Excel */}
           <button
             type="button"
             onClick={handleExportEmployees}
             title="Unduh seluruh data pegawai ke format Excel (.xlsx)"
-            className="py-1 px-2.5 bg-white/90 hover:bg-slate-50 text-slate-700 border border-sky-100 rounded-xl text-[9.5px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+            className="w-full py-1 px-2 bg-white/90 hover:bg-slate-50 text-slate-700 border border-sky-100 rounded-xl text-[9.5px] font-bold transition flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
           >
             <Download className="w-3 h-3 text-slate-600" />
             <span>Ekspor Data</span>
@@ -570,7 +570,7 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
               setImportFileName('');
               setImportErrors([]);
             }}
-            className="py-1 px-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl text-[9.5px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+            className="w-full py-1 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl text-[9.5px] font-bold transition flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
           >
             <FileSpreadsheet className="w-3 h-3 text-emerald-600" />
             <span>Import Excel / CSV</span>
@@ -595,7 +595,9 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
             {totalEmployees}
           </p>
           <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
-            {countPegawai} Dosen/Tendik
+            {countPegawai}{' '}
+            <span className="hidden sm:inline">Dosen & Tendik</span>
+            <span className="sm:hidden">Dosen</span>
           </p>
         </div>
 
@@ -614,7 +616,8 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
             {countPegawai}
           </p>
           <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
-            Pendidik & Staf
+            <span className="hidden sm:inline">Pendidik & Staf</span>
+            <span className="sm:hidden">Pendidik</span>
           </p>
         </div>
 
@@ -633,7 +636,8 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
             {countAtasan}
           </p>
           <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
-            Pimpinan & Kaprodi
+            <span className="hidden sm:inline">Pimpinan & Kaprodi</span>
+            <span className="sm:hidden">Penilai</span>
           </p>
         </div>
 
@@ -655,7 +659,9 @@ export function EmployeeManager({ users, superiors, campusLocations }: EmployeeM
             </span>
           </p>
           <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
-            {totalEmployees - countActive} Nonaktif
+            {totalEmployees - countActive}{' '}
+            <span className="hidden sm:inline">Akun Nonaktif</span>
+            <span className="sm:hidden">Nonaktif</span>
           </p>
         </div>
       </div>
