@@ -939,14 +939,21 @@ export function ReportGenerator({
 
           {/* Tampilan Mobile: Tabel Kompak Minimalis 5 Kolom Vital (Zero Horizontal Scroll di Ponsel) */}
           <div className="block md:hidden w-full overflow-hidden rounded-xl border border-slate-200/90 shadow-2xs print:hidden">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse table-fixed">
+              <colgroup>
+                <col className="w-[43%]" />
+                <col className="w-[17%]" />
+                <col className="w-[12%]" />
+                <col className="w-[12%]" />
+                <col className="w-[16%]" />
+              </colgroup>
               <thead>
                 <tr className="bg-slate-100 text-slate-700 border-b border-slate-200 text-[10px] font-bold uppercase tracking-tight">
-                  <th className="py-2 px-2.5">Pegawai</th>
-                  <th className="py-2 px-1 text-center w-14">Hadir</th>
-                  <th className="py-2 px-1 text-center w-11 text-amber-700">Lambat</th>
-                  <th className="py-2 px-1 text-center w-10 text-rose-700">Alfa</th>
-                  <th className="py-2 px-1.5 text-center w-14">Aksi</th>
+                  <th className="py-2 px-2 text-left">Pegawai</th>
+                  <th className="py-2 px-1 text-center">Hadir</th>
+                  <th className="py-2 px-1 text-center text-amber-700">Lambat</th>
+                  <th className="py-2 px-1 text-center text-rose-700">Alfa</th>
+                  <th className="py-2 px-1 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-800 bg-white">
@@ -959,30 +966,21 @@ export function ReportGenerator({
                 ) : (
                   filteredReportData.map((row) => (
                     <tr key={`mob-rep-${row.userId}`} className="hover:bg-sky-50/30 transition-colors">
-                      {/* 1. Pegawai: Nama, NIP & Unit */}
-                      <td className="py-2 px-2.5 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-800 font-bold text-[10px] flex items-center justify-center shrink-0">
-                            {row.name
-                              .split(' ')
-                              .map((n) => n[0])
-                              .slice(0, 2)
-                              .join('')}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-bold text-slate-900 text-xs truncate max-w-[130px] xs:max-w-[160px]" title={row.name}>
-                              {row.name}
-                            </p>
-                            <p className="text-[10px] text-slate-500 font-mono truncate max-w-[130px] xs:max-w-[160px]">
-                              {row.nip} • {row.unitKerja}
-                            </p>
-                          </div>
+                      {/* 1. Pegawai: Nama Lengkap & NIP/Unit (Tanpa Kotak Inisial agar Hemat Ruang) */}
+                      <td className="py-2 px-2 min-w-0">
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 text-[11px] truncate leading-tight" title={row.name}>
+                            {row.name}
+                          </p>
+                          <p className="text-[9.5px] text-slate-500 font-mono truncate mt-0.5">
+                            {row.nip} • {row.unitKerja}
+                          </p>
                         </div>
                       </td>
 
                       {/* 2. Hadir: Angka Hadir & % */}
-                      <td className="py-2 px-1 text-center font-mono">
-                        <span className="font-bold text-sky-900 text-xs block tabular-nums">
+                      <td className="py-2 px-0.5 text-center font-mono">
+                        <span className="font-bold text-sky-900 text-[11px] block tabular-nums">
                           {row.totalHadir}
                         </span>
                         <span className="text-[9.5px] font-black text-emerald-700 block tabular-nums">
@@ -991,40 +989,40 @@ export function ReportGenerator({
                       </td>
 
                       {/* 3. Lambat */}
-                      <td className="py-2 px-1 text-center font-mono tabular-nums">
+                      <td className="py-2 px-0.5 text-center font-mono tabular-nums">
                         {row.terlambat > 0 ? (
-                          <span className="font-bold text-amber-800 bg-amber-50 px-1 py-0.5 rounded text-[11px]">
+                          <span className="font-bold text-amber-800 bg-amber-50 px-1 py-0.5 rounded text-[10.5px]">
                             {row.terlambat}
                           </span>
                         ) : (
-                          <span className="text-slate-400 text-[11px]">0</span>
+                          <span className="text-slate-400 text-[10.5px]">0</span>
                         )}
                       </td>
 
                       {/* 4. Alfa */}
-                      <td className="py-2 px-1 text-center font-mono tabular-nums">
+                      <td className="py-2 px-0.5 text-center font-mono tabular-nums">
                         {row.alfa > 0 ? (
-                          <span className="font-black text-rose-600 bg-rose-50 px-1 py-0.5 rounded text-[11px]">
+                          <span className="font-black text-rose-600 bg-rose-50 px-1 py-0.5 rounded text-[10.5px]">
                             {row.alfa}
                           </span>
                         ) : (
-                          <span className="text-slate-400 text-[11px]">0</span>
+                          <span className="text-slate-400 text-[10.5px]">0</span>
                         )}
                       </td>
 
-                      {/* 5. Aksi: Tombol Rincian */}
-                      <td className="py-2 px-1.5 text-center">
+                      {/* 5. Aksi: Tombol Ikon Mata (Terlihat Jelas 100% Tanpa Terpotong) */}
+                      <td className="py-2 px-1 text-center">
                         <button
                           type="button"
                           onClick={() => {
                             setSelectedUserId(row.userId);
                             setActiveTab('RINCIAN_PERORANGAN');
                           }}
-                          className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 border border-sky-200/80 transition shadow-2xs cursor-pointer w-full"
-                          title="Buka Lembar Rincian Pegawai Ini"
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 border border-sky-200/90 transition shadow-2xs cursor-pointer mx-auto"
+                          title={`Lihat Buku Presensi ${row.name}`}
+                          aria-label={`Lihat Buku Presensi ${row.name}`}
                         >
-                          <Eye className="w-3 h-3 text-sky-600" />
-                          <span>Rincian</span>
+                          <Eye className="w-3.5 h-3.5 text-sky-600 shrink-0" />
                         </button>
                       </td>
                     </tr>
@@ -1034,24 +1032,24 @@ export function ReportGenerator({
               {/* Ringkasan Total Footer Mobile */}
               <tfoot>
                 <tr className="bg-slate-100 text-slate-900 font-bold border-t border-slate-200 text-[10px]">
-                  <td className="py-2 px-2.5 text-right font-bold uppercase tracking-wider text-[9.5px]">
+                  <td className="py-2 px-2 text-right font-bold uppercase tracking-wider text-[9.5px]">
                     Total / Rata-rata:
                   </td>
-                  <td className="py-2 px-1 text-center font-mono">
-                    <span className="block text-sky-950 font-bold tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono">
+                    <span className="block text-sky-950 font-bold tabular-nums text-[10.5px]">
                       {kpiStats.totalHadirWfo + kpiStats.totalHadirWfa}
                     </span>
-                    <span className="block text-[9.5px] font-black text-sky-950 tabular-nums">
+                    <span className="block text-[9px] font-black text-sky-950 tabular-nums">
                       {kpiStats.avgKehadiran}%
                     </span>
                   </td>
-                  <td className="py-2 px-1 text-center font-mono text-amber-800 tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono text-amber-800 tabular-nums text-[10.5px]">
                     {kpiStats.totalTerlambat}
                   </td>
-                  <td className="py-2 px-1 text-center font-mono text-rose-800 tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono text-rose-800 tabular-nums text-[10.5px]">
                     {kpiStats.totalAlfa}
                   </td>
-                  <td className="py-2 px-1.5" />
+                  <td className="py-2 px-1" />
                 </tr>
               </tfoot>
             </table>
