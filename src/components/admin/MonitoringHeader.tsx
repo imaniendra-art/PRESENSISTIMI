@@ -34,7 +34,8 @@ export function MonitoringHeader({
 
   // Navigasi geser 1 hari (Kemarin / Besok)
   const shiftDay = (days: number) => {
-    const current = new Date(currentDateStr + 'T00:00:00');
+    const [y, m, d] = currentDateStr.split('-').map(Number);
+    const current = new Date(y, m - 1, d);
     current.setDate(current.getDate() + days);
     const yyyy = current.getFullYear();
     const mm = String(current.getMonth() + 1).padStart(2, '0');

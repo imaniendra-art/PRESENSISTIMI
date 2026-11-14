@@ -66,6 +66,28 @@ interface ActivePhotoModalData {
   location: string;
 }
 
+// Helper untuk menyederhanakan nama lokasi/gedung agar tidak panjang di tabel
+function formatLocationShort(name?: string | null): string {
+  if (!name) return 'Kampus 1';
+  const lower = name.toLowerCase();
+  if (
+    lower.includes('kampus ii') ||
+    lower.includes('kampus 2') ||
+    lower.includes('pascasarjana')
+  ) {
+    return 'Kampus 2';
+  }
+  if (
+    lower.includes('kampus i') ||
+    lower.includes('kampus 1') ||
+    lower.includes('stimi') ||
+    lower.includes('utama')
+  ) {
+    return 'Kampus 1';
+  }
+  return name.replace(/^Target:\s*/i, '').trim();
+}
+
 export function MonitoringTableClient({
   users,
   formattedDateDisplay,
@@ -160,7 +182,7 @@ export function MonitoringTableClient({
 
   return (
     <>
-      <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden w-full">
         {/* Toolbar Pencarian & Filter Cepat (Web & Mobile) */}
         <div className="p-3 sm:p-5 border-b border-slate-100 bg-slate-50/50 space-y-3">
           <div className="flex items-center justify-between gap-2">
@@ -230,8 +252,8 @@ export function MonitoringTableClient({
           </div>
         </div>
 
-        {/* Tampilan Desktop: Tabel Lengkap Terstruktur (hidden md:block) */}
-        <div className="hidden md:block overflow-x-auto">
+        {/* Tampilan Desktop: Tabel Proporsional 100% Lebar Layar (Zero Horizontal Scroll) */}
+        <div className="hidden md:block w-full overflow-hidden">
           {filteredUsers.length === 0 ? (
             <div className="py-12 px-4 text-center space-y-2">
               <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mx-auto">
@@ -256,31 +278,47 @@ export function MonitoringTableClient({
               </button>
             </div>
           ) : (
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse table-fixed">
+              {/* Alokasi Lebar Kolom Proporsional (Total Tepat 100% Pas Layar) */}
+              <colgroup>
+                <col className="w-[4%]" />
+                <col className="w-[19%]" />
+                <col className="w-[15%]" />
+                <col className="w-[12%]" />
+                {/* Presensi Masuk (Total 25%) */}
+                <col className="w-[8%]" />
+                <col className="w-[6%]" />
+                <col className="w-[11%]" />
+                {/* Presensi Pulang (Total 25%) */}
+                <col className="w-[8%]" />
+                <col className="w-[6%]" />
+                <col className="w-[11%]" />
+              </colgroup>
+
               {/* Header 2 Tingkat: Grup MASUK & Grup PULANG */}
               <thead>
                 <tr className="bg-sky-50/70 text-slate-700 uppercase tracking-wider text-[10px] border-b border-sky-100">
                   <th
                     rowSpan={2}
-                    className="py-3 px-3 font-extrabold text-center w-12 border-r border-sky-100/80"
+                    className="py-2.5 px-2 font-extrabold text-center border-r border-sky-100/80"
                   >
                     No.
                   </th>
                   <th
                     rowSpan={2}
-                    className="py-3 px-4 font-extrabold border-r border-sky-100/80 min-w-[170px]"
+                    className="py-2.5 px-3 font-extrabold border-r border-sky-100/80"
                   >
                     Pegawai
                   </th>
                   <th
                     rowSpan={2}
-                    className="py-3 px-3.5 font-extrabold border-r border-sky-100/80 min-w-[130px]"
+                    className="py-2.5 px-3 font-extrabold border-r border-sky-100/80"
                   >
                     Unit & Jabatan
                   </th>
                   <th
                     rowSpan={2}
-                    className="py-3 px-3 font-extrabold text-center border-r border-sky-100/80 min-w-[100px]"
+                    className="py-2.5 px-2 font-extrabold text-center border-r border-sky-100/80"
                   >
                     Status
                   </th>
@@ -288,7 +326,7 @@ export function MonitoringTableClient({
                   {/* Header Grup PRESENSI MASUK */}
                   <th
                     colSpan={3}
-                    className="py-2 px-3 font-black text-center bg-emerald-50 text-emerald-800 border-r border-emerald-200/80 tracking-normal"
+                    className="py-2 px-2 font-black text-center bg-emerald-50 text-emerald-800 border-r border-emerald-200/80 tracking-normal"
                   >
                     <span className="flex items-center justify-center gap-1.5">
                       <LogIn className="w-3.5 h-3.5 text-emerald-600" />
@@ -299,7 +337,7 @@ export function MonitoringTableClient({
                   {/* Header Grup PRESENSI PULANG */}
                   <th
                     colSpan={3}
-                    className="py-2 px-3 font-black text-center bg-sky-50 text-sky-800 tracking-normal"
+                    className="py-2 px-2 font-black text-center bg-sky-50 text-sky-800 tracking-normal"
                   >
                     <span className="flex items-center justify-center gap-1.5">
                       <LogOut className="w-3.5 h-3.5 text-sky-600" />
@@ -310,25 +348,25 @@ export function MonitoringTableClient({
 
                 {/* Sub-Header Kolom Masuk & Pulang */}
                 <tr className="bg-slate-50/90 text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                  {/* Kolom Masuk: Waktu, Foto, Lokasi */}
-                  <th className="py-2 px-3 font-bold bg-emerald-50/40 text-emerald-900 border-r border-emerald-100/60 min-w-[90px]">
+                  {/* Kolom Masuk: Jam, Foto, Lokasi */}
+                  <th className="py-1.5 px-2.5 font-bold bg-emerald-50/40 text-emerald-900 border-r border-emerald-100/60">
                     Jam
                   </th>
-                  <th className="py-2 px-2 text-center font-bold bg-emerald-50/40 text-emerald-900 border-r border-emerald-100/60 w-14">
+                  <th className="py-1.5 px-1.5 text-center font-bold bg-emerald-50/40 text-emerald-900 border-r border-emerald-100/60">
                     Foto
                   </th>
-                  <th className="py-2 px-3 font-bold bg-emerald-50/40 text-emerald-900 border-r border-sky-100 min-w-[150px]">
+                  <th className="py-1.5 px-2.5 font-bold bg-emerald-50/40 text-emerald-900 border-r border-sky-100">
                     Lokasi & Jarak
                   </th>
 
-                  {/* Kolom Pulang: Waktu, Foto, Lokasi */}
-                  <th className="py-2 px-3 font-bold bg-sky-50/40 text-sky-900 border-r border-sky-100/60 min-w-[90px]">
+                  {/* Kolom Pulang: Jam, Foto, Lokasi */}
+                  <th className="py-1.5 px-2.5 font-bold bg-sky-50/40 text-sky-900 border-r border-sky-100/60">
                     Jam
                   </th>
-                  <th className="py-2 px-2 text-center font-bold bg-sky-50/40 text-sky-900 border-r border-sky-100/60 w-14">
+                  <th className="py-1.5 px-1.5 text-center font-bold bg-sky-50/40 text-sky-900 border-r border-sky-100/60">
                     Foto
                   </th>
-                  <th className="py-2 px-3 font-bold bg-sky-50/40 text-sky-900 min-w-[150px]">
+                  <th className="py-1.5 px-2.5 font-bold bg-sky-50/40 text-sky-900">
                     Lokasi & Jarak
                   </th>
                 </tr>
@@ -347,18 +385,18 @@ export function MonitoringTableClient({
                   return (
                     <tr key={user.id} className="hover:bg-sky-50/30 transition">
                       {/* 1. Nomor Urut */}
-                      <td className="py-3 px-3 text-center font-mono font-bold text-slate-500 text-xs border-r border-slate-100">
+                      <td className="py-2.5 px-2 text-center font-mono font-bold text-slate-500 text-xs border-r border-slate-100">
                         {idx + 1}
                       </td>
 
                       {/* 2. Pegawai */}
-                      <td className="py-3 px-4 border-r border-slate-100">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs uppercase text-slate-600 shrink-0">
+                      <td className="py-2.5 px-3 border-r border-slate-100">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-[11px] uppercase text-slate-600 shrink-0">
                             {user.name.slice(0, 2)}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-bold text-slate-900 truncate max-w-[180px]">
+                            <p className="font-bold text-slate-900 truncate">
                               {user.name}
                             </p>
                             <p className="text-[10px] text-slate-400 font-mono">
@@ -369,60 +407,50 @@ export function MonitoringTableClient({
                       </td>
 
                       {/* 3. Unit Kerja & Jabatan */}
-                      <td className="py-3 px-3.5 border-r border-slate-100">
-                        <p className="font-medium text-slate-800 truncate max-w-[150px]">
+                      <td className="py-2.5 px-3 border-r border-slate-100">
+                        <p className="font-semibold text-slate-800 truncate">
                           {user.unitKerja}
                         </p>
-                        <p className="text-[10px] text-slate-500 truncate max-w-[150px]">
+                        <p className="text-[10px] text-slate-500 truncate">
                           {user.jabatan}
                         </p>
                       </td>
 
                       {/* 4. Status Kehadiran */}
-                      <td className="py-3 px-3 whitespace-nowrap text-center border-r border-slate-100">
+                      <td className="py-2.5 px-2 whitespace-nowrap text-center border-r border-slate-100">
                         {!att || !att.clockInTime ? (
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-slate-100 text-slate-600">
-                            Belum Presensi
+                            Belum
                           </span>
                         ) : att.isDinasLuar ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-purple-100 text-purple-800">
-                            <Briefcase className="w-3 h-3" /> Dinas Luar
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-purple-100 text-purple-800">
+                            <Briefcase className="w-3 h-3" /> Dinas
                           </span>
                         ) : att.clockInStatus === 'TEPAT_WAKTU' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-100 text-emerald-800">
-                            <CheckCircle2 className="w-3 h-3" /> Tepat Waktu
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-100 text-emerald-800">
+                            <CheckCircle2 className="w-3 h-3" /> Tepat
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-rose-100 text-rose-800">
-                            <ClockAlert className="w-3 h-3" /> Terlambat
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-rose-100 text-rose-800">
+                            <ClockAlert className="w-3 h-3" /> Lambat
                           </span>
                         )}
                       </td>
 
                       {/* ===== BAGIAN MASUK ===== */}
                       {/* 5. Jam Masuk */}
-                      <td className="py-3 px-3 whitespace-nowrap border-r border-emerald-100/60 bg-emerald-50/10">
+                      <td className="py-2.5 px-2.5 whitespace-nowrap border-r border-emerald-100/60 bg-emerald-50/10">
                         {inTimeInfo ? (
-                          <div className="flex flex-col">
-                            <span className="font-mono font-bold text-slate-900 leading-tight">
-                              {inTimeInfo.localTime}{' '}
-                              <span className="text-[9px] font-sans font-medium text-slate-500">
-                                {inTimeInfo.tzLabel}
-                              </span>
-                            </span>
-                            {inTimeInfo.tzLabel !== 'WITA' && (
-                              <span className="text-[8.5px] text-slate-400 font-mono">
-                                ({inTimeInfo.witaTime} WITA)
-                              </span>
-                            )}
-                          </div>
+                          <span className="font-mono font-bold text-slate-900 text-xs">
+                            {inTimeInfo.localTime}
+                          </span>
                         ) : (
-                          <span className="text-slate-400 font-mono">-</span>
+                          <span className="text-slate-400 italic text-[11px]">Belum</span>
                         )}
                       </td>
 
                       {/* 6. Foto Masuk */}
-                      <td className="py-3 px-2 text-center border-r border-emerald-100/60 bg-emerald-50/10">
+                      <td className="py-2.5 px-1.5 text-center border-r border-emerald-100/60 bg-emerald-50/10">
                         {att?.clockInPhoto ? (
                           <button
                             type="button"
@@ -446,7 +474,7 @@ export function MonitoringTableClient({
                                   : att.clockInStatus === 'TEPAT_WAKTU'
                                   ? 'success'
                                   : 'warning',
-                                location: `${att.locationName || 'Kampus STIMI'}${
+                                location: `${formatLocationShort(att.locationName)}${
                                   att.clockInLat && att.clockInLng
                                     ? ` • ${getRegionDescription(
                                         att.clockInLat,
@@ -456,7 +484,7 @@ export function MonitoringTableClient({
                                 }`,
                               });
                             }}
-                            className="relative w-8 h-8 rounded-xl overflow-hidden bg-slate-100 border border-emerald-200 shadow-2xs hover:scale-105 transition cursor-pointer mx-auto"
+                            className="relative w-7 h-7 rounded-lg overflow-hidden bg-slate-100 border border-emerald-200 shadow-2xs hover:scale-105 transition cursor-pointer mx-auto"
                             title="Klik untuk zoom Selfie Masuk"
                           >
                             <img
@@ -464,69 +492,38 @@ export function MonitoringTableClient({
                               alt={`Masuk ${user.name}`}
                               className="w-full h-full object-cover"
                             />
-                            <span className="absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white text-[6.5px] font-black text-center uppercase py-0.2">
+                            <span className="absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white text-[6px] font-black text-center uppercase py-0.2">
                               Msk
                             </span>
                           </button>
                         ) : (
-                          <span className="text-slate-300 text-xs">-</span>
+                          <span className="text-slate-400 italic text-[11px]">Belum</span>
                         )}
                       </td>
 
                       {/* 7. Lokasi & Jarak Masuk */}
-                      <td className="py-3 px-3 whitespace-nowrap border-r border-sky-100 bg-emerald-50/10">
+                      <td className="py-2.5 px-2.5 whitespace-nowrap border-r border-sky-100 bg-emerald-50/10">
                         {att && att.clockInTime ? (
-                          <div className="flex flex-col gap-0.5">
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-                              <Building2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                              <span className="truncate max-w-[130px]">
-                                {att.locationName || 'Kampus STIMI'}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 text-[10px] text-slate-500 font-mono">
-                              {att.clockInDistance !== null && att.clockInDistance !== undefined && (
-                                <span className="font-semibold text-emerald-800">
-                                  {formatDistance(att.clockInDistance)}
+                          <div className="flex items-center gap-1 min-w-0">
+                            <span className="font-bold text-slate-800 text-[11px] truncate">
+                              {formatLocationShort(att.locationName)}
+                            </span>
+                            {att.clockInDistance !== null &&
+                              att.clockInDistance !== undefined && (
+                                <span className="text-[10px] text-emerald-800 font-mono font-bold shrink-0">
+                                  • {formatDistance(att.clockInDistance)}
                                 </span>
                               )}
-                              {att.clockInLat && att.clockInLng && (
-                                <a
-                                  href={`https://www.google.com/maps?q=${att.clockInLat},${att.clockInLng}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-sky-600 hover:text-sky-800 hover:underline inline-flex items-center gap-0.5 ml-0.5"
-                                  title="Lihat titik GPS Masuk di Maps"
-                                >
-                                  <MapPin className="w-2.5 h-2.5 text-rose-500 shrink-0" />
-                                  <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        ) : user.assignedLocationName ? (
-                          <span className="text-[11px] text-slate-400 italic">
-                            Target: {user.assignedLocationName}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 font-mono">-</span>
-                        )}
-                      </td>
-
-                      {/* ===== BAGIAN PULANG ===== */}
-                      {/* 8. Jam Pulang */}
-                      <td className="py-3 px-3 whitespace-nowrap border-r border-sky-100/60 bg-sky-50/10">
-                        {outTimeInfo ? (
-                          <div className="flex flex-col">
-                            <span className="font-mono font-bold text-slate-800 leading-tight">
-                              {outTimeInfo.localTime}{' '}
-                              <span className="text-[9px] font-sans font-medium text-slate-500">
-                                {outTimeInfo.tzLabel}
-                              </span>
-                            </span>
-                            {outTimeInfo.tzLabel !== 'WITA' && (
-                              <span className="text-[8.5px] text-slate-400 font-mono">
-                                ({outTimeInfo.witaTime} WITA)
-                              </span>
+                            {att.clockInLat && att.clockInLng && (
+                              <a
+                                href={`https://www.google.com/maps?q=${att.clockInLat},${att.clockInLng}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-sky-600 hover:text-sky-800 inline-flex items-center shrink-0 ml-0.5"
+                                title="Lihat titik GPS Masuk di Maps"
+                              >
+                                <MapPin className="w-2.5 h-2.5 text-rose-500" />
+                              </a>
                             )}
                           </div>
                         ) : (
@@ -534,8 +531,20 @@ export function MonitoringTableClient({
                         )}
                       </td>
 
+                      {/* ===== BAGIAN PULANG ===== */}
+                      {/* 8. Jam Pulang */}
+                      <td className="py-2.5 px-2.5 whitespace-nowrap border-r border-sky-100/60 bg-sky-50/10">
+                        {outTimeInfo ? (
+                          <span className="font-mono font-bold text-slate-800 text-xs">
+                            {outTimeInfo.localTime}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 italic text-[11px]">Belum</span>
+                        )}
+                      </td>
+
                       {/* 9. Foto Pulang */}
-                      <td className="py-3 px-2 text-center border-r border-sky-100/60 bg-sky-50/10">
+                      <td className="py-2.5 px-1.5 text-center border-r border-sky-100/60 bg-sky-50/10">
                         {att?.clockOutPhoto ? (
                           <button
                             type="button"
@@ -561,7 +570,7 @@ export function MonitoringTableClient({
                                     : att.clockOutStatus === 'PULANG_CEPAT'
                                     ? 'warning'
                                     : 'purple',
-                                location: `${att.locationName || 'Kampus STIMI'}${
+                                location: `${formatLocationShort(att.locationName)}${
                                   att.clockOutLat && att.clockOutLng
                                     ? ` • ${getRegionDescription(
                                         att.clockOutLat,
@@ -571,7 +580,7 @@ export function MonitoringTableClient({
                                 }`,
                               });
                             }}
-                            className="relative w-8 h-8 rounded-xl overflow-hidden bg-slate-100 border border-sky-200 shadow-2xs hover:scale-105 transition cursor-pointer mx-auto"
+                            className="relative w-7 h-7 rounded-lg overflow-hidden bg-slate-100 border border-sky-200 shadow-2xs hover:scale-105 transition cursor-pointer mx-auto"
                             title="Klik untuk zoom Selfie Pulang"
                           >
                             <img
@@ -579,52 +588,39 @@ export function MonitoringTableClient({
                               alt={`Pulang ${user.name}`}
                               className="w-full h-full object-cover"
                             />
-                            <span className="absolute bottom-0 inset-x-0 bg-sky-600/90 text-white text-[6.5px] font-black text-center uppercase py-0.2">
+                            <span className="absolute bottom-0 inset-x-0 bg-sky-600/90 text-white text-[6px] font-black text-center uppercase py-0.2">
                               Plg
                             </span>
                           </button>
-                        ) : att?.clockInTime ? (
-                          <div
-                            className="w-8 h-8 rounded-xl bg-slate-50 border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 mx-auto"
-                            title="Belum absen pulang"
-                          >
-                            <Clock className="w-3 h-3 text-slate-300" />
-                            <span className="text-[6.5px] text-slate-400 font-bold">Plg</span>
-                          </div>
                         ) : (
-                          <span className="text-slate-300 text-xs">-</span>
+                          <span className="text-slate-400 italic text-[11px]">Belum</span>
                         )}
                       </td>
 
                       {/* 10. Lokasi & Jarak Pulang */}
-                      <td className="py-3 px-3 whitespace-nowrap bg-sky-50/10">
+                      <td className="py-2.5 px-2.5 whitespace-nowrap bg-sky-50/10">
                         {att?.clockOutTime ? (
-                          <div className="flex flex-col gap-0.5">
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-                              <Building2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                              <span className="truncate max-w-[130px]">
-                                {att.locationName || 'Kampus STIMI'}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 text-[10px] text-slate-500 font-mono">
-                              {att.clockOutDistance !== null && att.clockOutDistance !== undefined && (
-                                <span className="font-semibold text-sky-800">
-                                  {formatDistance(att.clockOutDistance)}
+                          <div className="flex items-center gap-1 min-w-0">
+                            <span className="font-bold text-slate-800 text-[11px] truncate">
+                              {formatLocationShort(att.locationName)}
+                            </span>
+                            {att.clockOutDistance !== null &&
+                              att.clockOutDistance !== undefined && (
+                                <span className="text-[10px] text-sky-800 font-mono font-bold shrink-0">
+                                  • {formatDistance(att.clockOutDistance)}
                                 </span>
                               )}
-                              {att.clockOutLat && att.clockOutLng && (
-                                <a
-                                  href={`https://www.google.com/maps?q=${att.clockOutLat},${att.clockOutLng}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-sky-600 hover:text-sky-800 hover:underline inline-flex items-center gap-0.5 ml-0.5"
-                                  title="Lihat titik GPS Pulang di Maps"
-                                >
-                                  <MapPin className="w-2.5 h-2.5 text-rose-500 shrink-0" />
-                                  <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
-                                </a>
-                              )}
-                            </div>
+                            {att.clockOutLat && att.clockOutLng && (
+                              <a
+                                href={`https://www.google.com/maps?q=${att.clockOutLat},${att.clockOutLng}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-sky-600 hover:text-sky-800 inline-flex items-center shrink-0 ml-0.5"
+                                title="Lihat titik GPS Pulang di Maps"
+                              >
+                                <MapPin className="w-2.5 h-2.5 text-rose-500" />
+                              </a>
+                            )}
                           </div>
                         ) : (
                           <span className="text-slate-400 italic text-[11px]">Belum</span>
@@ -672,7 +668,7 @@ export function MonitoringTableClient({
                     <div className="shrink-0">
                       {!att || !att.clockInTime ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-600">
-                          Belum Presensi
+                          Belum
                         </span>
                       ) : att.isDinasLuar ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-100 text-purple-800">
@@ -698,10 +694,12 @@ export function MonitoringTableClient({
                         <span className="text-[9px] font-bold uppercase text-emerald-800 flex items-center gap-1">
                           <LogIn className="w-3 h-3" /> Masuk
                         </span>
-                        {inTimeInfo && (
+                        {inTimeInfo ? (
                           <span className="font-mono font-bold text-slate-900 text-xs">
                             {inTimeInfo.localTime}
                           </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 italic">Belum</span>
                         )}
                       </div>
 
@@ -729,7 +727,7 @@ export function MonitoringTableClient({
                                   : att.clockInStatus === 'TEPAT_WAKTU'
                                   ? 'success'
                                   : 'warning',
-                                location: `${att.locationName || 'Kampus STIMI'}${
+                                location: `${formatLocationShort(att.locationName)}${
                                   att.clockInLat && att.clockInLng
                                     ? ` • ${getRegionDescription(
                                         att.clockInLat,
@@ -748,12 +746,12 @@ export function MonitoringTableClient({
                             />
                           </button>
                         ) : (
-                          <span className="text-slate-400 font-mono text-[10px]">-</span>
+                          <span className="text-slate-400 italic text-[10px]">Belum</span>
                         )}
 
                         <div className="min-w-0">
                           <p className="text-[10px] font-semibold text-slate-800 truncate">
-                            {att?.locationName || 'Kampus STIMI'}
+                            {att?.clockInTime ? formatLocationShort(att.locationName) : 'Belum'}
                           </p>
                           {att?.clockInDistance !== null && att?.clockInDistance !== undefined && (
                             <p className="text-[9px] text-emerald-800 font-mono font-bold">
@@ -775,7 +773,7 @@ export function MonitoringTableClient({
                             {outTimeInfo.localTime}
                           </span>
                         ) : (
-                          <span className="text-[9.5px] italic text-slate-400">Belum</span>
+                          <span className="text-[10px] italic text-slate-400">Belum</span>
                         )}
                       </div>
 
@@ -805,7 +803,7 @@ export function MonitoringTableClient({
                                     : att.clockOutStatus === 'PULANG_CEPAT'
                                     ? 'warning'
                                     : 'purple',
-                                location: `${att.locationName || 'Kampus STIMI'}${
+                                location: `${formatLocationShort(att.locationName)}${
                                   att.clockOutLat && att.clockOutLng
                                     ? ` • ${getRegionDescription(
                                         att.clockOutLat,
@@ -824,14 +822,14 @@ export function MonitoringTableClient({
                             />
                           </button>
                         ) : (
-                          <span className="text-slate-400 font-mono text-[10px]">-</span>
+                          <span className="text-slate-400 italic text-[10px]">Belum</span>
                         )}
 
                         <div className="min-w-0">
                           <p className="text-[10px] font-semibold text-slate-800 truncate">
                             {att?.clockOutTime
-                              ? att.locationName || 'Kampus STIMI'
-                              : 'Belum Pulang'}
+                              ? formatLocationShort(att.locationName)
+                              : 'Belum'}
                           </p>
                           {att?.clockOutDistance !== null && att?.clockOutDistance !== undefined && (
                             <p className="text-[9px] text-sky-800 font-mono font-bold">

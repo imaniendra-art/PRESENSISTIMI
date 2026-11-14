@@ -27,20 +27,36 @@ export default async function AdminMonitoringPage({
   }
 
   const resolvedParams = await searchParams;
-  const today = getStartOfDay();
+  const now = new Date();
 
-  let targetDate = today;
-  let currentDateStr = today.toISOString().split('T')[0];
+  // Format YYYY-MM-DD dalam zona waktu WITA Makassar
+  const formatYMD = (d: Date) => {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Makassar',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(d);
+  };
 
-  if (resolvedParams?.date) {
-    const parsed = new Date(resolvedParams.date + 'T00:00:00');
-    if (!isNaN(parsed.getTime())) {
-      targetDate = getStartOfDay(parsed);
-      currentDateStr = resolvedParams.date;
-    }
+  const todayStr = formatYMD(now);
+  let currentDateStr = todayStr;
+
+  if (resolvedParams?.date && /^\d{4}-\d{2}-\d{2}$/.test(resolvedParams.date)) {
+    currentDateStr = resolvedParams.date;
   }
 
-  const isToday = targetDate.getTime() === today.getTime();
+  const isToday = currentDateStr === todayStr;
+
+  const [y, m, d] = currentDateStr.split('-').map(Number);
+  const targetDate = new Date(y, m - 1, d, 12, 0, 0, 0);
+
+  // Rentang query toleran zona waktu (WITA/WIB) untuk tanggal target
+  const startOfQueryDay = new Date(`${currentDateStr}T00:00:00+08:00`);
+  startOfQueryDay.setHours(startOfQueryDay.getHours() - 3);
+
+  const endOfQueryDay = new Date(`${currentDateStr}T23:59:59+08:00`);
+  endOfQueryDay.setHours(endOfQueryDay.getHours() + 3);
 
   const formattedDateDisplay = targetDate.toLocaleDateString('id-ID', {
     weekday: 'long',
@@ -62,7 +78,12 @@ export default async function AdminMonitoringPage({
       include: {
         assignedLocation: true,
         attendances: {
-          where: { date: targetDate },
+          where: {
+            date: {
+              gte: startOfQueryDay,
+              lte: endOfQueryDay,
+            },
+          },
           include: {
             location: true,
           },
