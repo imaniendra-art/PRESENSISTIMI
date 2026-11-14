@@ -293,28 +293,28 @@ export function MonitoringTableClient({
     <>
       <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden w-full">
         {/* Toolbar Pencarian & Filter Cepat (Web & Mobile) */}
-        <div className="p-3 sm:p-5 border-b border-slate-100 bg-slate-50/50 space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <span>Daftar Presensi Pegawai</span>
+        <div className="p-2.5 sm:p-5 border-b border-slate-100 bg-slate-50/50 space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+            <h3 className="text-[10px] sm:text-sm font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <span className="truncate">Daftar Presensi Pegawai</span>
               <span className="text-slate-300 font-normal">|</span>
-              <span className="text-sky-700 font-semibold normal-case font-sans">
+              <span className="text-sky-700 font-semibold normal-case font-sans text-[9.5px] sm:text-sm shrink-0">
                 {formattedDateDisplay}
               </span>
             </h3>
           </div>
 
           {/* Controls Bar: Search Input, Unit Dropdown, Status Dropdown (2-Kolom Rapi di Mobile) */}
-          <div className="grid grid-cols-2 sm:grid-cols-12 gap-1.5 sm:gap-2 pt-1">
+          <div className="grid grid-cols-2 sm:grid-cols-12 gap-1.5 sm:gap-2 pt-0.5">
             {/* Search Input: Lebar Penuh di Mobile (col-span-2) */}
             <div className="col-span-2 sm:col-span-6 lg:col-span-5 relative">
-              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari nama atau No. ID pegawai..."
-                className="w-full pl-8 sm:pl-9 pr-7 sm:pr-8 py-1.5 sm:py-2 bg-white border border-slate-200 rounded-xl text-[11px] sm:text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs"
+                className="w-full pl-7 sm:pl-9 pr-6 sm:pr-8 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-normal text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs"
               />
               {searchQuery && (
                 <button
@@ -332,7 +332,7 @@ export function MonitoringTableClient({
               <select
                 value={unitFilter}
                 onChange={(e) => setUnitFilter(e.target.value)}
-                className="w-full px-2 sm:px-2.5 py-1.5 sm:py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+                className="w-full px-2 sm:px-2.5 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[9px] sm:text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
               >
                 <option value="ALL">Semua Unit ({totalEmployees})</option>
                 {unitList.map((unit) => (
@@ -348,7 +348,7 @@ export function MonitoringTableClient({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-2 sm:px-2.5 py-1.5 sm:py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
+                className="w-full px-2 sm:px-2.5 py-1 sm:py-2 bg-white border border-slate-200 rounded-xl text-[9px] sm:text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
               >
                 <option value="ALL">Semua Status</option>
                 <option value="HADIR">Hadir ({totalHadir})</option>
