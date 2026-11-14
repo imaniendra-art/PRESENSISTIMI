@@ -31,7 +31,7 @@ export function Navbar() {
           { href: '/admin/dashboard', label: 'Overview', icon: BarChart3 },
           { href: '/admin/monitoring', label: 'Monitor Hari Ini', icon: Clock },
           { href: '/admin/pegawai', label: 'Data Pegawai', icon: Users },
-          { href: '/admin/pengaturan', label: 'Radius Kampus', icon: Settings },
+          { href: '/admin/pengaturan', label: 'Pengaturan', icon: Settings },
           { href: '/admin/laporan', label: 'Rekap & Ekspor', icon: FileText },
         ];
       case 'ATASAN':

@@ -97,6 +97,8 @@ export default async function AdminDashboardPage() {
     }),
   ]);
 
+  const isWfaToday = Boolean((campusSetting as any)?.wfaFriday !== false && isFriday);
+
   // Metrik Utama Hari Ini
   const hadirMasuk = attendancesToday.filter((a) => a.clockInTime).length;
   const tepatWaktu = attendancesToday.filter(
@@ -297,7 +299,7 @@ export default async function AdminDashboardPage() {
                   Pola Hari Ini
                 </span>
                 <span className="text-xs font-bold text-slate-800 block whitespace-nowrap">
-                  {isFriday ? 'WFA Fleksibel' : 'WFO Kampus'}
+                  {isWfaToday ? 'WFA Fleksibel' : 'WFO Kampus'}
                 </span>
               </div>
             </div>
@@ -322,7 +324,7 @@ export default async function AdminDashboardPage() {
             <Link
               href="/admin/pengaturan"
               className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs hover:border-sky-300 transition min-w-0"
-              title="Radius Kampus"
+              title="Pengaturan Kampus"
             >
               <MapPin className="w-3 h-3 text-sky-600 shrink-0" />
               <span className="text-[9.5px] font-bold text-slate-800 font-mono whitespace-nowrap">
@@ -333,7 +335,7 @@ export default async function AdminDashboardPage() {
             <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs min-w-0">
               <Building2 className="w-3 h-3 text-emerald-600 shrink-0" />
               <span className="text-[9.5px] font-bold text-slate-800 whitespace-nowrap">
-                {isFriday ? 'WFA' : 'WFO'}
+                {isWfaToday ? 'WFA' : 'WFO'}
               </span>
             </div>
           </div>

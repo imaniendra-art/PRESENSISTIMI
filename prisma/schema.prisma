@@ -193,6 +193,9 @@ model CampusSetting {
   workStart          String   @default("08:00")
   workEnd            String   @default("16:30")
   gracePeriodMinutes Int      @default(15)
+  earliestClockIn    String   @default("06:30")
+  wfaFriday          Boolean  @default(true)
+  workDays           String   @default("1,2,3,4,5")
   
   updatedById        String?  @db.ObjectId
   updatedBy          User?    @relation(fields: [updatedById], references: [id])

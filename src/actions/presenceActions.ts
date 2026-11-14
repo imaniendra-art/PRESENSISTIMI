@@ -166,6 +166,23 @@ export async function submitClockIn(data: {
     return { success: false, message: 'Pengaturan kampus belum dikonfigurasi oleh Admin' };
   }
 
+  // Validasi Jendela Waktu Buka Presensi Pagi (Earliest Clock In)
+  const earliest = (campusSetting as any).earliestClockIn;
+  if (earliest && typeof earliest === 'string' && earliest.includes(':')) {
+    const [eH, eM] = earliest.split(':').map(Number);
+    const nowWitaHour = (now.getUTCHours() + 8) % 24;
+    const nowWitaMinute = now.getUTCMinutes();
+    const currentMinutes = nowWitaHour * 60 + nowWitaMinute;
+    const earliestMinutes = eH * 60 + eM;
+
+    if (currentMinutes < earliestMinutes) {
+      return {
+        success: false,
+        message: `Presensi masuk belum dibuka. Gerbang presensi baru dapat diakses mulai pukul ${earliest} WITA.`,
+      };
+    }
+  }
+
   // Ambil semua gedung aktif
   const activeLocations = await prisma.campusLocation.findMany({
     where: { isActive: true },
@@ -675,7 +692,7 @@ export async function submitQuickPresence(data: {
   let resolvedLocationName: string = campusSetting.campusName;
   let recordedDistance = 0;
 
-  const isFriday = now.getDay() === 5;
+  const isFriday = (campusSetting as any).wfaFriday !== false && now.getDay() === 5;
   const isDinasLuar = Boolean(data.isDinasLuar);
 
   if (isDinasLuar) {
@@ -799,6 +816,23 @@ export async function submitQuickPresence(data: {
 
   // KONDISI 1: Belum Presensi Masuk -> Lakukan Clock In
   if (!existing || !existing.clockInTime) {
+    // Validasi Jendela Buka Presensi Pagi (Earliest Clock In)
+    const earliest = (campusSetting as any).earliestClockIn;
+    if (earliest && typeof earliest === 'string' && earliest.includes(':')) {
+      const [eH, eM] = earliest.split(':').map(Number);
+      const nowWitaHour = (now.getUTCHours() + 8) % 24;
+      const nowWitaMinute = now.getUTCMinutes();
+      const currentMinutes = nowWitaHour * 60 + nowWitaMinute;
+      const earliestMinutes = eH * 60 + eM;
+
+      if (currentMinutes < earliestMinutes) {
+        return {
+          success: false,
+          message: `Presensi masuk belum dibuka. Gerbang presensi baru dapat diakses mulai pukul ${earliest} WITA.`,
+        };
+      }
+    }
+
     let photoPath = '';
     try {
       photoPath = await saveSelfieImage(data.photoBase64, 'in', user.nip);

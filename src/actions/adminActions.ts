@@ -17,43 +17,50 @@ export async function updateCampusSettings(formData: FormData) {
     return { success: false, message: 'Hanya Admin SDM yang dapat mengubah pengaturan kampus' };
   }
 
-  const campusName = formData.get('campusName') as string;
-  const address = formData.get('address') as string;
-  const workStart = formData.get('workStart') as string;
-  const workEnd = formData.get('workEnd') as string;
-  const gracePeriodMinutes = parseInt(formData.get('gracePeriodMinutes') as string, 10);
+  const campusName = (formData.get('campusName') as string)?.trim() || 'STIMI Makassar';
+  const address = (formData.get('address') as string)?.trim() || 'Kampus STIMI Makassar';
+  const workStart = (formData.get('workStart') as string)?.trim() || '08:00';
+  const workEnd = (formData.get('workEnd') as string)?.trim() || '16:30';
+  const earliestClockIn = (formData.get('earliestClockIn') as string)?.trim() || '06:30';
+  const gracePeriodMinutes = parseInt(formData.get('gracePeriodMinutes') as string, 10) || 15;
+  const radiusMeters = parseFloat(formData.get('radiusMeters') as string) || 100.0;
+  const wfaFriday = formData.get('wfaFriday') === 'true' || formData.get('wfaFriday') === 'on';
+  const workDays = (formData.get('workDays') as string)?.trim() || '1,2,3,4,5';
 
   const existing = await prisma.campusSetting.findFirst();
+
+  const payload: any = {
+    campusName,
+    address,
+    workStart,
+    workEnd,
+    earliestClockIn,
+    gracePeriodMinutes,
+    radiusMeters,
+    wfaFriday,
+    workDays,
+    updatedById: session.user.id,
+  };
 
   if (existing) {
     await prisma.campusSetting.update({
       where: { id: existing.id },
-      data: {
-        campusName,
-        address,
-        workStart,
-        workEnd,
-        gracePeriodMinutes,
-        updatedById: session.user.id,
-      },
+      data: payload,
     });
   } else {
     await prisma.campusSetting.create({
-      data: {
-        campusName,
-        address,
-        workStart,
-        workEnd,
-        gracePeriodMinutes,
-        updatedById: session.user.id,
-      },
+      data: payload,
     });
   }
 
   revalidatePath('/admin/pengaturan');
+  revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/monitoring');
   revalidatePath('/pegawai/dashboard');
+  revalidatePath('/atasan/dashboard');
+  revalidatePath('/absen-cepat');
 
-  return { success: true, message: 'Pengaturan jam kerja institusi berhasil diperbarui!' };
+  return { success: true, message: 'Pengaturan kampus & jam operasional berhasil diperbarui!' };
 }
 
 // ==========================================
