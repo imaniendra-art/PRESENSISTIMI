@@ -12,6 +12,10 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html,
 body {
   background-color: #f8fafc;
