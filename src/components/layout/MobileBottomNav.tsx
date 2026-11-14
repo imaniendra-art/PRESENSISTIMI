@@ -29,8 +29,8 @@ export function MobileBottomNav() {
           { href: '/admin/dashboard', label: 'Ringkasan', icon: BarChart3 },
           { href: '/admin/monitoring', label: 'Monitoring', icon: Clock },
           { href: '/admin/pegawai', label: 'Pegawai', icon: Users },
+          { href: '/admin/pengaturan', label: 'Pengaturan', icon: Settings },
           { href: '/admin/laporan', label: 'Laporan', icon: FileText },
-          { href: '/profil', label: 'Profil', icon: User },
         ];
       case 'ATASAN':
         return [
