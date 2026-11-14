@@ -17,7 +17,6 @@ import {
   Search,
   Eye,
   Calendar,
-  ArrowLeft,
   Briefcase,
   MapPin,
   Timer,
@@ -913,22 +912,10 @@ export function ReportGenerator({
           <div className="p-4 sm:p-7 space-y-5">
             {/* Toolbar Pemilih Pegawai & Aksi */}
             <div className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 print-hidden print:hidden">
-              <div className="flex items-center flex-wrap gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('REKAP_SEMUA')}
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Kembali ke Rekap Semua</span>
-                </button>
-
-                <div className="h-4 w-px bg-slate-200 hidden sm:block" />
-
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-sky-600" />
-                  <span className="text-xs font-bold text-slate-800">Pilih Pegawai:</span>
-                  <select
+              <div className="flex items-center flex-wrap gap-2">
+                <Users className="w-4 h-4 text-sky-600" />
+                <span className="text-xs font-bold text-slate-800">Pilih Pegawai:</span>
+                <select
                     value={selectedUserId}
                     onChange={(e) => setSelectedUserId(e.target.value)}
                     className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer min-w-[240px] shadow-2xs"
@@ -940,7 +927,6 @@ export function ReportGenerator({
                     ))}
                   </select>
                 </div>
-              </div>
 
               <div className="flex items-center gap-2">
                 <button
