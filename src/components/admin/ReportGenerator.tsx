@@ -573,31 +573,33 @@ export function ReportGenerator({
         {/* Toolbar Header Terpadu: Pilihan Tab di Kiri & Filter Periode di Kanan */}
         <div className="p-3 sm:p-4 bg-slate-50/80 border-b border-slate-200/90 flex flex-col lg:flex-row lg:items-center justify-between gap-3 print-hidden print:hidden">
           {/* Tab Switcher Segmented */}
-          <div className="flex items-center gap-1.5 p-1 bg-white rounded-xl border border-slate-200 shadow-2xs">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 bg-white rounded-xl border border-slate-200 shadow-2xs w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setActiveTab('REKAP_SEMUA')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'REKAP_SEMUA'
                   ? 'bg-sky-50 text-sky-800 shadow-2xs border border-sky-200/80 font-black'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Building className="w-3.5 h-3.5 text-sky-600" />
-              <span>Rekap Seluruh SDM</span>
+              <Building className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+              <span className="sm:hidden">Rekap Semua</span>
+              <span className="hidden sm:inline">Rekap Seluruh SDM</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('RINCIAN_PERORANGAN')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'RINCIAN_PERORANGAN'
                   ? 'bg-sky-50 text-sky-800 shadow-2xs border border-sky-200/80 font-black'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Users className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Rincian Perorangan (1 SDM per Bulan)</span>
+              <Users className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+              <span className="sm:hidden">Perorangan</span>
+              <span className="hidden sm:inline">Rincian Perorangan (1 SDM per Bulan)</span>
             </button>
           </div>
 
@@ -678,8 +680,8 @@ export function ReportGenerator({
               </p>
             </div>
 
-          {/* Kop Surat Resmi Institusi STIMI */}
-          <div className="flex items-center justify-center gap-5 pb-4 border-b-2 border-slate-900">
+          {/* Kop Surat Resmi Institusi STIMI (Tampil Utuh di Desktop & Cetak PDF, Disederhanakan di Ponsel) */}
+          <div className="hidden sm:flex items-center justify-center gap-5 pb-4 border-b-2 border-slate-900 print:flex">
             <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
               <Image
                 src="/logo.png"
@@ -708,8 +710,14 @@ export function ReportGenerator({
             </div>
           </div>
 
-          {/* Tabel Rekapitulasi Seluruh Pegawai - Dirapatkan agar Bebas Horizontal Scroll di Desktop */}
-          <div className="overflow-x-auto lg:overflow-x-visible w-full">
+          {/* Baris Ringkas Layar Ponsel (sm:hidden) */}
+          <div className="sm:hidden flex items-center justify-between pb-2 border-b border-slate-100 text-[11px] font-semibold text-slate-600 print:hidden">
+            <span className="text-slate-800 font-bold">Rekap Presensi SDM</span>
+            <span className="text-slate-500 font-mono">{monthNames[filterMonth - 1]} {filterYear}</span>
+          </div>
+
+          {/* Tampilan Desktop: Tabel Rekapitulasi 17 Kolom Mandiri (Zero Horizontal Scroll di Desktop) */}
+          <div className="hidden md:block overflow-x-auto lg:overflow-x-visible w-full">
             <table className="w-full text-left text-[11px] border-collapse">
               <thead>
                 <tr className="bg-slate-100 text-slate-700 border-y-2 border-slate-300 text-[10px] sm:text-[10.5px] uppercase tracking-tight">
@@ -888,8 +896,128 @@ export function ReportGenerator({
             </table>
           </div>
 
-          {/* Tanda Tangan Pengesahan (Siap Cetak) */}
-          <div className="mt-12 pt-6 flex justify-between text-xs text-slate-800 break-inside-avoid">
+          {/* Tampilan Mobile: Tabel Kompak Minimalis 5 Kolom Vital (Zero Horizontal Scroll di Ponsel) */}
+          <div className="block md:hidden w-full overflow-hidden rounded-xl border border-slate-200/90 shadow-2xs print:hidden">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 text-slate-700 border-b border-slate-200 text-[10px] font-bold uppercase tracking-tight">
+                  <th className="py-2 px-2.5">Pegawai</th>
+                  <th className="py-2 px-1 text-center w-14">Hadir</th>
+                  <th className="py-2 px-1 text-center w-11 text-amber-700">Lambat</th>
+                  <th className="py-2 px-1 text-center w-10 text-rose-700">Alfa</th>
+                  <th className="py-2 px-1.5 text-center w-14">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-800 bg-white">
+                {filteredReportData.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-xs text-slate-400">
+                      Tidak ada data pegawai yang sesuai filter
+                    </td>
+                  </tr>
+                ) : (
+                  filteredReportData.map((row) => (
+                    <tr key={`mob-rep-${row.userId}`} className="hover:bg-sky-50/30 transition-colors">
+                      {/* 1. Pegawai: Nama, NIP & Unit */}
+                      <td className="py-2 px-2.5 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-800 font-bold text-[10px] flex items-center justify-center shrink-0">
+                            {row.name
+                              .split(' ')
+                              .map((n) => n[0])
+                              .slice(0, 2)
+                              .join('')}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-900 text-xs truncate max-w-[130px] xs:max-w-[160px]" title={row.name}>
+                              {row.name}
+                            </p>
+                            <p className="text-[10px] text-slate-500 font-mono truncate max-w-[130px] xs:max-w-[160px]">
+                              {row.nip} • {row.unitKerja}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* 2. Hadir: Angka Hadir & % */}
+                      <td className="py-2 px-1 text-center font-mono">
+                        <span className="font-bold text-sky-900 text-xs block tabular-nums">
+                          {row.totalHadir}
+                        </span>
+                        <span className="text-[9.5px] font-black text-emerald-700 block tabular-nums">
+                          {row.persentaseKehadiran}%
+                        </span>
+                      </td>
+
+                      {/* 3. Lambat */}
+                      <td className="py-2 px-1 text-center font-mono tabular-nums">
+                        {row.terlambat > 0 ? (
+                          <span className="font-bold text-amber-800 bg-amber-50 px-1 py-0.5 rounded text-[11px]">
+                            {row.terlambat}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-[11px]">0</span>
+                        )}
+                      </td>
+
+                      {/* 4. Alfa */}
+                      <td className="py-2 px-1 text-center font-mono tabular-nums">
+                        {row.alfa > 0 ? (
+                          <span className="font-black text-rose-600 bg-rose-50 px-1 py-0.5 rounded text-[11px]">
+                            {row.alfa}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-[11px]">0</span>
+                        )}
+                      </td>
+
+                      {/* 5. Aksi: Tombol Rincian */}
+                      <td className="py-2 px-1.5 text-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedUserId(row.userId);
+                            setActiveTab('RINCIAN_PERORANGAN');
+                          }}
+                          className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 border border-sky-200/80 transition shadow-2xs cursor-pointer w-full"
+                          title="Buka Lembar Rincian Pegawai Ini"
+                        >
+                          <Eye className="w-3 h-3 text-sky-600" />
+                          <span>Rincian</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+              {/* Ringkasan Total Footer Mobile */}
+              <tfoot>
+                <tr className="bg-slate-100 text-slate-900 font-bold border-t border-slate-200 text-[10px]">
+                  <td className="py-2 px-2.5 text-right font-bold uppercase tracking-wider text-[9.5px]">
+                    Total / Rata-rata:
+                  </td>
+                  <td className="py-2 px-1 text-center font-mono">
+                    <span className="block text-sky-950 font-bold tabular-nums">
+                      {kpiStats.totalHadirWfo + kpiStats.totalHadirWfa}
+                    </span>
+                    <span className="block text-[9.5px] font-black text-sky-950 tabular-nums">
+                      {kpiStats.avgKehadiran}%
+                    </span>
+                  </td>
+                  <td className="py-2 px-1 text-center font-mono text-amber-800 tabular-nums">
+                    {kpiStats.totalTerlambat}
+                  </td>
+                  <td className="py-2 px-1 text-center font-mono text-rose-800 tabular-nums">
+                    {kpiStats.totalAlfa}
+                  </td>
+                  <td className="py-2 px-1.5" />
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          {/* Tanda Tangan Pengesahan (Siap Cetak / Desktop) */}
+          <div className="mt-8 sm:mt-12 pt-4 sm:pt-6 hidden sm:flex print:flex justify-between text-xs text-slate-800 break-inside-avoid">
             <div className="text-center w-64">
               <p>Mengetahui,</p>
               <p className="font-bold">Ketua STIMI Makassar</p>
@@ -914,27 +1042,29 @@ export function ReportGenerator({
           <div className="p-3.5 sm:p-5 space-y-4">
             {/* Toolbar Pemilih Pegawai & Aksi */}
             <div className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 print-hidden print:hidden">
-              <div className="flex items-center flex-wrap gap-2">
-                <Users className="w-4 h-4 text-sky-600" />
-                <span className="text-xs font-bold text-slate-800">Pilih Pegawai:</span>
-                <select
-                    value={selectedUserId}
-                    onChange={(e) => setSelectedUserId(e.target.value)}
-                    className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer min-w-[240px] shadow-2xs"
-                  >
-                    {individualReports.map((emp) => (
-                      <option key={emp.userId} value={emp.userId}>
-                        {emp.name} ({emp.nip}) - {emp.jabatan}
-                      </option>
-                    ))}
-                  </select>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+                <div className="flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-sky-600 shrink-0" />
+                  <span className="text-xs font-bold text-slate-800 shrink-0">Pilih Pegawai:</span>
                 </div>
+                <select
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer w-full sm:min-w-[260px] shadow-2xs"
+                >
+                  {individualReports.map((emp) => (
+                    <option key={emp.userId} value={emp.userId}>
+                      {emp.name} ({emp.nip}) - {emp.jabatan}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              <div className="flex items-center gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={handleExportExcelIndividual}
-                  className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Ekspor Excel</span>
@@ -943,16 +1073,17 @@ export function ReportGenerator({
                 <button
                   type="button"
                   onClick={handlePrintPDF}
-                  className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
-                  <span>Cetak Lembar Individu</span>
+                  <span className="sm:hidden">Cetak PDF</span>
+                  <span className="hidden sm:inline">Cetak Lembar Individu</span>
                 </button>
               </div>
             </div>
 
-            {/* Kop Surat STIMI */}
-            <div className="flex items-center justify-center gap-5 pb-5 border-b-2 border-slate-900">
+            {/* Kop Surat STIMI (Tampil Utuh di Desktop & Cetak PDF, Disederhanakan di Ponsel) */}
+            <div className="hidden sm:flex items-center justify-center gap-5 pb-5 border-b-2 border-slate-900 print:flex">
               <div className="relative w-16 h-16 shrink-0">
                 <Image
                   src="/logo.png"
@@ -976,6 +1107,12 @@ export function ReportGenerator({
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* Baris Info Ringkas Layar Ponsel Tab 2 */}
+            <div className="sm:hidden flex items-center justify-between pb-2 border-b border-slate-100 text-[11px] font-semibold text-slate-600 print:hidden">
+              <span className="text-slate-800 font-bold">Buku Presensi Pegawai</span>
+              <span className="text-slate-500 font-mono">{monthNames[filterMonth - 1]} {filterYear}</span>
             </div>
 
             {/* Kartu Profil Pegawai Terpilih */}
@@ -1095,8 +1232,8 @@ export function ReportGenerator({
               </div>
             </div>
 
-            {/* Tabel Log Presensi Harian Efektif (Senin s/d Jumat) */}
-            <div className="overflow-x-auto">
+            {/* Tampilan Desktop: Tabel Log Presensi Harian Efektif (Senin s/d Jumat) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-100 text-slate-700 border-y-2 border-slate-300">
@@ -1234,8 +1371,146 @@ export function ReportGenerator({
               </table>
             </div>
 
-            {/* Tanda Tangan Pengesahan Individual */}
-            <div className="mt-12 pt-6 flex justify-between text-xs text-slate-800 break-inside-avoid">
+            {/* Tampilan Mobile: Timeline Cards Harian (Satu Tangan di Ponsel) */}
+            <div className="block md:hidden space-y-2.5 print:hidden">
+              <div className="text-[11px] font-bold text-slate-700 flex items-center justify-between px-1">
+                <span>Catatan Presensi Harian ({currentIndividual.dailyLogs.length} Hari Kerja)</span>
+                <span className="text-slate-400 font-mono text-[10px]">WITA (Makassar)</span>
+              </div>
+
+              {currentIndividual.dailyLogs.map((log) => {
+                const isToday = log.isToday;
+                return (
+                  <div
+                    key={`mob-day-${log.no}`}
+                    className={`p-3 rounded-2xl border transition shadow-2xs space-y-2 ${
+                      isToday
+                        ? 'bg-sky-50/70 border-sky-300 ring-2 ring-sky-500/20'
+                        : log.statusType === 'ALFA'
+                        ? 'bg-rose-50/40 border-rose-200'
+                        : 'bg-white border-slate-200/90'
+                    }`}
+                  >
+                    {/* Header Card Harian: No + Tanggal + Badge Hari Ini + Badge Status */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="w-5 h-5 rounded-md bg-slate-100 text-slate-700 font-mono text-[10px] font-bold flex items-center justify-center shrink-0">
+                          {log.no}
+                        </span>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-xs font-bold text-slate-900 truncate">
+                            {log.dateDisplay}
+                          </span>
+                          {isToday && (
+                            <span className="px-1.5 py-0.2 rounded text-[8.5px] bg-sky-200 text-sky-900 font-black uppercase tracking-wider shrink-0">
+                              Hari Ini
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="shrink-0">
+                        {log.statusType === 'HADIR_WFO' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <Building className="w-2.5 h-2.5 text-emerald-600" />
+                            WFO
+                          </span>
+                        ) : log.statusType === 'HADIR_WFA' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                            <MapPin className="w-2.5 h-2.5 text-sky-600" />
+                            WFA
+                          </span>
+                        ) : log.statusType === 'DINAS_LUAR' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                            <Briefcase className="w-2.5 h-2.5 text-indigo-600" />
+                            Dinas Luar
+                          </span>
+                        ) : log.statusType === 'IZIN_CUTI' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                            <FileText className="w-2.5 h-2.5 text-purple-600" />
+                            {log.statusLabel}
+                          </span>
+                        ) : log.statusType === 'ALFA' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-200">
+                            <UserX className="w-2.5 h-2.5 text-rose-600" />
+                            Alfa
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-400">
+                            <Calendar className="w-2.5 h-2.5" />
+                            Mendatang
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Body: Grid Jam Masuk & Pulang */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {/* Presensi Masuk */}
+                      <div className="p-2 rounded-xl bg-slate-50/70 border border-slate-100 space-y-0.5">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">
+                          Masuk
+                        </span>
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-slate-900 text-xs tabular-nums">
+                            {log.clockInTime || '-'}
+                          </span>
+                          {log.clockInStatus === 'TEPAT_WAKTU' && (
+                            <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200/60">
+                              Tepat
+                            </span>
+                          )}
+                          {log.clockInStatus === 'TERLAMBAT' && (
+                            <span className="text-[9px] font-bold text-amber-800 bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60">
+                              {log.clockInStatusLabel}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Presensi Pulang */}
+                      <div className="p-2 rounded-xl bg-slate-50/70 border border-slate-100 space-y-0.5">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">
+                          Pulang
+                        </span>
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-slate-900 text-xs tabular-nums">
+                            {log.clockOutTime || '-'}
+                          </span>
+                          {log.clockOutTime ? (
+                            <span className="text-[9px] font-medium text-slate-600 bg-slate-100 px-1 py-0.2 rounded">
+                              {log.clockOutStatusLabel}
+                            </span>
+                          ) : log.clockInTime && isToday ? (
+                            <span className="text-[9px] font-bold text-sky-700 bg-sky-50 px-1 py-0.2 rounded">
+                              Sedang Kerja
+                            </span>
+                          ) : log.clockInTime ? (
+                            <span className="text-[9px] font-bold text-rose-700 bg-rose-50 px-1 py-0.2 rounded">
+                              Tdk Pulang
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer Card Harian: Durasi & Lokasi / Catatan */}
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[10.5px] text-slate-500">
+                      <span className="flex items-center gap-1 font-mono font-semibold text-slate-700">
+                        <Clock className="w-3 h-3 text-sky-600" />
+                        <span>Durasi: {log.durationDisplay}</span>
+                      </span>
+                      <span className="truncate max-w-[170px] text-slate-600 font-medium" title={log.locationDisplay}>
+                        📍 {log.locationDisplay}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Tanda Tangan Pengesahan Individual (Siap Cetak / Desktop) */}
+            <div className="mt-8 sm:mt-12 pt-4 sm:pt-6 hidden sm:flex print:flex justify-between text-xs text-slate-800 break-inside-avoid">
               <div className="text-center w-64">
                 <p>Pegawai Yang Bersangkutan,</p>
                 <div className="h-20" />
