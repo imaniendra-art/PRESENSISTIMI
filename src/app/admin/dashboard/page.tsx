@@ -183,17 +183,17 @@ export default async function AdminDashboardPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 space-y-2.5 sm:space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-8 space-y-2.5 sm:space-y-6">
         {/* Soft Sky Hero Card - Simetris & Terstruktur */}
         <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-2xl sm:rounded-3xl p-3 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-4">
           {/* Header Row: Judul di Kiri & Jam Live di Sampingnya (Khusus Mobile Mengisi Space Kosong) */}
-          <div className="flex items-center justify-between gap-3 w-full lg:w-auto">
-            {/* Sisi Kiri: Menumpuk 2 Baris Bersih & Simetris */}
+          <div className="flex items-center justify-between gap-2 w-full lg:w-auto">
+            {/* Sisi Kiri: Menumpuk 2 Baris Bersih & Simetris (Pas 2 Baris Saja) */}
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+              <h1 className="text-sm sm:text-2xl font-black text-slate-900 tracking-tight leading-tight whitespace-nowrap">
                 Overview Kehadiran
               </h1>
-              <p className="text-base sm:text-xl font-extrabold text-slate-800 tracking-tight mt-0.5 leading-snug">
+              <p className="text-xs sm:text-lg font-extrabold text-slate-700 tracking-tight mt-0.5 leading-tight whitespace-nowrap">
                 STIMI YAPMI Makassar
               </p>
             </div>
@@ -391,19 +391,19 @@ export default async function AdminDashboardPage() {
           <div className="order-2 lg:order-1 lg:col-span-7 lg:col-start-1 space-y-2.5 sm:space-y-6">
             {/* Tren Kehadiran Mingguan (Senin - Jumat) */}
             <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-xs">
-              <div className="flex items-center justify-between mb-6">
-                <div>
+              <div className="flex items-start justify-between gap-2 mb-4 sm:mb-6">
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-sky-600" />
-                    <h2 className="text-sm font-bold text-slate-900">
-                      Tren Kehadiran Mingguan (Senin - Jumat)
+                    <TrendingUp className="w-4 h-4 text-sky-600 shrink-0" />
+                    <h2 className="text-sm font-bold text-slate-900 leading-tight">
+                      Tren Kehadiran Mingguan
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Tingkat kedisiplinan dan absensi civitas akademika minggu berjalan
+                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                    Kedisiplinan kehadiran Senin s/d Jumat
                   </p>
                 </div>
-                <span className="px-3 py-1 bg-sky-50 text-sky-700 border border-sky-200/80 rounded-full text-xs font-bold font-mono">
+                <span className="px-2.5 py-0.5 bg-sky-50 text-sky-700 border border-sky-200/80 rounded-full text-[10px] sm:text-xs font-bold font-mono shrink-0 whitespace-nowrap">
                   Target: 100%
                 </span>
               </div>
@@ -448,13 +448,13 @@ export default async function AdminDashboardPage() {
                 })}
               </div>
 
-              <div className="mt-4 flex items-center justify-between text-xs text-slate-500 pt-2">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-md bg-gradient-to-t from-sky-600 to-sky-400 inline-block" />
-                  Hari Ini ({persentaseHadir}% Presensi)
+              <div className="mt-3 sm:mt-4 flex items-center justify-between gap-1 text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-t from-sky-600 to-sky-400 inline-block shrink-0" />
+                  Hari Ini ({persentaseHadir}%)
                 </span>
-                <span className="text-slate-400 font-mono text-[11px]">
-                  Basis: {totalPegawai} Pegawai Aktif
+                <span className="text-slate-400 font-mono text-[10px] sm:text-[11px]">
+                  {totalPegawai} Pegawai Aktif
                 </span>
               </div>
             </div>
@@ -462,14 +462,14 @@ export default async function AdminDashboardPage() {
             {/* Breakdown Berdasarkan Unit Kerja */}
             <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-xs">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-sky-600" />
-                  <h2 className="text-sm font-bold text-slate-900">
-                    Distribusi Kehadiran Unit Kerja Hari Ini
+                <div className="flex items-center gap-2 min-w-0">
+                  <Building2 className="w-4 h-4 text-sky-600 shrink-0" />
+                  <h2 className="text-sm font-bold text-slate-900 truncate">
+                    Distribusi Unit Kerja Hari Ini
                   </h2>
                 </div>
-                <span className="text-xs font-semibold text-slate-500">
-                  {unitStats.length} Unit Kerja
+                <span className="text-xs font-semibold text-slate-500 shrink-0 whitespace-nowrap">
+                  {unitStats.length} Unit
                 </span>
               </div>
 
