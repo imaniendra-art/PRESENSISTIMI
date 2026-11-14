@@ -38,7 +38,7 @@ export default async function AdminPegawaiPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-8 space-y-2.5 sm:space-y-6">
         <EmployeeManager
           users={users}
           superiors={superiors}
