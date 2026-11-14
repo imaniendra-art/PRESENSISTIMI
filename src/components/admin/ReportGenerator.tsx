@@ -586,9 +586,6 @@ export function ReportGenerator({
             >
               <Building className="w-3.5 h-3.5 text-sky-600" />
               <span>Rekap Seluruh SDM</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-sky-100 text-sky-800 text-[10px] font-mono font-bold">
-                {reportData.length}
-              </span>
             </button>
 
             <button
@@ -602,11 +599,6 @@ export function ReportGenerator({
             >
               <Users className="w-3.5 h-3.5 text-indigo-600" />
               <span>Rincian Perorangan (1 SDM per Bulan)</span>
-              {currentIndividual && (
-                <span className="px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-bold max-w-[130px] truncate">
-                  {currentIndividual.name}
-                </span>
-              )}
             </button>
           </div>
 
