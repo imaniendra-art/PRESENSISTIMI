@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/layout/Navbar';
 import { ProfileEditor } from '@/components/profile/ProfileEditor';
-import { UserCheck, Settings } from 'lucide-react';
+import { UserCheck, Settings, BookOpen, Download } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,6 +90,42 @@ export default async function ProfilPage() {
 
         {/* Editor Profil & Password */}
         <ProfileEditor initialUser={userProfileData} />
+
+        {/* Kartu Pusat Bantuan & Buku Pedoman Penggunaan */}
+        <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-indigo-600 rounded-3xl p-6 text-white shadow-xl shadow-sky-600/15 border border-sky-400/30 flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div className="space-y-1.5 max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 border border-white/30 rounded-full text-white text-xs font-semibold">
+              <BookOpen className="w-3.5 h-3.5 text-sky-100" />
+              <span>Pusat Bantuan & Buku Pedoman Resmi</span>
+            </div>
+            <h2 className="text-lg sm:text-xl font-extrabold tracking-tight">
+              Buku Pedoman Penggunaan PRESENSISTIMI
+            </h2>
+            <p className="text-xs text-sky-100 leading-relaxed">
+              Panduan lengkap operasional presensi selfie, geofencing GPS, tata cara pengajuan cuti & dinas luar, serta solusi kendala izin kamera/lokasi di ponsel Anda.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <Link
+              href="/pedoman"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-sky-700 hover:bg-sky-50 active:bg-sky-100 rounded-xl text-xs font-bold shadow-md shadow-sky-950/20 transition cursor-pointer"
+            >
+              <BookOpen className="w-4 h-4 text-sky-600" />
+              <span>Buka Pedoman Interaktif</span>
+            </Link>
+
+            <a
+              href="/api/pedoman/download"
+              download
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 bg-white/20 hover:bg-white/30 active:bg-white/40 border border-white/30 text-white rounded-xl text-xs font-semibold backdrop-blur-md transition cursor-pointer"
+              title="Unduh langsung berkas pedoman format Markdown (.md)"
+            >
+              <Download className="w-4 h-4" />
+              <span>Unduh Berkas</span>
+            </a>
+          </div>
+        </div>
       </main>
     </div>
   );

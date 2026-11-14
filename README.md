@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PRESENSISTIMI — Sistem Presensi Elektronik STIMI Makassar
 
-## Getting Started
+Platform presensi dan manajemen kehadiran kepegawaian modern berbasis Web dan PWA (*Progressive Web App*) untuk Dosen dan Tenaga Kependidikan di lingkungan **Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) Makassar**.
 
-First, run the development server:
+---
+
+## 📚 Dokumentasi & Buku Pedoman Resmi
+
+1. **[Buku Pedoman Penggunaan (User Manual)](./PANDUAN_PENGGUNA.md)**: Panduan operasional lengkap untuk Dosen/Staf, Pejabat Penilai, dan Admin SDM (Termasuk troubleshooting izin GPS/Kamera).
+2. **[Dokumentasi Arsitektur Teknis](./DOKUMENTASI.md)**: Arsitektur sistem Next.js 15, formula Haversine geofence, pipeline WebP, dan RBAC.
+3. **[Product Requirements Document (PRD)](./PRD.md)**: Spesifikasi kebutuhan fungsional dan sasaran proyek.
+4. **[Development Roadmap](./ROADMAP.md)**: Pelacak tahapan dan progres fase pengerjaan sistem.
+5. **[Changelog](./CHANGELOG.md)**: Riwayat perubahan versi dan rilis pembaruan.
+6. **[Panduan Deployment Server](./SERVER_DEPLOY_GUIDE.md)**: Langkah instalasi dan penyiapan server VPS / PM2 / NGINX di lingkungan produksi.
+
+---
+
+## ⚡ Fitur Utama
+
+- **Presensi GPS Geofencing (Formula Haversine)**: Validasi posisi fisik perangkat terhadap radius toleransi resmi kampus secara *server-side*.
+- **Kamera Selfie Real-Time (Anti-Galeri)**: Pengambilan foto wajah langsung via WebRTC untuk mencegah pemalsuan foto.
+- **Absen Cepat & Kiosk Lobi (`/absen-cepat` / `/kiosk`)**: Presensi kilat satu layar (*single-screen / zero-scroll*) tanpa perlu login akun pribadi, cukup ketik NIP dan jepret wajah dengan auto-reset 4 detik.
+- **Pola Kerja Institusi Terpadu**: Mode WFO (Senin–Kamis), Mode WFA (Jumat fleksibel), dan Penugasan Dinas Luar.
+- **Modul Pengajuan & Approval Digital**: Alur persetujuan cuti tahunan, izin sakit, dan surat tugas dinas luar kota tanpa kertas.
+- **Rekapitulasi Laporan Multi-Sheet Excel & Cetak PDF Resmi**: Format cetak landscape A4 dengan kop surat STIMI Makassar dan tanda tangan pengesahan pimpinan.
+- **Multi-Gedung & Hybrid Cloud Storage**: Dukungan titik koordinat banyak kampus serta kompresi cerdas WebP via Sharp ke Supabase Storage.
+
+---
+
+## 🛠️ Menjalankan Proyek di Lingkungan Lokal
 
 ```bash
+# 1. Pasang dependensi
+npm install
+
+# 2. Sinkronkan skema Prisma ke database MongoDB
+npx prisma db push
+
+# 3. Jalankan server pengembangan
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000) pada peramban web Anda.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 Lisensi & Hak Cipta
+Hak Cipta © 2026 STIMI Makassar. Seluruh hak cipta dilindungi undang-undang.

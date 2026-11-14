@@ -6,6 +6,20 @@ Format pencatatan mengacu pada [Keep a Changelog](https://keepachangelog.com/id-
 
 ---
 
+## [1.4.4] - 2026-11-14
+
+### Ditambahkan (Added - Buku Pedoman Penggunaan & Pusat Bantuan Pengguna)
+- **Buku Pedoman Penggunaan Resmi STIMI Makassar (`PANDUAN_PENGGUNA.md`)**:
+  - Panduan komprehensif Bab I s/d Bab V berstandar institusional yang memuat ketentuan WFO/WFA, panduan instalasi PWA di Android & iOS, panduan presensi selfie GPS, fitur absen cepat/kiosk, persetujuan atasan, pengelolaan master pegawai & multi-gedung admin, serta troubleshooting kendala kamera & GPS.
+- **Halaman Interaktif Buku Pedoman (`/pedoman`)**:
+  - Rute baru interaktif dengan filter navigasi bab, desain modern ramah smartphone dan desktop, tombol **"Cetak / Simpan PDF"** yang diformat khusus `@media print` tanpa navbar/footer, dan tombol unduh berkas pedoman.
+- **Kartu Pusat Bantuan & Buku Pedoman pada Halaman Profil (`/profil`)**:
+  - Ditempatkan di halaman profil pengguna agar dosen, tendik, dan atasan dapat membuka pedoman interaktif atau langsung mengunduh berkasnya kapan saja.
+- **Endpoint Pengunduhan Berkas Pedoman (`/api/pedoman/download`)**:
+  - Handler API server untuk menyajikan dan mengunduh berkas markdown `Buku_Pedoman_PRESENSISTIMI_v1.4.3.md` secara instan.
+
+---
+
 ## [1.4.3] - 2026-11-12
 
 ### Ditambahkan & Ditingkatkan (Added & Enhanced - Rekap Laporan Lengkap Multi-Sheet & PDF Landscape)
