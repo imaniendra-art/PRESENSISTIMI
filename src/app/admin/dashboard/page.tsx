@@ -16,6 +16,9 @@ import {
   Building2,
   TrendingUp,
   ArrowUpRight,
+  Clock,
+  MapPin,
+  Calendar,
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -30,6 +33,7 @@ export default async function AdminDashboardPage() {
 
   // Hitung rentang 5 hari kerja minggu berjalan (Senin s/d Jumat)
   const currentDay = today.getDay(); // 0 = Min, 1 = Sen, ..., 6 = Sab
+  const isFriday = currentDay === 5;
   const monday = new Date(today);
   const diffToMonday = (currentDay === 0 ? -6 : 1) - currentDay;
   monday.setDate(today.getDate() + diffToMonday);
@@ -174,38 +178,74 @@ export default async function AdminDashboardPage() {
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Compact Page Header - Clean, Focused & Space-Saving */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                Overview Kehadiran
-              </h1>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200/80">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
-                Live
-              </span>
+        {/* Soft Sky Hero Card - Simetris & Terstruktur */}
+        <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-3xl p-5 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          {/* Sisi Kiri: Identitas & Tanggal */}
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/90 border border-sky-200/80 text-sky-700 shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+              <span>Monitoring Presensi Real-Time</span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
-              {formattedToday} • Jam Operasional: {campusSetting?.workStart} - {campusSetting?.workEnd} WITA •{' '}
-              <Link
-                href="/admin/pengaturan"
-                className="text-sky-700 hover:text-sky-800 font-semibold hover:underline"
-                title="Buka Pengaturan Radius Kampus & Geofence"
-              >
-                Radius Geofence: {campusSetting?.radiusMeters}m
-              </Link>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Overview Kehadiran STIMI
+            </h1>
+            <p className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+              <Calendar className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+              <span>{formattedToday}</span>
             </p>
           </div>
 
-          <Link
-            href="/admin/monitoring"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 active:bg-sky-200 border border-sky-200/80 transition shadow-2xs self-start sm:self-auto cursor-pointer"
-          >
-            <Activity className="w-3.5 h-3.5 text-sky-600" />
-            <span>Monitor Hari Ini</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          {/* Sisi Kanan: 3 Pill Box Simetris */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full lg:w-auto shrink-0">
+            {/* Box 1: Jam Operasional */}
+            <div className="flex items-center gap-3 px-3.5 py-2.5 bg-white/90 border border-sky-100 rounded-2xl shadow-2xs">
+              <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100/60">
+                <Clock className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider truncate">
+                  Jam Kerja
+                </span>
+                <span className="text-xs font-bold text-slate-800 font-mono block truncate">
+                  {campusSetting?.workStart} - {campusSetting?.workEnd} WITA
+                </span>
+              </div>
+            </div>
+
+            {/* Box 2: Radius Geofence */}
+            <Link
+              href="/admin/pengaturan"
+              className="flex items-center gap-3 px-3.5 py-2.5 bg-white/90 hover:bg-white border border-sky-100 hover:border-sky-300 rounded-2xl shadow-2xs transition group cursor-pointer"
+              title="Klik untuk konfigurasi radius geofence"
+            >
+              <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white flex items-center justify-center shrink-0 border border-sky-100/60 transition shadow-2xs">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider truncate">
+                  Radius Geofence
+                </span>
+                <span className="text-xs font-bold text-slate-800 font-mono group-hover:text-sky-700 transition block truncate">
+                  {campusSetting?.radiusMeters} Meter
+                </span>
+              </div>
+            </Link>
+
+            {/* Box 3: Pola Kehadiran Hari Ini */}
+            <div className="flex items-center gap-3 px-3.5 py-2.5 bg-white/90 border border-sky-100 rounded-2xl shadow-2xs">
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100/60">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider truncate">
+                  Pola Hari Ini
+                </span>
+                <span className="text-xs font-bold text-slate-800 block truncate">
+                  {isFriday ? 'WFA Fleksibel' : 'WFO Kampus'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Metrik Utama (Responsif: 2 kolom di HP, 4 kolom di layar lebar) */}
