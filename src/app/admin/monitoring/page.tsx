@@ -65,8 +65,8 @@ export default async function AdminMonitoringPage({
     year: 'numeric',
   });
 
-  // Ambil data kampus, pejabat penilai, cuti pending, dan pegawai aktif secara konkuren
-  const [campusSetting, totalAtasan, pendingLeaves, users] = await Promise.all([
+  // Ambil data kampus, pejabat penilai, cuti pending, pegawai aktif, serta cuti & dinas aktif hari ini secara konkuren
+  const [campusSetting, totalAtasan, pendingLeaves, users, activeLeaves, activeDuties] = await Promise.all([
     prisma.campusSetting.findFirst(),
     prisma.user.count({ where: { role: 'ATASAN', isActive: true } }),
     prisma.leaveRequest.count({ where: { status: 'PENDING' } }),
@@ -90,6 +90,33 @@ export default async function AdminMonitoringPage({
         },
       },
       orderBy: { name: 'asc' },
+    }),
+    prisma.leaveRequest.findMany({
+      where: {
+        status: 'APPROVED',
+        startDate: { lte: endOfQueryDay },
+        endDate: { gte: startOfQueryDay },
+      },
+      select: {
+        id: true,
+        userId: true,
+        type: true,
+        reason: true,
+      },
+    }),
+    prisma.dutyTrip.findMany({
+      where: {
+        status: 'APPROVED',
+        startDate: { lte: endOfQueryDay },
+        endDate: { gte: startOfQueryDay },
+      },
+      select: {
+        id: true,
+        userId: true,
+        title: true,
+        destination: true,
+        letterNumber: true,
+      },
     }),
   ]);
 
@@ -143,6 +170,9 @@ export default async function AdminMonitoringPage({
       );
     }
 
+    const userLeave = activeLeaves.find((l) => l.userId === u.id) || null;
+    const userDuty = activeDuties.find((d) => d.userId === u.id) || null;
+
     return {
       id: u.id,
       name: u.name,
@@ -150,6 +180,21 @@ export default async function AdminMonitoringPage({
       jabatan: u.jabatan || 'Staf',
       unitKerja: u.unitKerja || 'Unit Lainnya',
       assignedLocationName: u.assignedLocation?.name || null,
+      activeLeave: userLeave
+        ? {
+            id: userLeave.id,
+            type: userLeave.type,
+            reason: userLeave.reason,
+          }
+        : null,
+      activeDutyTrip: userDuty
+        ? {
+            id: userDuty.id,
+            title: userDuty.title,
+            destination: userDuty.destination,
+            letterNumber: userDuty.letterNumber,
+          }
+        : null,
       attendance: att
         ? {
             id: att.id,
@@ -267,9 +312,19 @@ export default async function AdminMonitoringPage({
               {belumPresensi}
             </p>
             <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 truncate">
-              {pendingLeaves}{' '}
-              <span className="hidden sm:inline">Izin Menunggu</span>
-              <span className="sm:hidden">Izin</span>
+              {activeLeaves.length > 0 ? (
+                <>
+                  <span className="text-amber-700 font-bold">{activeLeaves.length}</span>{' '}
+                  <span className="hidden sm:inline">Cuti/Izin Aktif</span>
+                  <span className="sm:hidden">Cuti/Izin</span>
+                </>
+              ) : (
+                <>
+                  {pendingLeaves}{' '}
+                  <span className="hidden sm:inline">Izin Menunggu</span>
+                  <span className="sm:hidden">Izin</span>
+                </>
+              )}
             </p>
           </div>
         </div>

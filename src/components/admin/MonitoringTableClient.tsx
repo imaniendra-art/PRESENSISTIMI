@@ -15,6 +15,9 @@ import {
   Clock,
   LogIn,
   LogOut,
+  CalendarOff,
+  FileText,
+  HeartPulse,
 } from 'lucide-react';
 import { getTimezoneFromCoordinates } from '@/lib/time';
 import { formatDistance, getRegionDescription } from '@/lib/geo';
@@ -37,6 +40,19 @@ export interface MonitoringAttendanceData {
   isDinasLuar: boolean;
 }
 
+export interface MonitoringLeaveData {
+  id: string;
+  type: string;
+  reason?: string | null;
+}
+
+export interface MonitoringDutyData {
+  id: string;
+  title: string;
+  destination: string;
+  letterNumber?: string | null;
+}
+
 export interface MonitoringUserRow {
   id: string;
   name: string;
@@ -45,6 +61,8 @@ export interface MonitoringUserRow {
   unitKerja: string;
   assignedLocationName?: string | null;
   attendance: MonitoringAttendanceData | null;
+  activeLeave?: MonitoringLeaveData | null;
+  activeDutyTrip?: MonitoringDutyData | null;
 }
 
 interface MonitoringTableClientProps {
@@ -86,6 +104,47 @@ function formatLocationShort(name?: string | null): string {
     return 'Kampus 1';
   }
   return name.replace(/^Target:\s*/i, '').trim();
+}
+
+// Helper untuk visualisasi status Izin / Cuti yang telah disetujui atasan
+function getLeaveBadgeInfo(type: string) {
+  switch (type) {
+    case 'CUTI_TAHUNAN':
+      return {
+        label: 'Cuti',
+        fullLabel: 'Cuti Tahunan',
+        badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
+        Icon: CalendarOff,
+      };
+    case 'CUTI_MELAHIRKAN':
+      return {
+        label: 'Cuti',
+        fullLabel: 'Cuti Melahirkan',
+        badgeClass: 'bg-pink-100 text-pink-800 border-pink-200',
+        Icon: CalendarOff,
+      };
+    case 'IZIN':
+      return {
+        label: 'Izin',
+        fullLabel: 'Izin Resmi',
+        badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+        Icon: FileText,
+      };
+    case 'SAKIT':
+      return {
+        label: 'Sakit',
+        fullLabel: 'Surat Sakit',
+        badgeClass: 'bg-orange-100 text-orange-800 border-orange-200',
+        Icon: HeartPulse,
+      };
+    default:
+      return {
+        label: 'Cuti/Izin',
+        fullLabel: 'Cuti / Izin',
+        badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
+        Icon: CalendarOff,
+      };
+  }
 }
 
 export function MonitoringTableClient({
@@ -144,6 +203,37 @@ export function MonitoringTableClient({
     return { localTime, witaTime, tzLabel };
   };
 
+  // Hitung jumlah civitas per kategori status untuk dropdown filter
+  const countTepat = useMemo(() => {
+    return users.filter(
+      (u) => u.attendance?.clockInStatus === 'TEPAT_WAKTU' && !u.attendance?.isDinasLuar
+    ).length;
+  }, [users]);
+
+  const countLambat = useMemo(() => {
+    return users.filter(
+      (u) => u.attendance?.clockInStatus === 'TERLAMBAT' && !u.attendance?.isDinasLuar
+    ).length;
+  }, [users]);
+
+  const countDinas = useMemo(() => {
+    return users.filter(
+      (u) =>
+        u.attendance?.isDinasLuar ||
+        ((!u.attendance || !u.attendance.clockInTime) && u.activeDutyTrip)
+    ).length;
+  }, [users]);
+
+  const countCutiIzin = useMemo(() => {
+    return users.filter((u) => (!u.attendance || !u.attendance.clockInTime) && u.activeLeave).length;
+  }, [users]);
+
+  const countBelumMurni = useMemo(() => {
+    return users.filter(
+      (u) => (!u.attendance || !u.attendance.clockInTime) && !u.activeLeave && !u.activeDutyTrip
+    ).length;
+  }, [users]);
+
   // Filter client-side instan
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -165,12 +255,20 @@ export function MonitoringTableClient({
         const att = user.attendance;
         if (statusFilter === 'BELUM') {
           if (att && att.clockInTime) return false;
+          if (user.activeLeave || user.activeDutyTrip) return false;
+        } else if (statusFilter === 'CUTI_IZIN') {
+          if (att && att.clockInTime) return false;
+          if (!user.activeLeave) return false;
         } else if (statusFilter === 'TEPAT') {
           if (!att || att.clockInStatus !== 'TEPAT_WAKTU' || att.isDinasLuar) return false;
         } else if (statusFilter === 'LAMBAT') {
           if (!att || att.clockInStatus !== 'TERLAMBAT' || att.isDinasLuar) return false;
         } else if (statusFilter === 'DINAS') {
-          if (!att || !att.isDinasLuar) return false;
+          if (
+            (!att || !att.isDinasLuar) &&
+            (!user.activeDutyTrip || (att && att.clockInTime))
+          )
+            return false;
         } else if (statusFilter === 'HADIR') {
           if (!att || !att.clockInTime) return false;
         }
@@ -241,12 +339,13 @@ export function MonitoringTableClient({
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition shadow-2xs cursor-pointer truncate"
               >
-                <option value="ALL">Semua Status</option>
+                <option value="ALL">Semua Status ({totalEmployees})</option>
                 <option value="HADIR">Hadir ({totalHadir})</option>
-                <option value="TEPAT">Tepat Waktu</option>
-                <option value="LAMBAT">Terlambat</option>
-                <option value="DINAS">Dinas Luar</option>
-                <option value="BELUM">Belum Presensi ({totalEmployees - totalHadir})</option>
+                <option value="TEPAT">Tepat Waktu ({countTepat})</option>
+                <option value="LAMBAT">Terlambat ({countLambat})</option>
+                <option value="DINAS">Dinas Luar ({countDinas})</option>
+                <option value="CUTI_IZIN">Cuti / Izin / Sakit ({countCutiIzin})</option>
+                <option value="BELUM">Belum Presensi ({countBelumMurni})</option>
               </select>
             </div>
           </div>
@@ -418,21 +517,51 @@ export function MonitoringTableClient({
 
                       {/* 4. Status Kehadiran */}
                       <td className="py-2.5 px-2 whitespace-nowrap text-center border-r border-slate-100">
-                        {!att || !att.clockInTime ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-slate-100 text-slate-600">
-                            Belum
-                          </span>
-                        ) : att.isDinasLuar ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-purple-100 text-purple-800">
+                        {att && att.clockInTime ? (
+                          att.isDinasLuar ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                              <Briefcase className="w-3 h-3" /> Dinas
+                            </span>
+                          ) : att.clockInStatus === 'TEPAT_WAKTU' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              <CheckCircle2 className="w-3 h-3" /> Tepat
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                              <ClockAlert className="w-3 h-3" /> Lambat
+                            </span>
+                          )
+                        ) : user.activeLeave ? (
+                          (() => {
+                            const info = getLeaveBadgeInfo(user.activeLeave.type);
+                            const IconComponent = info.Icon;
+                            return (
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold border ${info.badgeClass}`}
+                                title={
+                                  user.activeLeave.reason
+                                    ? `Alasan: ${user.activeLeave.reason}`
+                                    : info.fullLabel
+                                }
+                              >
+                                <IconComponent className="w-3 h-3" /> {info.label}
+                              </span>
+                            );
+                          })()
+                        ) : user.activeDutyTrip ? (
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-purple-100 text-purple-800 border border-purple-200"
+                            title={
+                              user.activeDutyTrip.title
+                                ? `Tugas: ${user.activeDutyTrip.title}`
+                                : undefined
+                            }
+                          >
                             <Briefcase className="w-3 h-3" /> Dinas
                           </span>
-                        ) : att.clockInStatus === 'TEPAT_WAKTU' ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-100 text-emerald-800">
-                            <CheckCircle2 className="w-3 h-3" /> Tepat
-                          </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-rose-100 text-rose-800">
-                            <ClockAlert className="w-3 h-3" /> Lambat
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-slate-100 text-slate-600">
+                            Belum
                           </span>
                         )}
                       </td>
@@ -443,6 +572,14 @@ export function MonitoringTableClient({
                         {inTimeInfo ? (
                           <span className="font-mono font-bold text-slate-900 text-xs">
                             {inTimeInfo.localTime}
+                          </span>
+                        ) : user.activeLeave ? (
+                          <span className="text-amber-700 font-semibold italic text-[11px]">
+                            {getLeaveBadgeInfo(user.activeLeave.type).fullLabel}
+                          </span>
+                        ) : user.activeDutyTrip ? (
+                          <span className="text-purple-700 font-semibold italic text-[11px]">
+                            Surat Tugas
                           </span>
                         ) : (
                           <span className="text-slate-400 italic text-[11px]">Belum</span>
@@ -526,6 +663,24 @@ export function MonitoringTableClient({
                               </a>
                             )}
                           </div>
+                        ) : user.activeLeave ? (
+                          <span
+                            className="text-amber-800 text-[11px] font-medium truncate block max-w-[130px]"
+                            title={
+                              user.activeLeave.reason
+                                ? `Alasan: ${user.activeLeave.reason}`
+                                : 'Izin/Cuti disetujui atasan'
+                            }
+                          >
+                            {user.activeLeave.reason ? user.activeLeave.reason : 'Disetujui'}
+                          </span>
+                        ) : user.activeDutyTrip ? (
+                          <span
+                            className="text-purple-800 text-[11px] font-medium truncate block max-w-[130px]"
+                            title={user.activeDutyTrip.destination}
+                          >
+                            {user.activeDutyTrip.destination}
+                          </span>
                         ) : (
                           <span className="text-slate-400 italic text-[11px]">Belum</span>
                         )}
@@ -537,6 +692,14 @@ export function MonitoringTableClient({
                         {outTimeInfo ? (
                           <span className="font-mono font-bold text-slate-800 text-xs">
                             {outTimeInfo.localTime}
+                          </span>
+                        ) : user.activeLeave ? (
+                          <span className="text-amber-700 font-semibold italic text-[11px]">
+                            {getLeaveBadgeInfo(user.activeLeave.type).fullLabel}
+                          </span>
+                        ) : user.activeDutyTrip ? (
+                          <span className="text-purple-700 font-semibold italic text-[11px]">
+                            Dinas Luar
                           </span>
                         ) : (
                           <span className="text-slate-400 italic text-[11px]">Belum</span>
@@ -622,6 +785,17 @@ export function MonitoringTableClient({
                               </a>
                             )}
                           </div>
+                        ) : user.activeLeave ? (
+                          <span className="text-amber-800 text-[11px] font-medium truncate block max-w-[130px]">
+                            Disetujui Atasan
+                          </span>
+                        ) : user.activeDutyTrip ? (
+                          <span
+                            className="text-purple-800 text-[11px] font-medium truncate block max-w-[130px]"
+                            title={user.activeDutyTrip.destination}
+                          >
+                            {user.activeDutyTrip.destination}
+                          </span>
                         ) : (
                           <span className="text-slate-400 italic text-[11px]">Belum</span>
                         )}
@@ -666,21 +840,51 @@ export function MonitoringTableClient({
                     </div>
 
                     <div className="shrink-0">
-                      {!att || !att.clockInTime ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-600">
-                          Belum
-                        </span>
-                      ) : att.isDinasLuar ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-100 text-purple-800">
-                          <Briefcase className="w-3 h-3" /> Dinas
-                        </span>
-                      ) : att.clockInStatus === 'TEPAT_WAKTU' ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800">
-                          <CheckCircle2 className="w-3 h-3" /> Tepat
+                      {att && att.clockInTime ? (
+                        att.isDinasLuar ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                            <Briefcase className="w-3 h-3" /> Dinas
+                          </span>
+                        ) : att.clockInStatus === 'TEPAT_WAKTU' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            <CheckCircle2 className="w-3 h-3" /> Tepat
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                            <ClockAlert className="w-3 h-3" /> Lambat
+                          </span>
+                        )
+                      ) : user.activeLeave ? (
+                        (() => {
+                          const info = getLeaveBadgeInfo(user.activeLeave.type);
+                          const IconComponent = info.Icon;
+                          return (
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${info.badgeClass}`}
+                              title={
+                                user.activeLeave.reason
+                                  ? `Alasan: ${user.activeLeave.reason}`
+                                  : info.fullLabel
+                              }
+                            >
+                              <IconComponent className="w-2.5 h-2.5" /> {info.label}
+                            </span>
+                          );
+                        })()
+                      ) : user.activeDutyTrip ? (
+                        <span
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-100 text-purple-800 border border-purple-200"
+                          title={
+                            user.activeDutyTrip.title
+                              ? `Tugas: ${user.activeDutyTrip.title}`
+                              : undefined
+                          }
+                        >
+                          <Briefcase className="w-2.5 h-2.5" /> Dinas
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-100 text-rose-800">
-                          <ClockAlert className="w-3 h-3" /> Lambat
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-600">
+                          Belum
                         </span>
                       )}
                     </div>
@@ -697,6 +901,14 @@ export function MonitoringTableClient({
                         {inTimeInfo ? (
                           <span className="font-mono font-bold text-slate-900 text-xs">
                             {inTimeInfo.localTime}
+                          </span>
+                        ) : user.activeLeave ? (
+                          <span className="text-[10px] text-amber-700 font-semibold italic">
+                            {getLeaveBadgeInfo(user.activeLeave.type).label}
+                          </span>
+                        ) : user.activeDutyTrip ? (
+                          <span className="text-[10px] text-purple-700 font-semibold italic">
+                            Surat Tugas
                           </span>
                         ) : (
                           <span className="text-[10px] text-slate-400 italic">Belum</span>
@@ -751,7 +963,15 @@ export function MonitoringTableClient({
 
                         <div className="min-w-0">
                           <p className="text-[10px] font-semibold text-slate-800 truncate">
-                            {att?.clockInTime ? formatLocationShort(att.locationName) : 'Belum'}
+                            {att?.clockInTime
+                              ? formatLocationShort(att.locationName)
+                              : user.activeLeave
+                              ? (user.activeLeave.reason
+                                  ? `Alasan: ${user.activeLeave.reason}`
+                                  : 'Disetujui Atasan')
+                              : user.activeDutyTrip
+                              ? user.activeDutyTrip.destination
+                              : 'Belum'}
                           </p>
                           {att?.clockInDistance !== null && att?.clockInDistance !== undefined && (
                             <p className="text-[9px] text-emerald-800 font-mono font-bold">
@@ -771,6 +991,14 @@ export function MonitoringTableClient({
                         {outTimeInfo ? (
                           <span className="font-mono font-bold text-slate-900 text-xs">
                             {outTimeInfo.localTime}
+                          </span>
+                        ) : user.activeLeave ? (
+                          <span className="text-[10px] text-amber-700 font-semibold italic">
+                            {getLeaveBadgeInfo(user.activeLeave.type).label}
+                          </span>
+                        ) : user.activeDutyTrip ? (
+                          <span className="text-[10px] text-purple-700 font-semibold italic">
+                            Dinas Luar
                           </span>
                         ) : (
                           <span className="text-[10px] italic text-slate-400">Belum</span>
@@ -829,6 +1057,10 @@ export function MonitoringTableClient({
                           <p className="text-[10px] font-semibold text-slate-800 truncate">
                             {att?.clockOutTime
                               ? formatLocationShort(att.locationName)
+                              : user.activeLeave
+                              ? 'Disetujui Atasan'
+                              : user.activeDutyTrip
+                              ? user.activeDutyTrip.destination
                               : 'Belum'}
                           </p>
                           {att?.clockOutDistance !== null && att?.clockOutDistance !== undefined && (
