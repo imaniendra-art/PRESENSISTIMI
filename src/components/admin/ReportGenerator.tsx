@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
@@ -13,10 +14,20 @@ import {
   Building,
   FileText,
   UserX,
+  Search,
+  Eye,
+  Calendar,
+  ArrowLeft,
+  Briefcase,
+  MapPin,
+  Timer,
+  AlertTriangle,
+  Award,
 } from 'lucide-react';
 import { CampusSetting } from '@prisma/client';
 
 export interface ReportSummaryRow {
+  userId: string;
   nip: string;
   name: string;
   jabatan: string;
@@ -51,6 +62,65 @@ export interface DailyLogRow {
   lokasi: string;
 }
 
+export interface EmployeeDailyLog {
+  no: number;
+  date: string;
+  dateDisplay: string;
+  dayName: string;
+  dayOfWeek: number;
+  isToday: boolean;
+  isPastOrToday: boolean;
+  statusType:
+    | 'HADIR_WFO'
+    | 'HADIR_WFA'
+    | 'DINAS_LUAR'
+    | 'IZIN_CUTI'
+    | 'ALFA'
+    | 'BELUM_BERJALAN';
+  statusLabel: string;
+  clockInTime: string | null;
+  clockInStatus: 'TEPAT_WAKTU' | 'TERLAMBAT' | 'DINAS_LUAR' | null;
+  clockInStatusLabel: string | null;
+  lateMinutes: number;
+  clockOutTime: string | null;
+  clockOutStatus: 'NORMAL' | 'PULANG_CEPAT' | 'DINAS_LUAR' | null;
+  clockOutStatusLabel: string | null;
+  durationMinutes: number;
+  durationDisplay: string;
+  locationDisplay: string;
+  note: string | null;
+}
+
+export interface EmployeeIndividualReport {
+  userId: string;
+  nip: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  jabatan: string;
+  unitKerja: string;
+  lokasiPenugasan: string;
+  scheduleName: string;
+  scheduleDetails: string;
+  stats: {
+    hariKerjaEfektif: number;
+    totalHadir: number;
+    hadirWfo: number;
+    hadirWfa: number;
+    tepatWaktu: number;
+    terlambat: number;
+    totalLateMinutes: number;
+    pulangCepat: number;
+    dinasLuar: number;
+    izinCutiSakit: number;
+    alfa: number;
+    persentaseKehadiran: number;
+    totalWorkMinutes: number;
+    totalWorkHoursDisplay: string;
+  };
+  dailyLogs: EmployeeDailyLog[];
+}
+
 export interface KpiStats {
   totalPegawai: number;
   avgKehadiran: number;
@@ -70,6 +140,7 @@ interface ReportGeneratorProps {
   campusSetting: CampusSetting;
   reportData: ReportSummaryRow[];
   dailyLogs: DailyLogRow[];
+  individualReports: EmployeeIndividualReport[];
   kpiStats: KpiStats;
   selectedMonth: number;
   selectedYear: number;
@@ -79,6 +150,7 @@ export function ReportGenerator({
   campusSetting,
   reportData,
   dailyLogs,
+  individualReports,
   kpiStats,
   selectedMonth,
   selectedYear,
@@ -86,6 +158,19 @@ export function ReportGenerator({
   const router = useRouter();
   const filterMonth = selectedMonth;
   const filterYear = selectedYear;
+
+  // Tab State: 'REKAP_SEMUA' atau 'RINCIAN_PERORANGAN'
+  const [activeTab, setActiveTab] = useState<'REKAP_SEMUA' | 'RINCIAN_PERORANGAN'>(
+    'REKAP_SEMUA'
+  );
+
+  // Selected Employee for Tab 2
+  const [selectedUserId, setSelectedUserId] = useState<string>(
+    individualReports.length > 0 ? individualReports[0].userId : ''
+  );
+
+  // Filter pencarian nama pegawai di tabel rekap
+  const [rekapSearch, setRekapSearch] = useState<string>('');
 
   const monthNames = [
     'Januari',
@@ -106,14 +191,30 @@ export function ReportGenerator({
     router.push(`/admin/laporan?month=${month}&year=${year}`);
   };
 
-  // Ekspor Excel Multi-Sheet Komprehensif
-  const handleExportExcel = () => {
+  // Pegawai terpilih untuk laporan perorangan
+  const currentIndividual =
+    individualReports.find((r) => r.userId === selectedUserId) || individualReports[0];
+
+  // Filter baris rekapitulasi berdasarkan teks pencarian
+  const filteredReportData = reportData.filter((row) => {
+    if (!rekapSearch.trim()) return true;
+    const q = rekapSearch.toLowerCase();
+    return (
+      row.name.toLowerCase().includes(q) ||
+      row.nip.toLowerCase().includes(q) ||
+      row.jabatan.toLowerCase().includes(q) ||
+      row.unitKerja.toLowerCase().includes(q)
+    );
+  });
+
+  // Ekspor Excel Multi-Sheet Komprehensif (Rekap Bulanan + Log Harian Seluruh Pegawai)
+  const handleExportExcelAll = () => {
     const workbook = XLSX.utils.book_new();
 
     // SHEET 1: REKAPITULASI BULANAN SEMUA PEGAWAI
     const summaryRows = reportData.map((row, idx) => ({
       No: idx + 1,
-      'No. ID': row.nip,
+      'No. ID / NIP': row.nip,
       'Nama Pegawai': row.name,
       Jabatan: row.jabatan,
       'Unit Kerja': row.unitKerja,
@@ -133,34 +234,33 @@ export function ReportGenerator({
 
     const worksheetSummary = XLSX.utils.json_to_sheet(summaryRows);
     worksheetSummary['!cols'] = [
-      { wch: 5 },  // No
-      { wch: 12 }, // NIP
-      { wch: 30 }, // Nama
-      { wch: 25 }, // Jabatan
-      { wch: 25 }, // Unit Kerja
-      { wch: 25 }, // Lokasi
-      { wch: 18 }, // Hari Kerja
-      { wch: 12 }, // Total Hadir
-      { wch: 24 }, // Hadir WFO
-      { wch: 18 }, // Hadir WFA
-      { wch: 14 }, // Tepat Waktu
-      { wch: 12 }, // Terlambat
-      { wch: 14 }, // Pulang Cepat
-      { wch: 12 }, // Dinas Luar
-      { wch: 20 }, // Izin/Cuti/Sakit
-      { wch: 22 }, // Alfa
-      { wch: 22 }, // % Kehadiran
+      { wch: 5 },
+      { wch: 14 },
+      { wch: 30 },
+      { wch: 25 },
+      { wch: 25 },
+      { wch: 25 },
+      { wch: 18 },
+      { wch: 12 },
+      { wch: 24 },
+      { wch: 18 },
+      { wch: 14 },
+      { wch: 12 },
+      { wch: 14 },
+      { wch: 12 },
+      { wch: 20 },
+      { wch: 22 },
+      { wch: 22 },
     ];
-
     XLSX.utils.book_append_sheet(workbook, worksheetSummary, 'Rekap Bulanan Pegawai');
 
-    // SHEET 2: LOG RINCIAN PRESENSI HARIAN
+    // SHEET 2: LOG RINCIAN PRESENSI HARIAN SELURUH PEGAWAI
     const dailyRows = dailyLogs.map((log) => ({
       No: log.no,
       Tanggal: log.tanggal,
       Hari: log.hari,
       'Mode Kerja': log.modeKerja,
-      'No. ID': log.nip,
+      'No. ID / NIP': log.nip,
       'Nama Pegawai': log.name,
       'Unit Kerja': log.unitKerja,
       'Jam Masuk (WITA)': log.jamMasuk,
@@ -173,24 +273,70 @@ export function ReportGenerator({
 
     const worksheetDaily = XLSX.utils.json_to_sheet(dailyRows);
     worksheetDaily['!cols'] = [
-      { wch: 5 },  // No
-      { wch: 14 }, // Tanggal
-      { wch: 10 }, // Hari
-      { wch: 22 }, // Mode Kerja
-      { wch: 12 }, // NIP
-      { wch: 30 }, // Nama
-      { wch: 25 }, // Unit Kerja
-      { wch: 18 }, // Jam Masuk
-      { wch: 15 }, // Status Masuk
-      { wch: 18 }, // Jam Pulang
-      { wch: 15 }, // Status Pulang
-      { wch: 20 }, // Durasi Kerja
-      { wch: 28 }, // Lokasi
+      { wch: 5 },
+      { wch: 14 },
+      { wch: 10 },
+      { wch: 22 },
+      { wch: 14 },
+      { wch: 30 },
+      { wch: 25 },
+      { wch: 18 },
+      { wch: 15 },
+      { wch: 18 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 28 },
     ];
-
     XLSX.utils.book_append_sheet(workbook, worksheetDaily, 'Log Presensi Harian');
 
     const fileName = `Rekap_Presensi_Lengkap_STIMI_${monthNames[filterMonth - 1]}_${filterYear}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
+
+  // Ekspor Excel Khusus 1 Pegawai (Buku Presensi Individu)
+  const handleExportExcelIndividual = () => {
+    if (!currentIndividual) return;
+
+    const workbook = XLSX.utils.book_new();
+
+    // Sheet 1: Rincian Log Harian Pegawai Terpilih
+    const rows = currentIndividual.dailyLogs.map((log) => ({
+      No: log.no,
+      'Hari & Tanggal': log.dateDisplay,
+      'Status / Mode Kerja': log.statusLabel,
+      'Jam Masuk (WITA)': log.clockInTime || '-',
+      'Status Masuk': log.clockInStatusLabel || '-',
+      'Menit Lambat': log.lateMinutes > 0 ? `${log.lateMinutes} Menit` : '-',
+      'Jam Pulang (WITA)': log.clockOutTime || '-',
+      'Status Pulang': log.clockOutStatusLabel || '-',
+      'Durasi Kerja': log.durationDisplay,
+      'Lokasi Presensi': log.locationDisplay,
+      'Catatan / Alasan': log.note || '-',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    worksheet['!cols'] = [
+      { wch: 5 },
+      { wch: 24 },
+      { wch: 22 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 14 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 16 },
+      { wch: 26 },
+      { wch: 30 },
+    ];
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      `Buku Presensi ${currentIndividual.nip}`
+    );
+
+    const safeName = currentIndividual.name.replace(/[^a-zA-Z0-9]/g, '_');
+    const fileName = `Presensi_Individu_${currentIndividual.nip}_${safeName}_${monthNames[filterMonth - 1]}_${filterYear}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -200,7 +346,7 @@ export function ReportGenerator({
 
   return (
     <div className="space-y-6">
-      {/* CSS Khusus Mode Cetak A4 Landscape & Print Optimization */}
+      {/* CSS Khusus Mode Cetak A4 Landscape / Portrait & Print Optimization */}
       <style>{`
         @media print {
           @page {
@@ -231,356 +377,862 @@ export function ReportGenerator({
         }
       `}</style>
 
-      {/* Panel Kontrol & Filter Interaktif (Disembunyikan saat cetak) */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-xs space-y-4 print-hidden print:hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200">
-              <FileSpreadsheet className="w-6 h-6" />
+      {/* 1. HERO HEADER: Harmonisasi Soft Sky & Slate (Setema Overview & Pengaturan) */}
+      <div className="relative overflow-hidden p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-sky-50/70 via-white to-sky-50/30 border border-sky-100 shadow-xs print-hidden print:hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200 shadow-2xs">
+              <FileSpreadsheet className="w-6 h-6 text-sky-700" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-slate-900">
-                  Laporan Periode: {monthNames[filterMonth - 1]} {filterYear}
-                </h2>
-                <span className="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 text-[10px] font-bold font-mono border border-sky-200">
-                  {reportData.length} Pegawai
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-sky-700">
+                  Modul Laporan Presensi STIMI
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-white text-sky-800 text-[10px] font-bold font-mono border border-sky-200/90 shadow-2xs">
+                  {monthNames[filterMonth - 1]} {filterYear}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold font-mono">
-                  {kpiStats.effectiveWorkingDays} Hari Kerja Efektif
+                  {reportData.length} Pegawai Terdaftar
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Format lengkap multi-sheet (Rekap Bulanan + Log Harian) sesuai pola 5 Hari Kerja (Senin-Kamis WFO, Jumat WFA)
+              <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                Rekapitulasi Kehadiran & Ekspor Laporan
+              </h1>
+              <p className="text-xs text-slate-500 mt-0.5 max-w-2xl leading-relaxed">
+                Pantau rekapitulasi kehadiran institusi bulanan atau telusuri buku presensi perorangan
+                SDM (jam masuk, pulang, durasi kerja, dan status harian) untuk evaluasi serta pengarsipan resmi.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={handleExportExcel}
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-950/20 cursor-pointer"
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>Ekspor Excel (.xlsx Multi-Sheet)</span>
-            </button>
+          <div className="flex items-center flex-wrap gap-2.5 self-start lg:self-center">
+            {activeTab === 'REKAP_SEMUA' ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleExportExcelAll}
+                  className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  <span>Ekspor Excel (.xlsx)</span>
+                </button>
 
-            <button
-              type="button"
-              onClick={handlePrintPDF}
-              className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-600/20 cursor-pointer"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Cetak / Simpan PDF Landscape</span>
-            </button>
-          </div>
-        </div>
+                <button
+                  type="button"
+                  onClick={handlePrintPDF}
+                  className="px-3.5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Cetak PDF Landscape</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={handleExportExcelIndividual}
+                  className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  <span>Ekspor Excel Pegawai Ini</span>
+                </button>
 
-        {/* Pemilih Periode Bulan & Tahun Interaktif */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-          <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <span className="text-xs font-bold text-slate-700">Pilih Periode Laporan:</span>
-          </div>
-
-          <div className="flex items-center flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => handlePeriodChange(10, 2026)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                filterMonth === 10 && filterYear === 2026
-                  ? 'bg-sky-600 text-white shadow-xs'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              }`}
-            >
-              Oktober 2026
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handlePeriodChange(11, 2026)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                filterMonth === 11 && filterYear === 2026
-                  ? 'bg-sky-600 text-white shadow-xs'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              }`}
-            >
-              November 2026 (Bulan Ini)
-            </button>
-
-            {/* Dropdown Bulan */}
-            <select
-              value={filterMonth}
-              onChange={(e) => handlePeriodChange(parseInt(e.target.value), filterYear)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
-            >
-              {monthNames.map((name, idx) => (
-                <option key={idx} value={idx + 1}>
-                  {name}
-                </option>
-              ))}
-            </select>
-
-            {/* Dropdown Tahun */}
-            <select
-              value={filterYear}
-              onChange={(e) => handlePeriodChange(filterMonth, parseInt(e.target.value))}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
-            >
-              <option value={2025}>2025</option>
-              <option value={2026}>2026</option>
-              <option value={2027}>2027</option>
-            </select>
+                <button
+                  type="button"
+                  onClick={handlePrintPDF}
+                  className="px-3.5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Cetak Lembar Individu</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Ringkasan Kartu Metrik KPI Institusi (Tampil di Layar Monitor Saja, Sembunyi Saat Cetak) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 print-hidden print:hidden">
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs">
+      {/* 2. KARTU FILTER PERIODE BULAN & TAHUN */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 print-hidden print:hidden">
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-sky-600" />
+          <span className="text-xs font-bold text-slate-800">Pilih Periode Laporan:</span>
+        </div>
+
+        <div className="flex items-center flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => handlePeriodChange(10, 2026)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              filterMonth === 10 && filterYear === 2026
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
+          >
+            Oktober 2026
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handlePeriodChange(11, 2026)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              filterMonth === 11 && filterYear === 2026
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
+          >
+            November 2026 (Bulan Ini)
+          </button>
+
+          {/* Dropdown Bulan */}
+          <select
+            value={filterMonth}
+            onChange={(e) => handlePeriodChange(parseInt(e.target.value), filterYear)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+          >
+            {monthNames.map((name, idx) => (
+              <option key={idx} value={idx + 1}>
+                {name}
+              </option>
+            ))}
+          </select>
+
+          {/* Dropdown Tahun */}
+          <select
+            value={filterYear}
+            onChange={(e) => handlePeriodChange(filterMonth, parseInt(e.target.value))}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+          >
+            <option value={2025}>2025</option>
+            <option value={2026}>2026</option>
+            <option value={2027}>2027</option>
+          </select>
+        </div>
+      </div>
+
+      {/* 3. GRID METRIK KPI INSTITUSI: Harmonisasi Soft Squircle */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 print-hidden print:hidden">
+        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <Users className="w-3.5 h-3.5 text-sky-600" />
+            <div className="w-6 h-6 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
+              <Users className="w-3.5 h-3.5" />
+            </div>
             <span>Total Pegawai</span>
           </div>
-          <p className="font-mono text-xl font-extrabold text-slate-900 mt-1">
+          <p className="font-mono text-xl font-extrabold text-slate-900 tabular-nums">
             {kpiStats.totalPegawai} <span className="text-xs font-normal text-slate-500">Orang</span>
           </p>
         </div>
 
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs">
+        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Rata-rata Kehadiran</span>
+            <div className="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+            </div>
+            <span>Rata Kehadiran</span>
           </div>
-          <p className="font-mono text-xl font-extrabold text-emerald-600 mt-1">
+          <p className="font-mono text-xl font-extrabold text-emerald-600 tabular-nums">
             {kpiStats.avgKehadiran}%
           </p>
         </div>
 
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs">
+        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <Building className="w-3.5 h-3.5 text-blue-600" />
+            <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Building className="w-3.5 h-3.5" />
+            </div>
             <span>Hadir WFO / WFA</span>
           </div>
-          <p className="font-mono text-xl font-extrabold text-slate-900 mt-1">
+          <p className="font-mono text-xl font-extrabold text-slate-900 tabular-nums">
             {kpiStats.totalHadirWfo}{' '}
             <span className="text-xs font-bold text-sky-600">/ {kpiStats.totalHadirWfa}</span>
           </p>
         </div>
 
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs">
+        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <Clock className="w-3.5 h-3.5 text-amber-600" />
+            <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+              <Clock className="w-3.5 h-3.5" />
+            </div>
             <span>Terlambat / Plg Cpt</span>
           </div>
-          <p className="font-mono text-xl font-extrabold text-amber-700 mt-1">
+          <p className="font-mono text-xl font-extrabold text-amber-700 tabular-nums">
             {kpiStats.totalTerlambat}{' '}
             <span className="text-xs font-normal text-slate-400">/ {kpiStats.totalPulangCepat}</span>
           </p>
         </div>
 
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs">
+        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <FileText className="w-3.5 h-3.5 text-indigo-600" />
+            <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <FileText className="w-3.5 h-3.5" />
+            </div>
             <span>Izin / Cuti / Sakit</span>
           </div>
-          <p className="font-mono text-xl font-extrabold text-indigo-700 mt-1">
+          <p className="font-mono text-xl font-extrabold text-indigo-700 tabular-nums">
             {kpiStats.totalIzinCuti} <span className="text-xs font-normal text-slate-400">Hari</span>
           </p>
         </div>
 
-        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs">
+        <div className="p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <div className="flex items-center gap-2 text-slate-500 text-[11px] font-semibold">
-            <UserX className="w-3.5 h-3.5 text-rose-600" />
+            <div className="w-6 h-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+              <UserX className="w-3.5 h-3.5" />
+            </div>
             <span>Alfa (Mangkir)</span>
           </div>
-          <p className="font-mono text-xl font-extrabold text-rose-600 mt-1">
+          <p className="font-mono text-xl font-extrabold text-rose-600 tabular-nums">
             {kpiStats.totalAlfa} <span className="text-xs font-normal text-slate-400">Hari</span>
           </p>
         </div>
       </div>
 
-      {/* Dokumen Formal Rekapitulasi (Siap Cetak / Print Ready Landscape) */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 print-landscape-container print:border-none print:shadow-none print:p-0 print:m-0 print:rounded-none">
-        {/* Kop Surat Resmi Institusi STIMI */}
-        <div className="flex items-center justify-center gap-5 pb-5 border-b-2 border-slate-900 mb-6">
-          <div className="relative w-16 h-16 shrink-0">
-            <Image
-              src="/logo.png"
-              alt="Logo STIMI Makassar"
-              width={64}
-              height={64}
-              className="w-16 h-16 object-contain"
-            />
+      {/* 4. TAB NAVIGATION: REKAP SELURUH SDM vs RINCIAN PERORANGAN */}
+      <div className="flex items-center gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit print-hidden print:hidden">
+        <button
+          type="button"
+          onClick={() => setActiveTab('REKAP_SEMUA')}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 cursor-pointer ${
+            activeTab === 'REKAP_SEMUA'
+              ? 'bg-white text-sky-800 shadow-xs border border-sky-100'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Building className="w-4 h-4 text-sky-600" />
+          <span>Rekap Seluruh SDM</span>
+          <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 text-[10px] font-mono font-bold">
+            {reportData.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('RINCIAN_PERORANGAN')}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 cursor-pointer ${
+            activeTab === 'RINCIAN_PERORANGAN'
+              ? 'bg-white text-sky-800 shadow-xs border border-sky-100'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Users className="w-4 h-4 text-indigo-600" />
+          <span>Rincian Perorangan (1 SDM per Bulan)</span>
+          {currentIndividual && (
+            <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-800 text-[10px] font-bold max-w-[130px] truncate">
+              {currentIndividual.name}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* 5. TAB 1: REKAPITULASI SELURUH SDM (KOMPREHENSIF) */}
+      {activeTab === 'REKAP_SEMUA' && (
+        <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs p-5 sm:p-7 print-landscape-container print:border-none print:shadow-none print:p-0 print:m-0 print:rounded-none space-y-5">
+          {/* Baris Pencarian Cepat di Layar Web */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 print-hidden print:hidden">
+            <div className="relative max-w-sm w-full">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Cari nama, NIP, atau unit kerja..."
+                value={rekapSearch}
+                onChange={(e) => setRekapSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500 bg-slate-50 text-slate-800"
+              />
+            </div>
+            <p className="text-[11px] text-slate-500">
+              Menampilkan <strong>{filteredReportData.length}</strong> dari {reportData.length} pegawai
+            </p>
           </div>
-          <div className="text-center">
-            <h2 className="text-lg sm:text-xl font-black uppercase tracking-wide text-slate-900">
-              SEKOLAH TINGGI ILMU MANAJEMEN INDONESIA (STIMI) YAPMI MAKASSAR
-            </h2>
-            <p className="text-xs text-slate-600 mt-0.5">{campusSetting.address}</p>
-            <div className="mt-2 pt-2 border-t border-slate-300">
-              <h3 className="text-sm font-extrabold uppercase text-slate-900 tracking-tight">
-                Laporan Rekapitulasi Kehadiran Dosen & Tenaga Kependidikan
-              </h3>
-              <p className="text-xs text-slate-600 mt-0.5">
-                Periode: Bulan <strong>{monthNames[filterMonth - 1]} {filterYear}</strong> • Pola 5 Hari Kerja (Senin–Kamis WFO, Jumat WFA)
-                {kpiStats.isCurrentMonth && (
-                  <span className="italic text-slate-500"> (Dihitung berjalan s/d hari ini: {kpiStats.effectiveWorkingDays} hari kerja)</span>
-                )}
-              </p>
+
+          {/* Kop Surat Resmi Institusi STIMI */}
+          <div className="flex items-center justify-center gap-5 pb-5 border-b-2 border-slate-900">
+            <div className="relative w-16 h-16 shrink-0">
+              <Image
+                src="/logo.png"
+                alt="Logo STIMI Makassar"
+                width={64}
+                height={64}
+                className="w-16 h-16 object-contain"
+              />
+            </div>
+            <div className="text-center">
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-wide text-slate-900">
+                SEKOLAH TINGGI ILMU MANAJEMEN INDONESIA (STIMI) YAPMI MAKASSAR
+              </h2>
+              <p className="text-xs text-slate-600 mt-0.5">{campusSetting.address}</p>
+              <div className="mt-2 pt-2 border-t border-slate-300">
+                <h3 className="text-sm font-extrabold uppercase text-slate-900 tracking-tight">
+                  Laporan Rekapitulasi Kehadiran Dosen & Tenaga Kependidikan
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Periode: Bulan <strong>{monthNames[filterMonth - 1]} {filterYear}</strong> • Pola 5 Hari Kerja (Senin–Kamis WFO, Jumat WFA)
+                  {kpiStats.isCurrentMonth && (
+                    <span className="italic text-slate-500"> (Dihitung berjalan s/d hari ini: {kpiStats.effectiveWorkingDays} hari kerja)</span>
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabel Rekapitulasi Seluruh Pegawai */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 text-slate-700 border-y-2 border-slate-300">
+                  <th className="py-2.5 px-2.5 font-bold text-center w-8">No</th>
+                  <th className="py-2.5 px-2.5 font-bold">No. ID</th>
+                  <th className="py-2.5 px-2.5 font-bold">Nama Pegawai</th>
+                  <th className="py-2.5 px-2.5 font-bold">Jabatan</th>
+                  <th className="py-2.5 px-2.5 font-bold">Unit Kerja</th>
+                  <th
+                    className="py-2.5 px-2 font-bold text-center bg-slate-200/70"
+                    title="Hari Kerja Efektif"
+                  >
+                    Hari Kerja
+                  </th>
+                  <th
+                    className="py-2.5 px-2 font-bold text-center text-sky-800"
+                    title="Total Hadir Fisik & WFA"
+                  >
+                    Total Hadir
+                  </th>
+                  <th
+                    className="py-2.5 px-2 font-bold text-center"
+                    title="Hadir WFO di Kampus (Senin-Kamis)"
+                  >
+                    WFO
+                  </th>
+                  <th className="py-2.5 px-2 font-bold text-center" title="Hadir WFA (Jumat)">
+                    WFA
+                  </th>
+                  <th className="py-2.5 px-2 font-bold text-center text-emerald-700">Tepat Waktu</th>
+                  <th className="py-2.5 px-2 font-bold text-center text-amber-700">Terlambat</th>
+                  <th className="py-2.5 px-2 font-bold text-center text-amber-800">Plg Cepat</th>
+                  <th className="py-2.5 px-2 font-bold text-center text-indigo-700">Dinas Luar</th>
+                  <th
+                    className="py-2.5 px-2 font-bold text-center text-purple-700"
+                    title="Izin, Cuti Tahunan, dan Sakit"
+                  >
+                    Izin/Cuti
+                  </th>
+                  <th
+                    className="py-2.5 px-2 font-bold text-center text-rose-700"
+                    title="Alfa / Tanpa Keterangan"
+                  >
+                    Alfa
+                  </th>
+                  <th className="py-2.5 px-2 font-bold text-center bg-sky-100/70 text-sky-900">
+                    % Hadir
+                  </th>
+                  <th className="py-2.5 px-2 font-bold text-center print:hidden print-hidden">
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 text-slate-800">
+                {filteredReportData.map((row, idx) => (
+                  <tr
+                    key={row.userId}
+                    className="hover:bg-sky-50/40 transition-colors print:hover:bg-transparent"
+                  >
+                    <td className="py-2 px-2 text-center font-medium">{idx + 1}</td>
+                    <td className="py-2 px-2 font-mono font-medium">{row.nip}</td>
+                    <td className="py-2 px-2 font-bold text-slate-900">{row.name}</td>
+                    <td className="py-2 px-2 text-slate-600 truncate max-w-[140px]">
+                      {row.jabatan}
+                    </td>
+                    <td className="py-2 px-2 text-slate-600 truncate max-w-[140px]">
+                      {row.unitKerja}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono font-semibold bg-slate-50 tabular-nums">
+                      {row.hariKerjaEfektif}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono font-bold text-sky-800 tabular-nums">
+                      {row.totalHadir}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono text-slate-700 tabular-nums">
+                      {row.hadirWfo}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono text-slate-700 tabular-nums">
+                      {row.hadirWfa}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono text-emerald-700 font-medium tabular-nums">
+                      {row.tepatWaktu}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono text-amber-700 font-medium tabular-nums">
+                      {row.terlambat > 0 ? (
+                        <span className="text-amber-800 font-bold">{row.terlambat}</span>
+                      ) : (
+                        '0'
+                      )}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono text-amber-800 font-medium tabular-nums">
+                      {row.pulangCepat > 0 ? row.pulangCepat : '0'}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono text-indigo-700 font-medium tabular-nums">
+                      {row.dinasLuar > 0 ? row.dinasLuar : '0'}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono text-purple-700 font-medium tabular-nums">
+                      {row.izinCutiSakit > 0 ? row.izinCutiSakit : '0'}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono font-bold tabular-nums">
+                      {row.alfa > 0 ? (
+                        <span className="text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
+                          {row.alfa}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">0</span>
+                      )}
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono font-black bg-sky-50 text-sky-950 tabular-nums">
+                      {row.persentaseKehadiran}%
+                    </td>
+                    <td className="py-2 px-2 text-center print:hidden print-hidden">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedUserId(row.userId);
+                          setActiveTab('RINCIAN_PERORANGAN');
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 border border-sky-200/80 transition shadow-2xs cursor-pointer"
+                        title="Lihat Log Buku Presensi Lengkap Pegawai Ini"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-sky-600" />
+                        <span>Rincian</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              {/* Baris Total & Rata-rata Institusi */}
+              <tfoot>
+                <tr className="bg-slate-100 text-slate-900 font-bold border-t-2 border-slate-300">
+                  <td
+                    colSpan={5}
+                    className="py-2.5 px-3 text-right uppercase tracking-wider text-[11px]"
+                  >
+                    Rata-rata / Total Keseluruhan:
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono tabular-nums">
+                    {kpiStats.effectiveWorkingDays}
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono text-sky-900 tabular-nums">
+                    {kpiStats.totalHadirWfo + kpiStats.totalHadirWfa}
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono tabular-nums">
+                    {kpiStats.totalHadirWfo}
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono tabular-nums">
+                    {kpiStats.totalHadirWfa}
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono text-emerald-800 tabular-nums">
+                    {reportData.reduce((acc, r) => acc + r.tepatWaktu, 0)}
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono text-amber-800 tabular-nums">
+                    {kpiStats.totalTerlambat}
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono text-amber-800 tabular-nums">
+                    {kpiStats.totalPulangCepat}
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono text-indigo-800 tabular-nums">
+                    {reportData.reduce((acc, r) => acc + r.dinasLuar, 0)}
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono text-purple-800 tabular-nums">
+                    {kpiStats.totalIzinCuti}
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono text-rose-800 tabular-nums">
+                    {kpiStats.totalAlfa}
+                  </td>
+                  <td className="py-2.5 px-2 text-center font-mono text-sky-950 bg-sky-200/60 font-black tabular-nums">
+                    {kpiStats.avgKehadiran}%
+                  </td>
+                  <td className="py-2.5 px-2 print:hidden print-hidden" />
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          {/* Tanda Tangan Pengesahan (Siap Cetak) */}
+          <div className="mt-12 pt-6 flex justify-between text-xs text-slate-800 break-inside-avoid">
+            <div className="text-center w-64">
+              <p>Mengetahui,</p>
+              <p className="font-bold">Ketua STIMI Makassar</p>
+              <div className="h-20" />
+              <p className="font-bold underline">( .................................................... )</p>
+              <p className="text-[11px] text-slate-500">NIDN. ........................................</p>
+            </div>
+
+            <div className="text-center w-64">
+              <p>Makassar, {new Date().toLocaleDateString('id-ID')}</p>
+              <p className="font-bold">Kepala Bagian SDM & Kepegawaian</p>
+              <div className="h-20" />
+              <p className="font-bold underline">( Administrator Kepegawaian STIMI )</p>
+              <p className="text-[11px] text-slate-500">No. ID: ADMIN001</p>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Tabel Rekapitulasi Komprehensif */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-slate-100 text-slate-700 border-y-2 border-slate-300">
-                <th className="py-2.5 px-2.5 font-bold text-center w-8">No</th>
-                <th className="py-2.5 px-2.5 font-bold">No. ID</th>
-                <th className="py-2.5 px-2.5 font-bold">Nama Pegawai</th>
-                <th className="py-2.5 px-2.5 font-bold">Jabatan</th>
-                <th className="py-2.5 px-2.5 font-bold">Unit Kerja</th>
-                <th className="py-2.5 px-2 font-bold text-center bg-slate-200/70" title="Hari Kerja Efektif">
-                  Hari Kerja
-                </th>
-                <th className="py-2.5 px-2 font-bold text-center text-sky-800" title="Total Hadir Fisik & WFA">
-                  Total Hadir
-                </th>
-                <th className="py-2.5 px-2 font-bold text-center" title="Hadir WFO di Kampus (Senin-Kamis)">
-                  WFO
-                </th>
-                <th className="py-2.5 px-2 font-bold text-center" title="Hadir WFA (Jumat)">
-                  WFA
-                </th>
-                <th className="py-2.5 px-2 font-bold text-center text-emerald-700">Tepat Waktu</th>
-                <th className="py-2.5 px-2 font-bold text-center text-amber-700">Terlambat</th>
-                <th className="py-2.5 px-2 font-bold text-center text-amber-800">Plg Cepat</th>
-                <th className="py-2.5 px-2 font-bold text-center text-indigo-700">Dinas Luar</th>
-                <th className="py-2.5 px-2 font-bold text-center text-purple-700" title="Izin, Cuti Tahunan, dan Sakit">
-                  Izin/Cuti
-                </th>
-                <th className="py-2.5 px-2 font-bold text-center text-rose-700" title="Alfa / Tanpa Keterangan">
-                  Alfa
-                </th>
-                <th className="py-2.5 px-2.5 font-bold text-center bg-sky-100/70 text-sky-900">
-                  % Hadir
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 text-slate-800">
-              {reportData.map((row, idx) => (
-                <tr key={row.nip} className="hover:bg-slate-50 print:hover:bg-transparent">
-                  <td className="py-2 px-2 text-center font-medium">{idx + 1}</td>
-                  <td className="py-2 px-2 font-mono font-medium">{row.nip}</td>
-                  <td className="py-2 px-2 font-bold text-slate-900">{row.name}</td>
-                  <td className="py-2 px-2 text-slate-600 truncate max-w-[150px]">{row.jabatan}</td>
-                  <td className="py-2 px-2 text-slate-600 truncate max-w-[150px]">{row.unitKerja}</td>
-                  <td className="py-2 px-2 text-center font-mono font-semibold bg-slate-50">
-                    {row.hariKerjaEfektif}
-                  </td>
-                  <td className="py-2 px-2 text-center font-mono font-bold text-sky-800">
-                    {row.totalHadir}
-                  </td>
-                  <td className="py-2 px-2 text-center font-mono text-slate-700">
-                    {row.hadirWfo}
-                  </td>
-                  <td className="py-2 px-2 text-center font-mono text-slate-700">
-                    {row.hadirWfa}
-                  </td>
-                  <td className="py-2 px-2 text-center font-mono text-emerald-700 font-medium">
-                    {row.tepatWaktu}
-                  </td>
-                  <td className="py-2 px-2 text-center font-mono text-amber-700 font-medium">
-                    {row.terlambat > 0 ? (
-                      <span className="text-amber-800 font-bold">{row.terlambat}</span>
-                    ) : (
-                      '0'
-                    )}
-                  </td>
-                  <td className="py-2 px-2 text-center font-mono text-amber-800 font-medium">
-                    {row.pulangCepat > 0 ? row.pulangCepat : '0'}
-                  </td>
-                  <td className="py-2 px-2 text-center font-mono text-indigo-700 font-medium">
-                    {row.dinasLuar > 0 ? row.dinasLuar : '0'}
-                  </td>
-                  <td className="py-2 px-2 text-center font-mono text-purple-700 font-medium">
-                    {row.izinCutiSakit > 0 ? row.izinCutiSakit : '0'}
-                  </td>
-                  <td className="py-2 px-2 text-center font-mono font-bold">
-                    {row.alfa > 0 ? (
-                      <span className="text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
-                        {row.alfa}
+      {/* 6. TAB 2: RINCIAN PERORANGAN (BUKU PRESENSI 1 SDM PER BULAN) */}
+      {activeTab === 'RINCIAN_PERORANGAN' && currentIndividual && (
+        <div className="space-y-6">
+          {/* Toolbar Pemilih Pegawai & Aksi */}
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 print-hidden print:hidden">
+            <div className="flex items-center flex-wrap gap-2.5">
+              <button
+                type="button"
+                onClick={() => setActiveTab('REKAP_SEMUA')}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Kembali ke Rekap Semua</span>
+              </button>
+
+              <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-sky-600" />
+                <span className="text-xs font-bold text-slate-800">Pilih Pegawai:</span>
+                <select
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer min-w-[240px]"
+                >
+                  {individualReports.map((emp) => (
+                    <option key={emp.userId} value={emp.userId}>
+                      {emp.name} ({emp.nip}) - {emp.jabatan}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExportExcelIndividual}
+                className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Ekspor Excel</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePrintPDF}
+                className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Cetak Lembar Individu</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Dokumen Formal Siap Cetak untuk 1 Pegawai */}
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs p-5 sm:p-7 print-landscape-container print:border-none print:shadow-none print:p-0 print:m-0 print:rounded-none space-y-5">
+            {/* Kop Surat STIMI */}
+            <div className="flex items-center justify-center gap-5 pb-5 border-b-2 border-slate-900">
+              <div className="relative w-16 h-16 shrink-0">
+                <Image
+                  src="/logo.png"
+                  alt="Logo STIMI Makassar"
+                  width={64}
+                  height={64}
+                  className="w-16 h-16 object-contain"
+                />
+              </div>
+              <div className="text-center">
+                <h2 className="text-lg sm:text-xl font-black uppercase tracking-wide text-slate-900">
+                  SEKOLAH TINGGI ILMU MANAJEMEN INDONESIA (STIMI) YAPMI MAKASSAR
+                </h2>
+                <p className="text-xs text-slate-600 mt-0.5">{campusSetting.address}</p>
+                <div className="mt-2 pt-2 border-t border-slate-300">
+                  <h3 className="text-sm font-extrabold uppercase text-slate-900 tracking-tight">
+                    Lembar Catatan Presensi Individu Pegawai (Buku Presensi)
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Periode: Bulan <strong>{monthNames[filterMonth - 1]} {filterYear}</strong> • Pola 5 Hari Kerja (Senin–Kamis WFO, Jumat WFA)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Kartu Profil Pegawai Terpilih */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-sky-50/70 via-white to-sky-50/30 border border-sky-100 shadow-xs space-y-3.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-sky-600 text-white flex items-center justify-center font-black text-lg shadow-2xs">
+                    {currentIndividual.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .slice(0, 2)
+                      .join('')}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-black text-slate-900">
+                        {currentIndividual.name}
+                      </h3>
+                      <span className="font-mono text-xs px-2 py-0.5 bg-sky-50 text-sky-800 rounded-md border border-sky-200 font-bold">
+                        NIP: {currentIndividual.nip}
                       </span>
-                    ) : (
-                      <span className="text-slate-400">0</span>
-                    )}
-                  </td>
-                  <td className="py-2 px-2.5 text-center font-mono font-black bg-sky-50 text-sky-950 tabular-nums">
-                    {row.persentaseKehadiran}%
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            {/* Baris Total & Rata-rata Institusi */}
-            <tfoot>
-              <tr className="bg-slate-100 text-slate-900 font-bold border-t-2 border-slate-300">
-                <td colSpan={5} className="py-2.5 px-3 text-right uppercase tracking-wider text-[11px]">
-                  Rata-rata / Total Keseluruhan:
-                </td>
-                <td className="py-2.5 px-2 text-center font-mono">{kpiStats.effectiveWorkingDays}</td>
-                <td className="py-2.5 px-2 text-center font-mono text-sky-900">
-                  {kpiStats.totalHadirWfo + kpiStats.totalHadirWfa}
-                </td>
-                <td className="py-2.5 px-2 text-center font-mono">{kpiStats.totalHadirWfo}</td>
-                <td className="py-2.5 px-2 text-center font-mono">{kpiStats.totalHadirWfa}</td>
-                <td className="py-2.5 px-2 text-center font-mono text-emerald-800">
-                  {reportData.reduce((acc, r) => acc + r.tepatWaktu, 0)}
-                </td>
-                <td className="py-2.5 px-2 text-center font-mono text-amber-800">
-                  {kpiStats.totalTerlambat}
-                </td>
-                <td className="py-2.5 px-2 text-center font-mono text-amber-800">
-                  {kpiStats.totalPulangCepat}
-                </td>
-                <td className="py-2.5 px-2 text-center font-mono text-indigo-800">
-                  {reportData.reduce((acc, r) => acc + r.dinasLuar, 0)}
-                </td>
-                <td className="py-2.5 px-2 text-center font-mono text-purple-800">
-                  {kpiStats.totalIzinCuti}
-                </td>
-                <td className="py-2.5 px-2 text-center font-mono text-rose-800">
-                  {kpiStats.totalAlfa}
-                </td>
-                <td className="py-2.5 px-2.5 text-center font-mono text-sky-950 bg-sky-200/60 font-black">
-                  {kpiStats.avgKehadiran}%
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 mt-0.5">
+                      <span className="flex items-center gap-1 font-medium">
+                        <Briefcase className="w-3.5 h-3.5 text-slate-400" />
+                        {currentIndividual.jabatan} • {currentIndividual.unitKerja}
+                      </span>
+                      <span className="text-slate-300">•</span>
+                      <span className="flex items-center gap-1 text-sky-700 font-semibold">
+                        <MapPin className="w-3.5 h-3.5 text-sky-500" />
+                        {currentIndividual.lokasiPenugasan}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-        {/* Tanda Tangan Pengesahan (Siap Cetak) */}
-        <div className="mt-12 pt-6 flex justify-between text-xs text-slate-800 break-inside-avoid">
-          <div className="text-center w-64">
-            <p>Mengetahui,</p>
-            <p className="font-bold">Ketua STIMI Makassar</p>
-            <div className="h-20" />
-            <p className="font-bold underline">( .................................................... )</p>
-            <p className="text-[11px] text-slate-500">NIDN. ........................................</p>
-          </div>
+                <div className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-white border border-sky-200/90 shadow-2xs text-[11px] font-semibold text-slate-700 space-y-0.5">
+                  <div className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+                    Ketentuan Jam Kerja:
+                  </div>
+                  <div className="font-mono font-bold text-sky-800 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-sky-600" />
+                    <span>{currentIndividual.scheduleName} ({currentIndividual.scheduleDetails})</span>
+                  </div>
+                </div>
+              </div>
 
-          <div className="text-center w-64">
-            <p>Makassar, {new Date().toLocaleDateString('id-ID')}</p>
-            <p className="font-bold">Kepala Bagian SDM & Kepegawaian</p>
-            <div className="h-20" />
-            <p className="font-bold underline">( Administrator Kepegawaian STIMI )</p>
-            <p className="text-[11px] text-slate-500">No. ID: ADMIN001</p>
+              {/* 6 Mini Kartu Statistik Pribadi Pegawai */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-1">
+                <div className="p-3 bg-white rounded-xl border border-sky-200/80 shadow-2xs space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 block">
+                    % Kehadiran
+                  </span>
+                  <p className="font-mono text-lg font-black text-sky-950 tabular-nums">
+                    {currentIndividual.stats.persentaseKehadiran}%
+                  </p>
+                  <p className="text-[10px] text-slate-500">
+                    {currentIndividual.stats.totalHadir} / {currentIndividual.stats.hariKerjaEfektif} Hari Hadir
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-blue-200/80 shadow-2xs space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 block">
+                    Total Jam Kerja
+                  </span>
+                  <p className="font-mono text-lg font-black text-blue-950 tabular-nums">
+                    {currentIndividual.stats.totalWorkHoursDisplay}
+                  </p>
+                  <p className="text-[10px] text-slate-500">Akumulasi Efektif</p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-emerald-200/80 shadow-2xs space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">
+                    Tepat Waktu
+                  </span>
+                  <p className="font-mono text-lg font-black text-emerald-700 tabular-nums">
+                    {currentIndividual.stats.tepatWaktu}{' '}
+                    <span className="text-xs font-normal text-slate-500">Hari</span>
+                  </p>
+                  <p className="text-[10px] text-emerald-600">Presensi Disiplin</p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-amber-200/80 shadow-2xs space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">
+                    Terlambat
+                  </span>
+                  <p className="font-mono text-lg font-black text-amber-800 tabular-nums">
+                    {currentIndividual.stats.terlambat}{' '}
+                    <span className="text-xs font-normal text-slate-500">Hari</span>
+                  </p>
+                  <p className="text-[10px] text-amber-700 font-medium">
+                    +{currentIndividual.stats.totalLateMinutes} mnt total
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-indigo-200/80 shadow-2xs space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 block">
+                    Izin / Cuti
+                  </span>
+                  <p className="font-mono text-lg font-black text-indigo-700 tabular-nums">
+                    {currentIndividual.stats.izinCutiSakit}{' '}
+                    <span className="text-xs font-normal text-slate-500">Hari</span>
+                  </p>
+                  <p className="text-[10px] text-slate-500">Disetujui Atasan</p>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-rose-200/80 shadow-2xs space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 block">
+                    Alfa (Mangkir)
+                  </span>
+                  <p className="font-mono text-lg font-black text-rose-600 tabular-nums">
+                    {currentIndividual.stats.alfa}{' '}
+                    <span className="text-xs font-normal text-slate-500">Hari</span>
+                  </p>
+                  <p className="text-[10px] text-slate-400">Tanpa Keterangan</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tabel Log Presensi Harian Efektif (Senin s/d Jumat) */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 text-slate-700 border-y-2 border-slate-300">
+                    <th className="py-2.5 px-2.5 font-bold text-center w-8">No</th>
+                    <th className="py-2.5 px-3 font-bold w-44">Hari & Tanggal</th>
+                    <th className="py-2.5 px-3 font-bold">Status / Mode Kerja</th>
+                    <th className="py-2.5 px-3 font-bold">Presensi Masuk</th>
+                    <th className="py-2.5 px-3 font-bold">Presensi Pulang</th>
+                    <th className="py-2.5 px-2.5 font-bold text-center w-32">Durasi Kerja</th>
+                    <th className="py-2.5 px-3 font-bold">Lokasi / Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 text-slate-800">
+                  {currentIndividual.dailyLogs.map((log) => {
+                    const isToday = log.isToday;
+                    return (
+                      <tr
+                        key={log.no}
+                        className={`transition-colors ${
+                          isToday
+                            ? 'bg-sky-50/70 font-semibold border-l-4 border-l-sky-500'
+                            : 'hover:bg-slate-50/80'
+                        }`}
+                      >
+                        <td className="py-2.5 px-2.5 text-center font-mono font-medium">
+                          {log.no}
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-slate-900">
+                          <div className="flex items-center gap-1.5">
+                            <span>{log.dateDisplay}</span>
+                            {isToday && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] bg-sky-200 text-sky-900 font-bold uppercase">
+                                Hari Ini
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3">
+                          {log.statusType === 'HADIR_WFO' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                              <Building className="w-3 h-3 text-slate-500" />
+                              WFO Kampus
+                            </span>
+                          ) : log.statusType === 'HADIR_WFA' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                              <MapPin className="w-3 h-3 text-sky-600" />
+                              WFA (Jumat)
+                            </span>
+                          ) : log.statusType === 'DINAS_LUAR' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                              <Briefcase className="w-3 h-3 text-indigo-600" />
+                              Dinas Luar Kota
+                            </span>
+                          ) : log.statusType === 'IZIN_CUTI' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                              <FileText className="w-3 h-3 text-purple-600" />
+                              {log.statusLabel}
+                            </span>
+                          ) : log.statusType === 'ALFA' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                              <UserX className="w-3 h-3 text-rose-600" />
+                              Alfa (Mangkir)
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-50 text-slate-400">
+                              <Calendar className="w-3 h-3" />
+                              Masa Mendatang
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          {log.clockInTime ? (
+                            <div className="space-y-0.5">
+                              <span className="font-mono font-bold text-slate-900 block tabular-nums">
+                                {log.clockInTime}
+                              </span>
+                              {log.clockInStatus === 'TEPAT_WAKTU' && (
+                                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/70">
+                                  <CheckCircle2 className="w-2.5 h-2.5" />
+                                  Tepat Waktu
+                                </span>
+                              )}
+                              {log.clockInStatus === 'TERLAMBAT' && (
+                                <span className="inline-flex items-center gap-1 text-[10px] text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/70">
+                                  <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
+                                  {log.clockInStatusLabel}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 font-mono">-</span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          {log.clockOutTime ? (
+                            <div className="space-y-0.5">
+                              <span className="font-mono font-bold text-slate-900 block tabular-nums">
+                                {log.clockOutTime}
+                              </span>
+                              <span className="inline-flex items-center gap-1 text-[10px] text-slate-600 font-medium bg-slate-100 px-1.5 py-0.5 rounded">
+                                {log.clockOutStatusLabel}
+                              </span>
+                            </div>
+                          ) : log.clockInTime && log.isPastOrToday && !isToday ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-rose-700 font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/70">
+                              Tidak Absen Pulang
+                            </span>
+                          ) : log.clockInTime && isToday ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-sky-700 font-bold bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200/70">
+                              Sedang Bekerja
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 font-mono">-</span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-2.5 text-center font-mono font-semibold text-slate-800 tabular-nums">
+                          {log.durationDisplay}
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-600">
+                          <div className="space-y-0.5 max-w-[200px]">
+                            <p className="truncate text-slate-800 font-medium">
+                              {log.locationDisplay}
+                            </p>
+                            {log.note && (
+                              <p className="text-[10.5px] text-slate-500 italic truncate" title={log.note}>
+                                Catatan: &quot;{log.note}&quot;
+                              </p>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Tanda Tangan Pengesahan Individual */}
+            <div className="mt-12 pt-6 flex justify-between text-xs text-slate-800 break-inside-avoid">
+              <div className="text-center w-64">
+                <p>Pegawai Yang Bersangkutan,</p>
+                <div className="h-20" />
+                <p className="font-bold underline">( {currentIndividual.name} )</p>
+                <p className="text-[11px] text-slate-500">NIP. {currentIndividual.nip}</p>
+              </div>
+
+              <div className="text-center w-64">
+                <p>Makassar, {new Date().toLocaleDateString('id-ID')}</p>
+                <p className="font-bold">Kepala Bagian SDM & Kepegawaian</p>
+                <div className="h-20" />
+                <p className="font-bold underline">( Administrator Kepegawaian STIMI )</p>
+                <p className="text-[11px] text-slate-500">No. ID: ADMIN001</p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
