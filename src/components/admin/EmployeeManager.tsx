@@ -512,7 +512,7 @@ export function EmployeeManager({ users, superiors, campusLocations, workSchedul
         Email: 'siti.rahmah@stimi.ac.id',
         Peran: 'PEGAWAI',
         Jabatan: 'Dosen Tetap Manajemen Pemasaran',
-        UnitKerja: 'Program Studi S1 Manajemen',
+        UnitKerja: 'PRODI S1 MANAJEMEN',
         NIP_Atasan: 'ATASAN001',
         Lokasi_Gedung: 'KAMPUS_1',
         Password: 'password123',

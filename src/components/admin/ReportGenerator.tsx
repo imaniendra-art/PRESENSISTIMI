@@ -660,9 +660,9 @@ export function ReportGenerator({
 
         {/* 4. TAB 1: REKAPITULASI SELURUH SDM (KOMPREHENSIF) */}
         {activeTab === 'REKAP_SEMUA' && (
-          <div className="p-4 sm:p-7 space-y-5">
+          <div className="p-3.5 sm:p-5 space-y-4">
             {/* Baris Pencarian Cepat di Layar Web */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 print-hidden print:hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 border-b border-slate-100 print-hidden print:hidden">
               <div className="relative max-w-sm w-full">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -679,26 +679,26 @@ export function ReportGenerator({
             </div>
 
           {/* Kop Surat Resmi Institusi STIMI */}
-          <div className="flex items-center justify-center gap-5 pb-5 border-b-2 border-slate-900">
-            <div className="relative w-16 h-16 shrink-0">
+          <div className="flex items-center justify-center gap-5 pb-4 border-b-2 border-slate-900">
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
               <Image
                 src="/logo.png"
                 alt="Logo STIMI Makassar"
                 width={64}
                 height={64}
-                className="w-16 h-16 object-contain"
+                className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
               />
             </div>
             <div className="text-center">
-              <h2 className="text-lg sm:text-xl font-black uppercase tracking-wide text-slate-900">
+              <h2 className="text-base sm:text-xl font-black uppercase tracking-wide text-slate-900">
                 SEKOLAH TINGGI ILMU MANAJEMEN INDONESIA (STIMI) YAPMI MAKASSAR
               </h2>
-              <p className="text-xs text-slate-600 mt-0.5">{campusSetting.address}</p>
-              <div className="mt-2 pt-2 border-t border-slate-300">
-                <h3 className="text-sm font-extrabold uppercase text-slate-900 tracking-tight">
+              <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5">{campusSetting.address}</p>
+              <div className="mt-1.5 pt-1.5 border-t border-slate-300">
+                <h3 className="text-xs sm:text-sm font-extrabold uppercase text-slate-900 tracking-tight">
                   Laporan Rekapitulasi Kehadiran Dosen & Tenaga Kependidikan
                 </h3>
-                <p className="text-xs text-slate-600 mt-0.5">
+                <p className="text-[10.5px] sm:text-xs text-slate-600 mt-0.5">
                   Periode: Bulan <strong>{monthNames[filterMonth - 1]} {filterYear}</strong> • Pola 5 Hari Kerja (Senin–Kamis WFO, Jumat WFA)
                   {kpiStats.isCurrentMonth && (
                     <span className="italic text-slate-500"> (Dihitung berjalan s/d hari ini: {kpiStats.effectiveWorkingDays} hari kerja)</span>
@@ -708,57 +708,57 @@ export function ReportGenerator({
             </div>
           </div>
 
-          {/* Tabel Rekapitulasi Seluruh Pegawai */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+          {/* Tabel Rekapitulasi Seluruh Pegawai - Dirapatkan agar Bebas Horizontal Scroll di Desktop */}
+          <div className="overflow-x-auto lg:overflow-x-visible w-full">
+            <table className="w-full text-left text-[11px] border-collapse">
               <thead>
-                <tr className="bg-slate-100 text-slate-700 border-y-2 border-slate-300">
-                  <th className="py-2.5 px-2.5 font-bold text-center w-8">No</th>
-                  <th className="py-2.5 px-2.5 font-bold">No. ID</th>
-                  <th className="py-2.5 px-2.5 font-bold">Nama Pegawai</th>
-                  <th className="py-2.5 px-2.5 font-bold">Jabatan</th>
-                  <th className="py-2.5 px-2.5 font-bold">Unit Kerja</th>
+                <tr className="bg-slate-100 text-slate-700 border-y-2 border-slate-300 text-[10px] sm:text-[10.5px] uppercase tracking-tight">
+                  <th className="py-2 px-1 font-bold text-center w-6">No</th>
+                  <th className="py-2 px-1 font-bold w-18">No. ID</th>
+                  <th className="py-2 px-1.5 font-bold">Nama Pegawai</th>
+                  <th className="py-2 px-1 font-bold">Jabatan</th>
+                  <th className="py-2 px-1 font-bold">Unit Kerja</th>
                   <th
-                    className="py-2.5 px-2 font-bold text-center bg-slate-200/70"
+                    className="py-2 px-0.5 font-bold text-center bg-slate-200/70 leading-tight"
                     title="Hari Kerja Efektif"
                   >
                     Hari Kerja
                   </th>
                   <th
-                    className="py-2.5 px-2 font-bold text-center text-sky-800"
+                    className="py-2 px-0.5 font-bold text-center text-sky-800 leading-tight"
                     title="Total Hadir Fisik & WFA"
                   >
                     Total Hadir
                   </th>
                   <th
-                    className="py-2.5 px-2 font-bold text-center"
+                    className="py-2 px-0.5 font-bold text-center leading-tight"
                     title="Hadir WFO di Kampus (Senin-Kamis)"
                   >
                     WFO
                   </th>
-                  <th className="py-2.5 px-2 font-bold text-center" title="Hadir WFA (Jumat)">
+                  <th className="py-2 px-0.5 font-bold text-center leading-tight" title="Hadir WFA (Jumat)">
                     WFA
                   </th>
-                  <th className="py-2.5 px-2 font-bold text-center text-emerald-700">Tepat Waktu</th>
-                  <th className="py-2.5 px-2 font-bold text-center text-amber-700">Terlambat</th>
-                  <th className="py-2.5 px-2 font-bold text-center text-amber-800">Plg Cepat</th>
-                  <th className="py-2.5 px-2 font-bold text-center text-indigo-700">Dinas Luar</th>
+                  <th className="py-2 px-0.5 font-bold text-center text-emerald-700 leading-tight">Tepat Waktu</th>
+                  <th className="py-2 px-0.5 font-bold text-center text-amber-700 leading-tight">Terlambat</th>
+                  <th className="py-2 px-0.5 font-bold text-center text-amber-800 leading-tight">Plg Cepat</th>
+                  <th className="py-2 px-0.5 font-bold text-center text-indigo-700 leading-tight">Dinas Luar</th>
                   <th
-                    className="py-2.5 px-2 font-bold text-center text-purple-700"
+                    className="py-2 px-0.5 font-bold text-center text-purple-700 leading-tight"
                     title="Izin, Cuti Tahunan, dan Sakit"
                   >
                     Izin/Cuti
                   </th>
                   <th
-                    className="py-2.5 px-2 font-bold text-center text-rose-700"
+                    className="py-2 px-0.5 font-bold text-center text-rose-700 leading-tight"
                     title="Alfa / Tanpa Keterangan"
                   >
                     Alfa
                   </th>
-                  <th className="py-2.5 px-2 font-bold text-center bg-sky-100/70 text-sky-900">
+                  <th className="py-2 px-0.5 font-bold text-center bg-sky-100/70 text-sky-900 leading-tight">
                     % Hadir
                   </th>
-                  <th className="py-2.5 px-2 font-bold text-center print:hidden print-hidden">
+                  <th className="py-2 px-1 font-bold text-center w-14 print:hidden print-hidden">
                     Aksi
                   </th>
                 </tr>
@@ -769,69 +769,71 @@ export function ReportGenerator({
                     key={row.userId}
                     className="hover:bg-sky-50/40 transition-colors print:hover:bg-transparent"
                   >
-                    <td className="py-2 px-2 text-center font-medium">{idx + 1}</td>
-                    <td className="py-2 px-2 font-mono font-medium">{row.nip}</td>
-                    <td className="py-2 px-2 font-bold text-slate-900">{row.name}</td>
-                    <td className="py-2 px-2 text-slate-600 truncate max-w-[140px]">
+                    <td className="py-1.5 px-1 text-center font-medium text-slate-500">{idx + 1}</td>
+                    <td className="py-1.5 px-1 font-mono text-[10.5px] text-slate-600">{row.nip}</td>
+                    <td className="py-1.5 px-1.5 font-bold text-slate-900 max-w-[145px] xl:max-w-none truncate" title={row.name}>
+                      {row.name}
+                    </td>
+                    <td className="py-1.5 px-1 text-slate-600 truncate max-w-[105px] text-[10.5px]" title={row.jabatan}>
                       {row.jabatan}
                     </td>
-                    <td className="py-2 px-2 text-slate-600 truncate max-w-[140px]">
+                    <td className="py-1.5 px-1 text-slate-600 truncate max-w-[95px] text-[10.5px]" title={row.unitKerja}>
                       {row.unitKerja}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono font-semibold bg-slate-50 tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono font-semibold bg-slate-50 tabular-nums">
                       {row.hariKerjaEfektif}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono font-bold text-sky-800 tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono font-bold text-sky-800 tabular-nums">
                       {row.totalHadir}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono text-slate-700 tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono text-slate-700 tabular-nums">
                       {row.hadirWfo}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono text-slate-700 tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono text-slate-700 tabular-nums">
                       {row.hadirWfa}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono text-emerald-700 font-medium tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono text-emerald-700 font-medium tabular-nums">
                       {row.tepatWaktu}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono text-amber-700 font-medium tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono text-amber-700 font-medium tabular-nums">
                       {row.terlambat > 0 ? (
                         <span className="text-amber-800 font-bold">{row.terlambat}</span>
                       ) : (
                         '0'
                       )}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono text-amber-800 font-medium tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono text-amber-800 font-medium tabular-nums">
                       {row.pulangCepat > 0 ? row.pulangCepat : '0'}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono text-indigo-700 font-medium tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono text-indigo-700 font-medium tabular-nums">
                       {row.dinasLuar > 0 ? row.dinasLuar : '0'}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono text-purple-700 font-medium tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono text-purple-700 font-medium tabular-nums">
                       {row.izinCutiSakit > 0 ? row.izinCutiSakit : '0'}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono font-bold tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono font-bold tabular-nums">
                       {row.alfa > 0 ? (
-                        <span className="text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
+                        <span className="text-rose-600 bg-rose-50 px-1 py-0.2 rounded font-black">
                           {row.alfa}
                         </span>
                       ) : (
                         <span className="text-slate-400">0</span>
                       )}
                     </td>
-                    <td className="py-2 px-2 text-center font-mono font-black bg-sky-50 text-sky-950 tabular-nums">
+                    <td className="py-1.5 px-0.5 text-center font-mono font-black bg-sky-50 text-sky-950 tabular-nums">
                       {row.persentaseKehadiran}%
                     </td>
-                    <td className="py-2 px-2 text-center print:hidden print-hidden">
+                    <td className="py-1.5 px-1 text-center print:hidden print-hidden">
                       <button
                         type="button"
                         onClick={() => {
                           setSelectedUserId(row.userId);
                           setActiveTab('RINCIAN_PERORANGAN');
                         }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 border border-sky-200/80 transition shadow-2xs cursor-pointer"
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10.5px] font-bold bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 border border-sky-200/80 transition shadow-2xs cursor-pointer"
                         title="Lihat Log Buku Presensi Lengkap Pegawai Ini"
                       >
-                        <Eye className="w-3.5 h-3.5 text-sky-600" />
+                        <Eye className="w-3 h-3 text-sky-600" />
                         <span>Rincian</span>
                       </button>
                     </td>
@@ -843,44 +845,44 @@ export function ReportGenerator({
                 <tr className="bg-slate-100 text-slate-900 font-bold border-t-2 border-slate-300">
                   <td
                     colSpan={5}
-                    className="py-2.5 px-3 text-right uppercase tracking-wider text-[11px]"
+                    className="py-2 px-2 text-right uppercase tracking-wider text-[10px]"
                   >
                     Rata-rata / Total Keseluruhan:
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono tabular-nums">
                     {kpiStats.effectiveWorkingDays}
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-sky-900 tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono text-sky-900 tabular-nums">
                     {kpiStats.totalHadirWfo + kpiStats.totalHadirWfa}
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono tabular-nums">
                     {kpiStats.totalHadirWfo}
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono tabular-nums">
                     {kpiStats.totalHadirWfa}
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-emerald-800 tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono text-emerald-800 tabular-nums">
                     {reportData.reduce((acc, r) => acc + r.tepatWaktu, 0)}
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-amber-800 tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono text-amber-800 tabular-nums">
                     {kpiStats.totalTerlambat}
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-amber-800 tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono text-amber-800 tabular-nums">
                     {kpiStats.totalPulangCepat}
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-indigo-800 tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono text-indigo-800 tabular-nums">
                     {reportData.reduce((acc, r) => acc + r.dinasLuar, 0)}
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-purple-800 tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono text-purple-800 tabular-nums">
                     {kpiStats.totalIzinCuti}
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-rose-800 tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono text-rose-800 tabular-nums">
                     {kpiStats.totalAlfa}
                   </td>
-                  <td className="py-2.5 px-2 text-center font-mono text-sky-950 bg-sky-200/60 font-black tabular-nums">
+                  <td className="py-2 px-0.5 text-center font-mono text-sky-950 bg-sky-200/60 font-black tabular-nums">
                     {kpiStats.avgKehadiran}%
                   </td>
-                  <td className="py-2.5 px-2 print:hidden print-hidden" />
+                  <td className="py-2 px-1 print:hidden print-hidden" />
                 </tr>
               </tfoot>
             </table>
@@ -909,7 +911,7 @@ export function ReportGenerator({
 
         {/* 5. TAB 2: RINCIAN PERORANGAN (BUKU PRESENSI 1 SDM PER BULAN) */}
         {activeTab === 'RINCIAN_PERORANGAN' && currentIndividual && (
-          <div className="p-4 sm:p-7 space-y-5">
+          <div className="p-3.5 sm:p-5 space-y-4">
             {/* Toolbar Pemilih Pegawai & Aksi */}
             <div className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 print-hidden print:hidden">
               <div className="flex items-center flex-wrap gap-2">

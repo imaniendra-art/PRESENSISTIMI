@@ -97,7 +97,7 @@ async function main() {
       password: atasanPassword,
       role: Role.ATASAN,
       jabatan: 'Ketua Program Studi Manajemen',
-      unitKerja: 'Program Studi S1 Manajemen',
+      unitKerja: 'PRODI S1 MANAJEMEN',
       assignedLocationId: null,
       isActive: true,
     },
@@ -118,7 +118,7 @@ async function main() {
       password: pegawaiPassword,
       role: Role.PEGAWAI,
       jabatan: 'Dosen Tetap Manajemen Keuangan',
-      unitKerja: 'Program Studi S1 Manajemen',
+      unitKerja: 'PRODI S1 MANAJEMEN',
       atasanId: atasan.id,
       assignedLocationId: loc1Id, // Ditugaskan khusus di Kampus I
       isActive: true,
