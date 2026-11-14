@@ -183,9 +183,9 @@ export default async function AdminDashboardPage() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 space-y-2.5 sm:space-y-6">
         {/* Soft Sky Hero Card - Simetris & Terstruktur */}
-        <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-3xl p-4 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 rounded-2xl sm:rounded-3xl p-3 sm:p-6 border border-sky-100/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-4">
           {/* Header Row: Judul di Kiri & Jam Live di Sampingnya (Khusus Mobile Mengisi Space Kosong) */}
           <div className="flex items-center justify-between gap-3 w-full lg:w-auto">
             {/* Sisi Kiri: Menumpuk 2 Baris Bersih & Simetris */}
@@ -272,7 +272,7 @@ export default async function AdminDashboardPage() {
           </div>
 
           {/* Sisi Bawah Versi Mobile: 4 Icon Keterangan 1-Baris Saja (Hemat Ruang & Elegan) */}
-          <div className="grid grid-cols-4 gap-1 sm:gap-1.5 pt-2 border-t border-sky-100/80 lg:hidden w-full">
+          <div className="grid grid-cols-4 gap-1 sm:gap-1.5 pt-1.5 sm:pt-2 border-t border-sky-100/80 lg:hidden w-full">
             <div className="flex items-center justify-center gap-1 py-1 px-1 bg-white/90 border border-sky-100 rounded-xl shadow-2xs min-w-0">
               <Calendar className="w-3 h-3 text-sky-600 shrink-0" />
               <span className="text-[9.5px] font-bold text-slate-800 whitespace-nowrap">
@@ -386,11 +386,11 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Bagian Visualisasi Analitik & Aktivitas Terkini (Mobile: Aktivitas di atas; Desktop: 2 Kolom Sejajar) */}
-        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-2.5 sm:gap-6">
           {/* Kolom Kiri di Desktop (7 Cols), tapi Urutan Kedua di Mobile */}
-          <div className="order-2 lg:order-1 lg:col-span-7 lg:col-start-1 space-y-6">
+          <div className="order-2 lg:order-1 lg:col-span-7 lg:col-start-1 space-y-2.5 sm:space-y-6">
             {/* Tren Kehadiran Mingguan (Senin - Jumat) */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs">
+            <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-xs">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <div className="flex items-center gap-2">
@@ -460,7 +460,7 @@ export default async function AdminDashboardPage() {
             </div>
 
             {/* Breakdown Berdasarkan Unit Kerja */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs">
+            <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-sky-600" />
@@ -507,8 +507,8 @@ export default async function AdminDashboardPage() {
           </div>
 
           {/* Kolom Kanan di Desktop (5 Cols), tapi Urutan Pertama di Mobile (Langsung di Bawah 4 Card) */}
-          <div className="order-1 lg:order-2 lg:col-span-5 lg:col-start-8 space-y-6">
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs h-full flex flex-col">
+          <div className="order-1 lg:order-2 lg:col-span-5 lg:col-start-8 space-y-2.5 sm:space-y-6">
+            <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-xs h-full flex flex-col">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-2.5 w-2.5">
