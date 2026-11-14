@@ -13,15 +13,12 @@ import {
   LogOut,
   Clock,
   ShieldAlert,
-  ChevronDown,
   User,
 } from 'lucide-react';
-import { useState } from 'react';
 
 export function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (!session?.user) return null;
 
@@ -163,79 +160,8 @@ export function Navbar() {
             >
               <LogOut className="w-4 h-4" />
             </button>
-
-            {/* Mobile Menu Toggle Button */}
-            <button
-              type="button"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition border border-slate-200 cursor-pointer"
-            >
-              <ChevronDown
-                className={`w-4 h-4 transform transition-transform ${
-                  isMobileMenuOpen ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
           </div>
         </div>
-
-        {/* Mobile Dropdown Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden py-3 border-t border-slate-100 space-y-1">
-            <Link
-              href="/profil"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="px-3 py-2.5 bg-sky-50/70 border border-sky-100 rounded-xl mb-2 flex items-center justify-between"
-            >
-              <div className="flex items-center gap-2.5">
-                {session.user.image ? (
-                  <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-slate-200 shrink-0">
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name || 'User'}
-                      fill
-                      sizes="32px"
-                      className="object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-8 h-8 rounded-xl bg-sky-600 text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase">
-                    {(session.user.name || 'U').slice(0, 2)}
-                  </div>
-                )}
-                <div>
-                  <p className="text-xs font-bold text-slate-800">{session.user.name}</p>
-                  <p className="text-[10px] text-slate-500">
-                    No. ID: {session.user.nip} • {session.user.jabatan}
-                  </p>
-                </div>
-              </div>
-              <span className="text-[10px] text-sky-700 font-bold bg-sky-100 px-2 py-0.5 rounded-md">
-                Profil
-              </span>
-            </Link>
-
-            {navLinks.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold ${
-                    isActive
-                      ? 'bg-sky-50 text-sky-700 font-bold border border-sky-200/60'
-                      : 'text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        )}
       </div>
     </header>
   );

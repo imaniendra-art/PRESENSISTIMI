@@ -3,7 +3,6 @@ import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/layout/Navbar';
-import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { ProfileEditor } from '@/components/profile/ProfileEditor';
 import { UserCheck } from 'lucide-react';
 
@@ -81,8 +80,6 @@ export default async function ProfilPage() {
         {/* Editor Profil & Password */}
         <ProfileEditor initialUser={userProfileData} />
       </main>
-
-      <MobileBottomNav />
     </div>
   );
 }

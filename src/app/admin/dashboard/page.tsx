@@ -187,7 +187,14 @@ export default async function AdminDashboardPage() {
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              {formattedToday} • Jam Operasional: {campusSetting?.workStart} - {campusSetting?.workEnd} WITA • Radius Geofence: {campusSetting?.radiusMeters}m
+              {formattedToday} • Jam Operasional: {campusSetting?.workStart} - {campusSetting?.workEnd} WITA •{' '}
+              <Link
+                href="/admin/pengaturan"
+                className="text-sky-700 hover:text-sky-800 font-semibold hover:underline"
+                title="Buka Pengaturan Radius Kampus & Geofence"
+              >
+                Radius Geofence: {campusSetting?.radiusMeters}m
+              </Link>
             </p>
           </div>
 
