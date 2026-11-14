@@ -31,12 +31,14 @@ export interface MonitoringAttendanceData {
   clockInPhoto?: string | null;
   clockInStatus?: string | null;
   clockInDistance?: number | null;
+  clockInNote?: string | null;
   clockOutTime?: string | null;
   clockOutLat?: number | null;
   clockOutLng?: number | null;
   clockOutPhoto?: string | null;
   clockOutStatus?: string | null;
   clockOutDistance?: number | null;
+  clockOutNote?: string | null;
   isDinasLuar: boolean;
 }
 
@@ -82,6 +84,7 @@ interface ActivePhotoModalData {
   status: string;
   statusType: 'success' | 'warning' | 'purple' | 'info';
   location: string;
+  note?: string | null;
 }
 
 // Helper untuk menyederhanakan nama lokasi/gedung agar tidak panjang di tabel
@@ -216,6 +219,12 @@ export function MonitoringTableClient({
     ).length;
   }, [users]);
 
+  const countPulangCepat = useMemo(() => {
+    return users.filter(
+      (u) => u.attendance?.clockOutStatus === 'PULANG_CEPAT'
+    ).length;
+  }, [users]);
+
   const countDinas = useMemo(() => {
     return users.filter(
       (u) =>
@@ -263,6 +272,8 @@ export function MonitoringTableClient({
           if (!att || att.clockInStatus !== 'TEPAT_WAKTU' || att.isDinasLuar) return false;
         } else if (statusFilter === 'LAMBAT') {
           if (!att || att.clockInStatus !== 'TERLAMBAT' || att.isDinasLuar) return false;
+        } else if (statusFilter === 'PULANG_CEPAT') {
+          if (!att || att.clockOutStatus !== 'PULANG_CEPAT') return false;
         } else if (statusFilter === 'DINAS') {
           if (
             (!att || !att.isDinasLuar) &&
@@ -343,6 +354,7 @@ export function MonitoringTableClient({
                 <option value="HADIR">Hadir ({totalHadir})</option>
                 <option value="TEPAT">Tepat ({countTepat})</option>
                 <option value="LAMBAT">Lambat ({countLambat})</option>
+                <option value="PULANG_CEPAT">Pulang Cepat ({countPulangCepat})</option>
                 <option value="DINAS">Dinas ({countDinas})</option>
                 <option value="CUTI_IZIN">Cuti/Izin ({countCutiIzin})</option>
                 <option value="BELUM">Belum ({countBelumMurni})</option>
@@ -570,9 +582,29 @@ export function MonitoringTableClient({
                       {/* 5. Jam Masuk */}
                       <td className="py-2.5 px-2.5 whitespace-nowrap border-r border-emerald-100/60 bg-emerald-50/10">
                         {inTimeInfo ? (
-                          <span className="font-mono font-bold text-slate-900 text-xs">
-                            {inTimeInfo.localTime}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`font-mono font-bold text-xs ${
+                                att?.clockInStatus === 'TERLAMBAT'
+                                  ? 'text-rose-700'
+                                  : 'text-slate-900'
+                              }`}
+                            >
+                              {inTimeInfo.localTime}
+                            </span>
+                            {att?.clockInStatus === 'TERLAMBAT' && (
+                              <span
+                                className="inline-flex items-center px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-rose-100 text-rose-800 border border-rose-200"
+                                title={
+                                  att?.clockInNote
+                                    ? `Keterangan: ${att.clockInNote}`
+                                    : 'Terlambat Masuk'
+                                }
+                              >
+                                Lambat
+                              </span>
+                            )}
+                          </div>
                         ) : user.activeLeave ? (
                           <span className="text-amber-700 font-semibold italic text-[11px]">
                             {getLeaveBadgeInfo(user.activeLeave.type).fullLabel}
@@ -611,6 +643,7 @@ export function MonitoringTableClient({
                                   : att.clockInStatus === 'TEPAT_WAKTU'
                                   ? 'success'
                                   : 'warning',
+                                note: att.clockInNote,
                                 location: `${formatLocationShort(att.locationName)}${
                                   att.clockInLat && att.clockInLng
                                     ? ` • ${getRegionDescription(
@@ -690,9 +723,29 @@ export function MonitoringTableClient({
                       {/* 8. Jam Pulang */}
                       <td className="py-2.5 px-2.5 whitespace-nowrap border-r border-sky-100/60 bg-sky-50/10">
                         {outTimeInfo ? (
-                          <span className="font-mono font-bold text-slate-800 text-xs">
-                            {outTimeInfo.localTime}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`font-mono font-bold text-xs ${
+                                att?.clockOutStatus === 'PULANG_CEPAT'
+                                  ? 'text-amber-800'
+                                  : 'text-slate-800'
+                              }`}
+                            >
+                              {outTimeInfo.localTime}
+                            </span>
+                            {att?.clockOutStatus === 'PULANG_CEPAT' && (
+                              <span
+                                className="inline-flex items-center px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-amber-100 text-amber-800 border border-amber-200"
+                                title={
+                                  att.clockOutNote
+                                    ? `Alasan: ${att.clockOutNote}`
+                                    : 'Pulang Lebih Cepat'
+                                }
+                              >
+                                Cepat
+                              </span>
+                            )}
+                          </div>
                         ) : user.activeLeave ? (
                           <span className="text-amber-700 font-semibold italic text-[11px]">
                             {getLeaveBadgeInfo(user.activeLeave.type).fullLabel}
@@ -733,6 +786,7 @@ export function MonitoringTableClient({
                                     : att.clockOutStatus === 'PULANG_CEPAT'
                                     ? 'warning'
                                     : 'purple',
+                                note: att.clockOutNote,
                                 location: `${formatLocationShort(att.locationName)}${
                                   att.clockOutLat && att.clockOutLng
                                     ? ` • ${getRegionDescription(
@@ -921,15 +975,22 @@ export function MonitoringTableClient({
                           <LogIn className="w-3 h-3" /> Masuk
                         </span>
                         {inTimeInfo ? (
-                          <span
-                            className={`font-mono font-bold text-xs ${
-                              att?.clockInStatus === 'TERLAMBAT'
-                                ? 'text-rose-700'
-                                : 'text-slate-900'
-                            }`}
-                          >
-                            {inTimeInfo.localTime}
-                          </span>
+                          <div className="flex items-center gap-1">
+                            <span
+                              className={`font-mono font-bold text-xs ${
+                                att?.clockInStatus === 'TERLAMBAT'
+                                  ? 'text-rose-700'
+                                  : 'text-slate-900'
+                              }`}
+                            >
+                              {inTimeInfo.localTime}
+                            </span>
+                            {att?.clockInStatus === 'TERLAMBAT' && (
+                              <span className="text-[8.5px] px-1 py-0.2 rounded font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                Lambat
+                              </span>
+                            )}
+                          </div>
                         ) : user.activeLeave ? (
                           <span className="text-[10px] text-amber-700 font-semibold italic">
                             {getLeaveBadgeInfo(user.activeLeave.type).label}
@@ -967,6 +1028,7 @@ export function MonitoringTableClient({
                                   : att.clockInStatus === 'TEPAT_WAKTU'
                                   ? 'success'
                                   : 'warning',
+                                note: att.clockInNote,
                                 location: `${formatLocationShort(att.locationName)}${
                                   att.clockInLat && att.clockInLng
                                     ? ` • ${getRegionDescription(
@@ -1025,6 +1087,14 @@ export function MonitoringTableClient({
                               )}
                             </div>
                           )}
+                          {att?.clockInNote && (
+                            <p
+                              className="text-[9px] text-slate-500 italic truncate max-w-full mt-0.5"
+                              title={att.clockInNote}
+                            >
+                              Ket: {att.clockInNote}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1033,7 +1103,9 @@ export function MonitoringTableClient({
                     <div
                       className={`p-2 sm:p-2.5 rounded-xl border space-y-1.5 transition ${
                         att?.clockOutTime
-                          ? 'bg-sky-50/50 border-sky-200/80 shadow-2xs'
+                          ? att?.clockOutStatus === 'PULANG_CEPAT'
+                            ? 'bg-amber-50/50 border-amber-200/80 shadow-2xs'
+                            : 'bg-sky-50/50 border-sky-200/80 shadow-2xs'
                           : user.activeLeave
                           ? 'bg-amber-50/50 border-amber-200/80'
                           : user.activeDutyTrip
@@ -1045,7 +1117,9 @@ export function MonitoringTableClient({
                         <span
                           className={`text-[9px] font-bold uppercase flex items-center gap-1 ${
                             att?.clockOutTime
-                              ? 'text-sky-800'
+                              ? att?.clockOutStatus === 'PULANG_CEPAT'
+                                ? 'text-amber-800'
+                                : 'text-sky-800'
                               : user.activeLeave
                               ? 'text-amber-800'
                               : user.activeDutyTrip
@@ -1056,9 +1130,22 @@ export function MonitoringTableClient({
                           <LogOut className="w-3 h-3" /> Pulang
                         </span>
                         {outTimeInfo ? (
-                          <span className="font-mono font-bold text-slate-900 text-xs">
-                            {outTimeInfo.localTime}
-                          </span>
+                          <div className="flex items-center gap-1">
+                            <span
+                              className={`font-mono font-bold text-xs ${
+                                att?.clockOutStatus === 'PULANG_CEPAT'
+                                  ? 'text-amber-800'
+                                  : 'text-slate-900'
+                              }`}
+                            >
+                              {outTimeInfo.localTime}
+                            </span>
+                            {att?.clockOutStatus === 'PULANG_CEPAT' && (
+                              <span className="text-[8.5px] px-1 py-0.2 rounded font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                Cepat
+                              </span>
+                            )}
+                          </div>
                         ) : user.activeLeave ? (
                           <span className="text-[10px] text-amber-700 font-semibold italic">
                             {getLeaveBadgeInfo(user.activeLeave.type).label}
@@ -1098,6 +1185,7 @@ export function MonitoringTableClient({
                                     : att.clockOutStatus === 'PULANG_CEPAT'
                                     ? 'warning'
                                     : 'purple',
+                                note: att.clockOutNote,
                                 location: `${formatLocationShort(att.locationName)}${
                                   att.clockOutLat && att.clockOutLng
                                     ? ` • ${getRegionDescription(
@@ -1153,6 +1241,14 @@ export function MonitoringTableClient({
                                 </a>
                               )}
                             </div>
+                          )}
+                          {att?.clockOutNote && (
+                            <p
+                              className="text-[9px] text-amber-800 italic truncate max-w-full mt-0.5"
+                              title={att.clockOutNote}
+                            >
+                              Ket: {att.clockOutNote}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -1245,6 +1341,15 @@ export function MonitoringTableClient({
                   </span>
                 </div>
               </div>
+
+              {activePhotoModal.note && (
+                <div className="pt-2 border-t border-slate-100 text-[11px] bg-amber-50/70 p-2.5 rounded-xl border border-amber-200/80">
+                  <span className="font-bold text-amber-900 block text-[9.5px] uppercase tracking-wider">
+                    Keterangan / Alasan:
+                  </span>
+                  <p className="italic text-slate-800 text-xs mt-0.5">{activePhotoModal.note}</p>
+                </div>
+              )}
 
               <div className="pt-2 border-t border-slate-100 flex items-start gap-1.5 text-[11px] text-slate-600">
                 <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
