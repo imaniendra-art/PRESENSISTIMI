@@ -290,10 +290,11 @@ export async function submitClockIn(data: {
     return { success: false, message: 'Gagal memproses foto kamera selfie' };
   }
 
-  // Evaluasi status keterlambatan
+  // Evaluasi status keterlambatan (gunakan jam masuk khusus jika disetel untuk dosen tersebut)
+  const effectiveWorkStart = (user as any).customWorkStart || campusSetting.workStart;
   const status = evaluateClockInStatus(
     now,
-    campusSetting.workStart,
+    effectiveWorkStart,
     campusSetting.gracePeriodMinutes,
     data.isDinasLuar,
     data.longitude
@@ -483,8 +484,13 @@ export async function submitClockOut(data: {
     return { success: false, message: 'Gagal memproses foto kamera selfie pulang' };
   }
 
-  // Evaluasi status kepulangan (Normal vs Pulang Cepat)
-  const status = evaluateClockOutStatus(now, campusSetting.workEnd, existing.isDinasLuar, data.longitude);
+  // Evaluasi status kepulangan (gunakan jam pulang khusus dosen jika disetel)
+  const userRecord = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { customWorkEnd: true } as any,
+  });
+  const effectiveWorkEnd = (userRecord as any)?.customWorkEnd || campusSetting.workEnd;
+  const status = evaluateClockOutStatus(now, effectiveWorkEnd, existing.isDinasLuar, data.longitude);
 
   await prisma.attendance.update({
     where: {
@@ -841,11 +847,12 @@ export async function submitQuickPresence(data: {
       return { success: false, message: 'Gagal memproses dan mengompres foto selfie' };
     }
 
+    const effectiveWorkStart = (user as any).customWorkStart || campusSetting.workStart;
     const clockInStatus = isDinasLuar
       ? 'DINAS_LUAR'
       : evaluateClockInStatus(
           now,
-          campusSetting.workStart,
+          effectiveWorkStart,
           campusSetting.gracePeriodMinutes,
           false,
           data.longitude
@@ -925,9 +932,10 @@ export async function submitQuickPresence(data: {
     }
 
     const isDinasLuarOut = isDinasLuar || existing.isDinasLuar;
+    const effectiveWorkEnd = (user as any).customWorkEnd || campusSetting.workEnd;
     const clockOutStatus = isDinasLuarOut
       ? 'DINAS_LUAR'
-      : evaluateClockOutStatus(now, campusSetting.workEnd, false, data.longitude);
+      : evaluateClockOutStatus(now, effectiveWorkEnd, false, data.longitude);
 
     const clockOutNote = isDinasLuarOut
       ? `[Dinas Luar] ${data.note?.trim() || existing.clockInNote || ''}`

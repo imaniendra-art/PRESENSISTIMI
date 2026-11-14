@@ -62,6 +62,11 @@ export interface MonitoringUserRow {
   jabatan: string;
   unitKerja: string;
   assignedLocationName?: string | null;
+  customWorkStart?: string | null;
+  customWorkEnd?: string | null;
+  workScheduleType?: string | null;
+  workDays?: string | null;
+  monthlyTargetDays?: number | null;
   attendance: MonitoringAttendanceData | null;
   activeLeave?: MonitoringLeaveData | null;
   activeDutyTrip?: MonitoringDutyData | null;
@@ -70,6 +75,7 @@ export interface MonitoringUserRow {
 interface MonitoringTableClientProps {
   users: MonitoringUserRow[];
   formattedDateDisplay: string;
+  targetDayOfWeek?: number;
   totalEmployees: number;
   totalHadir: number;
 }
@@ -153,6 +159,7 @@ function getLeaveBadgeInfo(type: string) {
 export function MonitoringTableClient({
   users,
   formattedDateDisplay,
+  targetDayOfWeek,
   totalEmployees,
   totalHadir,
 }: MonitoringTableClientProps) {
@@ -160,6 +167,20 @@ export function MonitoringTableClient({
   const [unitFilter, setUnitFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [activePhotoModal, setActivePhotoModal] = useState<ActivePhotoModalData | null>(null);
+
+  // Helper untuk menentukan apakah dosen bebas tugas hari ini
+  const isUserOffToday = (u: MonitoringUserRow) => {
+    return (
+      targetDayOfWeek !== undefined &&
+      u.workScheduleType === 'CUSTOM_DAYS' &&
+      Boolean(u.workDays) &&
+      !u.workDays!.split(',').map((s) => s.trim()).includes(String(targetDayOfWeek))
+    );
+  };
+
+  const isUserMonthlyQuota = (u: MonitoringUserRow) => {
+    return u.workScheduleType === 'MONTHLY_QUOTA';
+  };
 
   // Ambil daftar unik Unit Kerja untuk dropdown filter
   const unitList = useMemo(() => {
@@ -237,11 +258,26 @@ export function MonitoringTableClient({
     return users.filter((u) => (!u.attendance || !u.attendance.clockInTime) && u.activeLeave).length;
   }, [users]);
 
+  const countBebasTugas = useMemo(() => {
+    return users.filter(
+      (u) =>
+        (!u.attendance || !u.attendance.clockInTime) &&
+        !u.activeLeave &&
+        !u.activeDutyTrip &&
+        (isUserOffToday(u) || isUserMonthlyQuota(u))
+    ).length;
+  }, [users, targetDayOfWeek]);
+
   const countBelumMurni = useMemo(() => {
     return users.filter(
-      (u) => (!u.attendance || !u.attendance.clockInTime) && !u.activeLeave && !u.activeDutyTrip
+      (u) =>
+        (!u.attendance || !u.attendance.clockInTime) &&
+        !u.activeLeave &&
+        !u.activeDutyTrip &&
+        !isUserOffToday(u) &&
+        !isUserMonthlyQuota(u)
     ).length;
-  }, [users]);
+  }, [users, targetDayOfWeek]);
 
   // Filter client-side instan
   const filteredUsers = useMemo(() => {
@@ -262,9 +298,16 @@ export function MonitoringTableClient({
       // 3. Filter Status Kehadiran
       if (statusFilter !== 'ALL') {
         const att = user.attendance;
+        const isOff = isUserOffToday(user);
+        const isMonthly = isUserMonthlyQuota(user);
+
         if (statusFilter === 'BELUM') {
           if (att && att.clockInTime) return false;
           if (user.activeLeave || user.activeDutyTrip) return false;
+          if (isOff || isMonthly) return false;
+        } else if (statusFilter === 'BEBAS_TUGAS') {
+          if (att && att.clockInTime) return false;
+          if (!isOff && !isMonthly) return false;
         } else if (statusFilter === 'CUTI_IZIN') {
           if (att && att.clockInTime) return false;
           if (!user.activeLeave) return false;
@@ -287,7 +330,7 @@ export function MonitoringTableClient({
 
       return true;
     });
-  }, [users, searchQuery, unitFilter, statusFilter]);
+  }, [users, searchQuery, unitFilter, statusFilter, targetDayOfWeek]);
 
   return (
     <>
@@ -358,6 +401,9 @@ export function MonitoringTableClient({
                 <option value="DINAS">Dinas ({countDinas})</option>
                 <option value="CUTI_IZIN">Cuti/Izin ({countCutiIzin})</option>
                 <option value="BELUM">Belum ({countBelumMurni})</option>
+                {countBebasTugas > 0 && (
+                  <option value="BEBAS_TUGAS">Jadwal Khusus ({countBebasTugas})</option>
+                )}
               </select>
             </div>
           </div>
@@ -513,6 +559,11 @@ export function MonitoringTableClient({
                             <p className="text-[10px] text-slate-400 font-mono">
                               No. ID: {user.nip}
                             </p>
+                            {(user.customWorkStart || user.customWorkEnd) && (
+                              <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-sky-50 text-sky-700 border border-sky-100 mt-0.5">
+                                ⏰ {user.customWorkStart || '09:00'}-{user.customWorkEnd || '16:00'}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -570,6 +621,14 @@ export function MonitoringTableClient({
                             }
                           >
                             <Briefcase className="w-3 h-3" /> Dinas
+                          </span>
+                        ) : isUserOffToday(user) ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-sky-50 text-sky-700 border border-sky-200" title="Bebas tugas / tidak dijadwalkan hadir hari ini">
+                            Bebas Tugas
+                          </span>
+                        ) : isUserMonthlyQuota(user) ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-amber-50 text-amber-700 border border-amber-200" title={`Target kehadiran: ${user.monthlyTargetDays || 4} hari/bulan`}>
+                            Fleksibel ({user.monthlyTargetDays || 4}x/bln)
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-slate-100 text-slate-600">
@@ -892,6 +951,11 @@ export function MonitoringTableClient({
                         <p className="text-[10px] text-slate-500 font-mono truncate">
                           No. ID: {user.nip} • {user.unitKerja}
                         </p>
+                        {(user.customWorkStart || user.customWorkEnd) && (
+                          <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[8px] font-bold bg-sky-50 text-sky-700 border border-sky-100 mt-0.5">
+                            ⏰ {user.customWorkStart || '09:00'}-{user.customWorkEnd || '16:00'}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -937,6 +1001,14 @@ export function MonitoringTableClient({
                           }
                         >
                           <Briefcase className="w-2.5 h-2.5" /> Dinas
+                        </span>
+                      ) : isUserOffToday(user) ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-sky-50 text-sky-700 border border-sky-200" title="Bebas tugas / tidak dijadwalkan hadir hari ini">
+                          Bebas Tugas
+                        </span>
+                      ) : isUserMonthlyQuota(user) ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200" title={`Target kehadiran: ${user.monthlyTargetDays || 4} hari/bulan`}>
+                          Fleksibel ({user.monthlyTargetDays || 4}x/bln)
                         </span>
                       ) : (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-600">

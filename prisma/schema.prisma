@@ -74,6 +74,13 @@ model User {
   assignedLocationId String?         @db.ObjectId
   assignedLocation   CampusLocation? @relation("UserAssignedLocation", fields: [assignedLocationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   
+  // Pola Jadwal Jam Kerja Khusus (Dosen / Shift Mandiri)
+  customWorkStart    String?
+  customWorkEnd      String?
+  workScheduleType   String?         @default("STANDARD") // STANDARD | CUSTOM_DAYS | MONTHLY_QUOTA
+  workDays           String?         // e.g. "2,4" untuk Selasa & Kamis
+  monthlyTargetDays  Int?            // e.g. 4 hari/bulan untuk dosen mengajar/tanpa jabfung
+  
   isActive           Boolean         @default(true)
   avatarUrl          String?
   createdAt          DateTime        @default(now())

@@ -210,6 +210,12 @@ export async function createEmployee(formData: FormData) {
   const unitKerja = (formData.get('unitKerja') as string)?.trim();
   const atasanId = (formData.get('atasanId') as string) || null;
   const assignedLocationId = (formData.get('assignedLocationId') as string) || null;
+  const customWorkStart = (formData.get('customWorkStart') as string)?.trim() || null;
+  const customWorkEnd = (formData.get('customWorkEnd') as string)?.trim() || null;
+  const workScheduleType = (formData.get('workScheduleType') as string) || 'STANDARD';
+  const workDays = (formData.get('workDays') as string)?.trim() || null;
+  const monthlyTargetDaysStr = formData.get('monthlyTargetDays') as string;
+  const monthlyTargetDays = monthlyTargetDaysStr ? parseInt(monthlyTargetDaysStr, 10) : null;
 
   if (!nip || !name || !password || !jabatan || !unitKerja) {
     return { success: false, message: 'Semua kolom bertanda bintang (No. ID, Nama, Password, Jabatan, Unit Kerja) wajib diisi' };
@@ -250,8 +256,13 @@ export async function createEmployee(formData: FormData) {
       unitKerja,
       atasanId: atasanId && atasanId !== 'none' ? atasanId : null,
       assignedLocationId: finalLocationId,
+      customWorkStart: customWorkStart || null,
+      customWorkEnd: customWorkEnd || null,
+      workScheduleType: workScheduleType || 'STANDARD',
+      workDays: workScheduleType === 'CUSTOM_DAYS' ? workDays : null,
+      monthlyTargetDays: workScheduleType === 'MONTHLY_QUOTA' ? (monthlyTargetDays || 4) : null,
       isActive: true,
-    },
+    } as any,
   });
 
   revalidatePath('/admin/pegawai');
@@ -274,6 +285,12 @@ export async function updateEmployee(formData: FormData) {
   const unitKerja = (formData.get('unitKerja') as string)?.trim();
   const atasanId = (formData.get('atasanId') as string) || null;
   const assignedLocationId = (formData.get('assignedLocationId') as string) || null;
+  const customWorkStart = (formData.get('customWorkStart') as string)?.trim() || null;
+  const customWorkEnd = (formData.get('customWorkEnd') as string)?.trim() || null;
+  const workScheduleType = (formData.get('workScheduleType') as string) || 'STANDARD';
+  const workDays = (formData.get('workDays') as string)?.trim() || null;
+  const monthlyTargetDaysStr = formData.get('monthlyTargetDays') as string;
+  const monthlyTargetDays = monthlyTargetDaysStr ? parseInt(monthlyTargetDaysStr, 10) : null;
 
   if (!userId || !nip || !name || !jabatan || !unitKerja) {
     return { success: false, message: 'Semua kolom wajib diisi' };
@@ -320,7 +337,12 @@ export async function updateEmployee(formData: FormData) {
       unitKerja,
       atasanId: finalAtasanId,
       assignedLocationId: finalLocationId,
-    },
+      customWorkStart: customWorkStart || null,
+      customWorkEnd: customWorkEnd || null,
+      workScheduleType: workScheduleType || 'STANDARD',
+      workDays: workScheduleType === 'CUSTOM_DAYS' ? workDays : null,
+      monthlyTargetDays: workScheduleType === 'MONTHLY_QUOTA' ? (monthlyTargetDays || 4) : null,
+    } as any,
   });
 
   revalidatePath('/admin/pegawai');

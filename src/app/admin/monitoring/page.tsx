@@ -50,6 +50,7 @@ export default async function AdminMonitoringPage({
 
   const [y, m, d] = currentDateStr.split('-').map(Number);
   const targetDate = new Date(y, m - 1, d, 12, 0, 0, 0);
+  const targetDayOfWeek = targetDate.getDay();
 
   // Rentang query toleran zona waktu (WITA/WIB) untuk tanggal target
   const startOfQueryDay = new Date(`${currentDateStr}T00:00:00+08:00`);
@@ -180,6 +181,11 @@ export default async function AdminMonitoringPage({
       jabatan: u.jabatan || 'Staf',
       unitKerja: u.unitKerja || 'Unit Lainnya',
       assignedLocationName: u.assignedLocation?.name || null,
+      customWorkStart: (u as any).customWorkStart || null,
+      customWorkEnd: (u as any).customWorkEnd || null,
+      workScheduleType: (u as any).workScheduleType || null,
+      workDays: (u as any).workDays || null,
+      monthlyTargetDays: (u as any).monthlyTargetDays || null,
       activeLeave: userLeave
         ? {
             id: userLeave.id,
@@ -335,6 +341,7 @@ export default async function AdminMonitoringPage({
         <MonitoringTableClient
           users={serializedUsers}
           formattedDateDisplay={formattedDateDisplay}
+          targetDayOfWeek={targetDayOfWeek}
           totalEmployees={totalEmployees}
           totalHadir={totalHadir}
         />
